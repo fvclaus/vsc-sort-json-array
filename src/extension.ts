@@ -2,12 +2,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import Window = vscode.window;
 import QuickPickItem = vscode.QuickPickItem;
 import TextEditor = vscode.TextEditor;
-
-/* interface Array<T> {
-    flatMap<E>(callback: (t: T) => E[]): E[]
-} */
 
 function intersection<E> (setA : Set<E>, setB : Set<E>) {
     var _intersection = new Set();
@@ -17,6 +14,55 @@ function intersection<E> (setA : Set<E>, setB : Set<E>) {
         }
     }
     return _intersection;
+}
+
+
+const sortByProperty = (a: any, b : any, property: string) : number => {
+    const aValue = a[property];
+    const bValue = b[property];
+    if (aValue > bValue) {
+        return 1;
+    } else if (aValue < bValue) {
+        return -1;
+    } else {
+        return 0;
+    }
+};
+
+function pickUntilSortIsDeterminable(window: typeof Window, selectedProperties: string[], quickPickItems: QuickPickItem[], arrayToSort : any[] ) : Promise<any[]>{
+    const remainingQuickPickItems = quickPickItems.filter(item => selectedProperties.indexOf(item.label) === -1);
+    return new Promise((resolve, reject) => {
+        window.showQuickPick(remainingQuickPickItems, {
+            canPickMany: false,
+            placeHolder: selectedProperties.length === 0? 'Pick property from list to define sort order.' : 'Sorting cannot produce determinable result. Please pick another property.'
+        }).then(selectedItem => {
+            if (selectedItem) {
+                const selectedProperty = selectedItem.label;
+                selectedProperties.push(selectedProperty);
+    
+                let sortIsDeterminable = true;
+                arrayToSort.sort((a, b) => {
+                    for(const selectedProperty of selectedProperties) {
+                        const order = sortByProperty(a, b, selectedProperty);
+                        if (order !== 0) {
+                            return order;
+                        }
+                    }                
+                    sortIsDeterminable = false;
+                    return 0;
+                });
+    
+                // The sort is determinable or the array cannot be sorted in a determinable way.
+                if (sortIsDeterminable || selectedProperties.length === quickPickItems.length) {
+                   resolve(arrayToSort);
+                } else {    
+                    pickUntilSortIsDeterminable(window, selectedProperties, quickPickItems, arrayToSort)
+                        .then(arrayToSort => resolve(arrayToSort));
+                }
+            }
+        });
+    });
+
 }
 
 // this method is called when your extension is activated
@@ -55,28 +101,11 @@ export function activate(context: vscode.ExtensionContext) {
                     if (quickPickItems.length === 0) {
                         window.showErrorMessage(`There are no properties all objects of this array have in common.`);
                     } else {
-                        window.showQuickPick(quickPickItems, {
-                            canPickMany: false,
-                            placeHolder: 'Pick property from list to define sort order.'
-                        }).then(selectedItem => {
-                            if (selectedItem) {
-                                const selectedProperty = selectedItem.label;
-                                parsedArray.sort((a, b) => {
-                                    const aValue = a[selectedProperty];
-                                    const bValue = b[selectedProperty];
-                                    if (aValue > bValue) {
-                                        return 1;
-                                    } else if (aValue < bValue) {
-                                        return -1;
-                                    } else {
-                                        return 0;
-                                    }
-                                });
-                                editor.edit(edit => {
-                                    edit.replace(selection, JSON.stringify(parsedArray, null, editor.options.tabSize));
-                                });
-                            }
-
+                        pickUntilSortIsDeterminable(window, [], quickPickItems, parsedArray.slice(0))
+                        .then(sortedArray => {
+                            editor.edit(edit => {
+                                edit.replace(selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
+                            });
                         });
                     }
                 } else {
