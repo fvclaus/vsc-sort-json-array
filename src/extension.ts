@@ -17,7 +17,7 @@ function intersection<E> (setA : Set<E>, setB : Set<E>) {
 }
 
 
-const sortByProperty = (a: any, b : any, property: string) : number => {
+function sortByProperty (a: any, b : any, property: string) : number {
     const aValue = a[property];
     const bValue = b[property];
     if (aValue > bValue) {
@@ -27,11 +27,11 @@ const sortByProperty = (a: any, b : any, property: string) : number => {
     } else {
         return 0;
     }
-};
+}
 
-function pickUntilSortIsDeterminable(window: typeof Window, selectedProperties: string[], quickPickItems: QuickPickItem[], arrayToSort : any[] ) : Promise<any[]>{
+function pickUntilSortIsDeterministic<E>(window: typeof Window, selectedProperties: string[], quickPickItems: QuickPickItem[], arrayToSort : E[] ) : Promise<E[]>{
     const remainingQuickPickItems = quickPickItems.filter(item => selectedProperties.indexOf(item.label) === -1);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         window.showQuickPick(remainingQuickPickItems, {
             canPickMany: false,
             placeHolder: selectedProperties.length === 0? 'Pick property from list to define sort order.' : 'Sorting cannot produce determinable result. Please pick another property.'
@@ -40,7 +40,7 @@ function pickUntilSortIsDeterminable(window: typeof Window, selectedProperties: 
                 const selectedProperty = selectedItem.label;
                 selectedProperties.push(selectedProperty);
     
-                let sortIsDeterminable = true;
+                let sortIsDeterminstic = true;
                 arrayToSort.sort((a, b) => {
                     for(const selectedProperty of selectedProperties) {
                         const order = sortByProperty(a, b, selectedProperty);
@@ -48,15 +48,15 @@ function pickUntilSortIsDeterminable(window: typeof Window, selectedProperties: 
                             return order;
                         }
                     }                
-                    sortIsDeterminable = false;
+                    sortIsDeterminstic = false;
                     return 0;
                 });
     
-                // The sort is determinable or the array cannot be sorted in a determinable way.
-                if (sortIsDeterminable || selectedProperties.length === quickPickItems.length) {
+                // The sort is deterministic or the array cannot be sorted in a determinable way.
+                if (sortIsDeterminstic || selectedProperties.length === quickPickItems.length) {
                    resolve(arrayToSort);
                 } else {    
-                    pickUntilSortIsDeterminable(window, selectedProperties, quickPickItems, arrayToSort)
+                    pickUntilSortIsDeterministic(window, selectedProperties, quickPickItems, arrayToSort)
                         .then(arrayToSort => resolve(arrayToSort));
                 }
             }
@@ -101,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
                     if (quickPickItems.length === 0) {
                         window.showErrorMessage(`There are no properties all objects of this array have in common.`);
                     } else {
-                        pickUntilSortIsDeterminable(window, [], quickPickItems, parsedArray.slice(0))
+                        pickUntilSortIsDeterministic(window, [], quickPickItems, parsedArray.slice(0))
                         .then(sortedArray => {
                             editor.edit(edit => {
                                 edit.replace(selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
