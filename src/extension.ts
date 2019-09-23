@@ -6,6 +6,40 @@ import Window = vscode.window;
 import QuickPickItem = vscode.QuickPickItem;
 import TextEditor = vscode.TextEditor;
 
+enum ArrayType {
+    OBJECT,
+    STRING,
+    NUMBER,
+    NOT_SUPPORTED
+}
+
+function determineType(item: any) {
+    const type = typeof item;
+    if (type === 'object' && !!item) {
+        return ArrayType.OBJECT;
+    } else if (type === 'string') {
+        return ArrayType.STRING;
+    } else if (type === 'number') {
+        return ArrayType.NUMBER;
+    } else {
+        return ArrayType.NOT_SUPPORTED;
+    }
+}
+
+function determineArrayType(array: any[]): ArrayType {
+    let arrayType: ArrayType | undefined;
+    array.forEach(item => {
+        const itemType = determineType(item);
+        if (arrayType && itemType !== arrayType) {
+            return ArrayType.NOT_SUPPORTED;
+        } else {
+            arrayType = itemType;
+        }
+    })
+
+    return arrayType as ArrayType;
+}
+
 function intersection<E>(setA: Set<E>, setB: Set<E>): Set<E> {
     var _intersection = new Set<E>();
     for (var elem of setB) {
@@ -61,6 +95,7 @@ function pickUntilSortIsDeterministic<E>(window: typeof Window, selectedProperti
     return new Promise((resolve) => {
         pickPropertiesIfNecessary(window, selectedProperties, quickPickItems)
             .then(selectedItem => {
+                // undefined if user uses ESC
                 if (selectedItem) {
                     const selectedProperty = selectedItem.label;
                     selectedProperties.push(selectedProperty);
@@ -79,6 +114,86 @@ function pickUntilSortIsDeterministic<E>(window: typeof Window, selectedProperti
     });
 
 }
+
+function sortComplexObjectArray(window: typeof Window, array: any[]): Promise<any[]> {
+
+    return new Promise((resolve, reject) => {
+        const commonProperties = array
+            .map(o => new Set(Object.getOwnPropertyNames(o)))
+            // Intersection is associative
+            .reduce((a, b) => intersection(a, b));
+        const quickPickItems = Array.from(commonProperties)
+            .map(property => ({
+                label: property
+            } as QuickPickItem));
+        if (quickPickItems.length === 0) {
+            reject(`There are no properties all objects of this array have in common.`);
+        } else {
+            pickUntilSortIsDeterministic(window, [], quickPickItems, array.slice(0))
+                .then(resolve);
+        }
+    });
+}
+
+
+enum SortOrder {
+    ascending,
+    descending
+}
+
+function generateNumberOrStringSortFn(type: ArrayType, sortOrder: SortOrder): (a:any, b: any) => number {
+
+    let sortFn: (a: any, b: any) => number;
+    if (type === ArrayType.NUMBER) {
+         sortFn =  (a:number, b:number) => a - b;        
+    } else {
+        sortFn = (a:string, b:string) => {
+            if (a < b) {
+                return -1;
+            } else if  (a > b) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    return sortOrder === SortOrder.ascending? sortFn : (a: any, b:any) => -1 * sortFn(a, b)
+}
+
+function sortNumberOrStringArray(window: typeof Window, array: any[], arrayType: ArrayType): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+        return window.showQuickPick([{
+            label: 'ascending'
+        }, {
+            label: 'descending'
+        }], {
+            canPickMany: false,
+            placeHolder: 'Select the sort order'
+        }).then(selectedItem => {
+                if (selectedItem) {
+                    resolve(array.sort(generateNumberOrStringSortFn(arrayType, SortOrder[selectedItem.label as keyof typeof SortOrder])))
+                }
+        })
+    })
+}
+
+function sortArray(window: typeof Window, array: any[]): Promise<any[]> {
+    const arrayType = determineArrayType(array);
+    switch (arrayType) {
+        case ArrayType.OBJECT:
+            return sortComplexObjectArray(window, array);
+        case ArrayType.NUMBER:
+        case ArrayType.STRING:
+            return sortNumberOrStringArray(window, array, arrayType);
+        case ArrayType.NOT_SUPPORTED:
+            return Promise.reject(`This array is not yet supported.`);
+        default:
+            throw new Error(`Unknown array type ${arrayType}`);
+    }
+}
+
+
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -101,24 +216,15 @@ export function activate(context: vscode.ExtensionContext) {
                 let parsedJson = JSON.parse(text);
                 if (parsedJson.constructor === Array) {
                     const parsedArray = (parsedJson as any[]);
-                    const commonProperties = parsedArray
-                        .map(o => new Set(Object.getOwnPropertyNames(o)))
-                        // Intersection is associative
-                        .reduce((a, b) => intersection(a, b));
-                    const quickPickItems = Array.from(commonProperties)
-                        .map(property => ({
-                            label: property
-                        } as QuickPickItem));
-                    if (quickPickItems.length === 0) {
-                        window.showErrorMessage(`There are no properties all objects of this array have in common.`);
-                    } else {
-                        pickUntilSortIsDeterministic(window, [], quickPickItems, parsedArray.slice(0))
-                            .then(sortedArray => {
-                                editor.edit(edit => {
-                                    edit.replace(selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
-                                });
-                            });
-                    }
+                    sortArray(window, parsedArray)
+                        .then(sortedArray => {
+                            editor.edit(edit => {
+                                edit.replace(selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
+                            })
+                        })
+                        .catch(error => {
+                            window.showErrorMessage(error)
+                        })
                 } else {
                     window.showErrorMessage(`Selection is a ${parsedJson.constructor} not an array.`);
                 }
