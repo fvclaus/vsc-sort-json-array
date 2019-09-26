@@ -32,14 +32,16 @@
         "test": "npm run compile && node ./out/test/runTest.js"
     },
     "devDependencies": {
+        "@types/chai": "^4.2.3",
         "@types/glob": "^7.1.1",
         "@types/mocha": "^5.2.6",
-        "@types/node": "^8.10.25",
+        "@types/node": "^12.7.8",
         "@types/vscode": "^1.26.0",
+        "chai": "^4.2.0",
         "glob": "^7.1.4",
         "mocha": "^6.1.4",
         "tslint": "^5.20.0",
-        "typescript": "^2.6.1",
+        "typescript": "^3.6.1",
         "vscode-test": "^1.2.0"
     }
 }
