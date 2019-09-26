@@ -6,6 +6,9 @@ import Window = vscode.window;
 import QuickPickItem = vscode.QuickPickItem;
 import TextEditor = vscode.TextEditor;
 import { ArrayType, determineArrayType } from './determineArrayType';
+import { sortObjectArray } from './sort/sortObjectArray';
+import { SortOrder } from './sort/SortOrder';
+import { genericSortFn } from './sort/genericSortFn';
 
 function intersection<E>(setA: Set<E>, setB: Set<E>): Set<E> {
     var _intersection = new Set<E>();
@@ -15,34 +18,6 @@ function intersection<E>(setA: Set<E>, setB: Set<E>): Set<E> {
         }
     }
     return _intersection;
-}
-
-function sortByProperty(a: any, b: any, property: string): number {
-    const aValue = a[property];
-    const bValue = b[property];
-    if (aValue > bValue) {
-        return 1;
-    } else if (aValue < bValue) {
-        return -1;
-    } else {
-        return 0;
-    }
-}
-
-function sortByProperties(arrayToSort: any[], selectedProperties: string[], sortOrder: SortOrder): boolean {
-    let sortIsDeterminstic = true;
-    arrayToSort.sort((a, b) => {
-        for (const selectedProperty of selectedProperties) {
-            const order = sortByProperty(a, b, selectedProperty);
-            if (order !== 0) {
-                return sortOrder === SortOrder.ascending? order : -1 * order;
-            }
-        }
-        sortIsDeterminstic = false;
-        return 0;
-    });
-
-    return sortIsDeterminstic;
 }
 
 function pickPropertiesIfNecessary(window: typeof Window, selectedProperties: string[], quickPickItems: QuickPickItem[]): Thenable<vscode.QuickPickItem | undefined> {
@@ -67,7 +42,7 @@ function pickUntilSortIsDeterministic<E>(window: typeof Window, selectedProperti
                     const selectedProperty = selectedItem.label;
                     selectedProperties.push(selectedProperty);
 
-                    let sortIsDeterminstic = sortByProperties(arrayToSort, selectedProperties, sortOrder);
+                    let sortIsDeterminstic = sortObjectArray(arrayToSort, selectedProperties, sortOrder);
 
                     // The sort is deterministic or the array cannot be sorted in a determinable way.
                     if (sortIsDeterminstic || selectedProperties.length === quickPickItems.length) {
@@ -103,34 +78,9 @@ function sortComplexObjectArray(window: typeof Window, array: any[], sortOrder: 
 }
 
 
-enum SortOrder {
-    ascending,
-    descending
-}
-
-function generateNumberOrStringSortFn(type: ArrayType, sortOrder: SortOrder): (a:any, b: any) => number {
-
-    let sortFn: (a: any, b: any) => number;
-    if (type === ArrayType.number) {
-         sortFn =  (a:number, b:number) => a - b;        
-    } else {
-        sortFn = (a:string, b:string) => {
-            if (a < b) {
-                return -1;
-            } else if  (a > b) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    }
-
-    return sortOrder === SortOrder.ascending? sortFn : (a: any, b:any) => -1 * sortFn(a, b)
-}
-
-function sortNumberOrStringArray(window: typeof Window, array: any[], arrayType: ArrayType, sortOrder: SortOrder): Promise<any[]> {
+function sortNumberOrStringArray2(window: typeof Window, array: any[], arrayType: ArrayType, sortOrder: SortOrder): Promise<any[]> {
     return new Promise((resolve, reject) => {       
-       resolve(array.sort(generateNumberOrStringSortFn(arrayType, sortOrder)))
+       resolve(array.sort(genericSortFn(arrayType, sortOrder)))
     });
 }
 
@@ -141,7 +91,7 @@ function sortArray(window: typeof Window, array: any[], sortOrder: SortOrder): P
             return sortComplexObjectArray(window, array, sortOrder);
         case ArrayType.number:
         case ArrayType.string:
-            return sortNumberOrStringArray(window, array, arrayType, sortOrder);
+            return sortNumberOrStringArray2(window, array, arrayType, sortOrder);
         default:
             return Promise.reject(`This array is not yet supported.`);
     }
