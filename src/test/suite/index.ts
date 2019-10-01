@@ -4,15 +4,16 @@ import * as glob from 'glob';
 
 export function run(): Promise<void> {
 	// Create the mocha test
-	const mocha = new Mocha({
+	const mocha = new Mocha({		
 		ui: 'tdd',
+		timeout: 10000
 	});
 	mocha.useColors(true);
 	
 	const testsRoot = path.resolve(__dirname, '..');
 
 	return new Promise((c, e) => {
-		glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
+		glob('**/**/*.test.js', { cwd: testsRoot }, (err, files) => {
 			if (err) {
 				return e(err);
 			}

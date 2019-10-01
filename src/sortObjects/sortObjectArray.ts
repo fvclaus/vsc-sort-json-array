@@ -1,5 +1,5 @@
-import { SortOrder } from "./SortOrder";
-import { genericSortFn } from "./genericSortFn";
+import { SortOrder } from "../SortOrder";
+import { genericSortFn } from "../sortNumberOrStrings/genericSortFn";
 
 function sortByProperty(a: any, b: any, property: string, sortOrder: SortOrder): number {
     return genericSortFn(sortOrder)(a[property], b[property]);

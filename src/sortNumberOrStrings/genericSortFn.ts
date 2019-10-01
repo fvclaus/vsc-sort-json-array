@@ -1,4 +1,4 @@
-import { SortOrder } from './SortOrder';
+import { SortOrder } from '../SortOrder';
 
 
 export function genericSortFn(sortOrder: SortOrder): (a: any, b: any) => number {

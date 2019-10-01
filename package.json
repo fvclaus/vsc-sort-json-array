@@ -5,7 +5,8 @@
     "version": "0.0.2",
     "publisher": "fvclaus",
     "engines": {
-        "vscode": "^1.26.0"
+        "vscode": "^1.26.0",
+        "nvm": "v12.10.0"
     },
     "repository": {
         "url": "https://github.com/fvclaus/vsc-sort-json-array"

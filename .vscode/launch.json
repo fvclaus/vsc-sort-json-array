@@ -16,7 +16,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
-            "preLaunchTask": "npm: watch"
+            "preLaunchTask": "npm-compile"
         },
         {
             "name": "Extension Tests",
@@ -25,12 +25,21 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test"
+                "--extensionTestsPath=${workspaceFolder}/out/test/suite"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/test/**/*.js"
             ],
-            "preLaunchTask": "npm: watch"
+            "preLaunchTask": "npm-compile"
+        },
+        {
+            "name": "Extension Tests (Mocha)",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "${workspaceFolder}/out/test/runTest.js",
+            "outFiles": [
+                "${workspaceFolder}/out/test/**/*.js"
+            ]
         }
     ]
 }

@@ -3,7 +3,7 @@ import { determineArrayType, ArrayType } from "../../determineArrayType";
 import chai = require('chai');
 const expect = chai.expect;
 
-describe('Determine array type', () => {
+suite('Determine array type', () => {
 
 	const UNSUPPORTED_ARRAYS = [
 		[],
@@ -15,7 +15,7 @@ describe('Determine array type', () => {
 	]
 
 	UNSUPPORTED_ARRAYS.forEach(unsupportedArray => {
-		it(`should not support array ${JSON.stringify(unsupportedArray)}`, () => {
+		test(`should not support array ${JSON.stringify(unsupportedArray)}`, () => {
 			expect(determineArrayType(unsupportedArray)).to.be.undefined;
 		});
 	});
@@ -29,7 +29,7 @@ describe('Determine array type', () => {
 	]
 
 	SUPPORTED_ARRAYS.forEach(([supportedArray, expectedType]) => {
-		it(`should supported supported ${JSON.stringify(supportedArray)}`, () => {
+		test(`should supported supported ${JSON.stringify(supportedArray)}`, () => {
 			expect(determineArrayType(supportedArray as any[])).to.equal(expectedType);
 		})
 	})
