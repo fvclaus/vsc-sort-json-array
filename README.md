@@ -1,3 +1,5 @@
+![](https://github.com/fvclaus/vsc-sort-json-array/workflows/tests/badge.svg)
+
 # sort-json-array README
 
 This is a visual studio code extension.
