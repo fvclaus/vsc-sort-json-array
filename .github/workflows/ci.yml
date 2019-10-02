@@ -1,9 +1,10 @@
-name: Greet Everyone
+name: tests
 on: [push]
 
 jobs:
   build:
-    name: Greeting
+    name: tests
+    # Run on windows because it provides a graphics server
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
