@@ -42,6 +42,20 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "type": "shell",
+            "command": "nvm run watch",
+            "label": "npm-watch",            
+            "problemMatcher": "$tsc-watch",
+            "isBackground": true,  
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
