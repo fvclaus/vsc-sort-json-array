@@ -1,4 +1,4 @@
-import { determineArrayType, ArrayType } from "../../determineArrayType";
+import { determineArrayType, ArrayType } from "../../sortOrder/determineArrayType";
 
 import chai = require('chai');
 const expect = chai.expect;

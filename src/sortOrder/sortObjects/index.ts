@@ -1,11 +1,11 @@
 import { sortObjectArray } from './sortObjectArray';
-import { SortOrder } from '../SortOrder';
 
 import * as vscode from 'vscode';
 
 import Window = vscode.window;
 import QuickPickItem = vscode.QuickPickItem;
 import { findCommonProperties } from './findCommonProperties';
+import { SortOrder } from '../SortOrder';
 
 function pickPropertiesIfNecessary(window: typeof Window, selectedProperties: string[], quickPickItems: QuickPickItem[]): Thenable<vscode.QuickPickItem | undefined> {
     const remainingQuickPickItems = quickPickItems.filter(item => selectedProperties.indexOf(item.label) === -1);
