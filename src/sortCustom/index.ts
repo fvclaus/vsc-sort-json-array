@@ -121,7 +121,9 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                     } catch (e) {
                         window.showErrorMessage(`Cannot rename module ${moduleChoice.label}: ${e}`);
                     }
-                    return pickModuleAndAction(extensionContext, outputChannel, window, workspace, array);
+                    pickModuleAndAction(extensionContext, outputChannel, window, workspace, array)
+                        .then(resolve)
+                        .catch(reject)
 
                 }
                 break;
@@ -138,7 +140,9 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                 } catch (e) {
                     window.showErrorMessage(`Cannot delete module ${moduleChoice.label}: ${e}`);
                 }
-                return pickModuleAndAction(extensionContext, outputChannel, window, workspace, array);
+                pickModuleAndAction(extensionContext, outputChannel, window, workspace, array)
+                    .then(resolve)
+                    .catch(reject);
         }
     });
 }

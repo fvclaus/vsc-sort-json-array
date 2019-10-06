@@ -2,16 +2,19 @@ import * as vscode from 'vscode'
 
 import { triggerSortCommandExpectSuccess } from '../triggerSortCommandExpectSucccess';
 
-import { afterEach, beforeEach } from 'mocha';
+import { afterEach, after, before } from 'mocha';
 import { sleep } from '../sleep';
 
 import { ExtensionApi } from '../../../extension';
 
+import chai = require('chai');
+const expect = chai.expect;
+
 import * as temp from 'temp';
-import * as glob from 'glob';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mvFile from 'mv';
+import * as rimraf from 'rimraf';
 
 
 const B2 = {
@@ -19,40 +22,22 @@ const B2 = {
     'productionStart': 1978,
     'maxPs': 136
 },
-C2 = {
-    'model': '100 C2',
-    'productionStart': 1976,
-    'maxPs': 170
-},
-A4 = {
-    'model': 'A4 B6',
-    'productionStart': 2000,
-    'maxPs': 344
-},
-Q5 = {
-    'model': 'Q5 8R',
-    'productionStart': 2008,
-    'maxPs': 270
-};
+    C2 = {
+        'model': '100 C2',
+        'productionStart': 1976,
+        'maxPs': 170
+    },
+    A4 = {
+        'model': 'A4 B6',
+        'productionStart': 2000,
+        'maxPs': 344
+    },
+    Q5 = {
+        'model': 'Q5 8R',
+        'productionStart': 2008,
+        'maxPs': 270
+    };
 
-interface CarSpec {
-    model: string;
-    productionStart: number;
-    maxPs: number;
-}
-
-function calculateDecade(carSpec: CarSpec) {
-    return Math.floor(carSpec.productionStart / 10) * 10
-}
-
-function sort(a: CarSpec, b: CarSpec): number {
-    const decadeDifference = calculateDecade(a) - calculateDecade(b);
-    if (decadeDifference == 0) {
-        return a.maxPs - b.maxPs;
-    } else {
-        return decadeDifference;
-    }
-}
 
 function writeCurrentDocument(content: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -65,27 +50,61 @@ function writeCurrentDocument(content: string): Promise<boolean> {
     })
 }
 
-function mvDir(from: string, to: string) {
-    const matches = glob.sync('*', {
+function rm(path: string): Promise<any> {
+    
+    return new Promise((resolve, reject) => {
+        rimraf(path, error => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
+    });
+}
+
+function mvDir(from: string, to: string): Promise<any> {
+    /* const matches = glob.sync('*', {
         cwd: from
-    });
-    matches.forEach(match => {
-        mvFile(path.join(from, match), path.join(to, match), console.error);
-    });
+    }); */
+    return new Promise((resolve, reject) => {
+        mvFile(from, to, {mkdirp: true}, error => {
+            if (error) {
+                reject(error);                
+            } else {
+                resolve();
+            }
+        });
+    })
+    /* matches.forEach(match => {
+        mvFile(path.join(from, match), path.join(to, match), error => {
+            if (error) {
+                console.error(error);
+            }
+        });
+    }); */
 }
 
-function moveExistingSortModules(globalStoragePath: string) {
+async function moveExistingSortModules(globalStoragePath: string): Promise<string> {
     const tempDir = temp.mkdirSync();
-    console.log(`Moving from ${globalStoragePath} to ${tempDir}`)
-    mvDir(globalStoragePath, tempDir);
+    // tempDir must not exists, otherwise mv() will try to open() it.
+    fs.rmdirSync(tempDir);
+    try {
+        // Make sure the global storage folder exists.
+        fs.mkdirSync(globalStoragePath);
+    } catch (e) {
+
+    }
+    await mvDir(globalStoragePath, tempDir);
+    return tempDir;
 }
 
-function moveExistingSortModulesBack(tempDir: string, globalStoragePath: string) {
-    mvDir(tempDir, globalStoragePath);
-    fs.unlinkSync(tempDir);
+async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: string) {
+    await rm(globalStoragePath);
+    await mvDir(tempDir, globalStoragePath);
 }
 
-async function loadExtension(extensionId: string) {
+async function activateExtension() {
     try {
         await vscode.commands.executeCommand('extension.sortJsonArrayCustom');
     } catch (e) {
@@ -93,13 +112,27 @@ async function loadExtension(extensionId: string) {
     }
 }
 
-suite('Sort objects', () => {
+async function selectQuickOpenItem(item: string) {
+    await vscode.commands.executeCommand('workbench.action.focusQuickOpen');
+    await vscode.env.clipboard.writeText(item);
+    await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+    await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
+}
+
+suite('Sort custom', () => {
 
     let globalStoragePath: string | undefined;
     let tempDir: string | undefined;
 
-    afterEach(async () => {
-        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    before(async () => {
+        const extensionId = 'fvclaus.sort-json-array';
+        await activateExtension();
+        const extensionApi: ExtensionApi = vscode.extensions.getExtension(extensionId)!.exports;
+        globalStoragePath = extensionApi.getGlobalStoragePath();
+        tempDir = await moveExistingSortModules(globalStoragePath);
+    });
+
+    after(async () => {
         if (globalStoragePath && tempDir) {
             try {
                 await moveExistingSortModulesBack(tempDir, globalStoragePath);
@@ -109,16 +142,14 @@ suite('Sort objects', () => {
         }
     });
 
-    test('should sort using name and age', async () => {
-        const commands = await vscode.commands.getCommands();
-        const extensionId = 'fvclaus.sort-json-array';
-        await loadExtension(extensionId);
-        const extensionApi: ExtensionApi = vscode.extensions.getExtension(extensionId)!.exports;
-        const globalStoragePath = extensionApi.getGlobalStoragePath();
-        moveExistingSortModules(globalStoragePath);
+
+    afterEach(async () => {
+        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    });
+
+    test('should sort using custom function', async () => {
         await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
-            // Must wait for extension to become active.
-            /* await sleep(1000); */
+            // Wait for quick open
             await sleep(1000);
             const sortByDecadeAndPs = `
             interface CarSpec {
@@ -143,27 +174,44 @@ suite('Sort objects', () => {
                 }
             }`;
             // Wait for new sort module to become open
-            await sleep(500);
             writeCurrentDocument(sortByDecadeAndPs);
-            await sleep(100);
             await vscode.commands.executeCommand('workbench.action.files.save');
-            await sleep(100);
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
             await sleep(100);
-            /* await vscode.commands.executeCommand('workbench.action.focusQuickOpen');
-            await sleep(2000);
-            await vscode.env.clipboard.writeText('age');
-            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-            await sleep(10000);
-            await vscode.commands.executeCommand('workbench.action.quickOpenSelectNext');
-            await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
-            await sleep(500);
-            return vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem'); */
         });
     });
 
-    /* test('should show no common properties error message', async () => {
-        triggerSortCommandExpectFailure(JSON.stringify([{ 'foo': 1 }, { 'bar': 2 }], null, 2), `There are no properties all objects of this array have in common.`);
-    }); */
+    test('should rename and apply file', async () => {
+
+        await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
+            // Wait for quick open
+            await sleep(1000);
+            await selectQuickOpenItem('sort.1.ts');
+            await selectQuickOpenItem('rename');
+            // Rename module
+            await selectQuickOpenItem('sort.cars.ts');
+            // Select renamed module
+            await selectQuickOpenItem('sort.cars.ts');
+            await selectQuickOpenItem('apply');
+        });
+    });
+
+    test('should delete file', async() => {
+        const document = await vscode.workspace.openTextDocument({
+            language: 'JSON',
+            content: '[1, 2, 3, 4]'
+        })
+        await vscode.window.showTextDocument(document);
+        await vscode.commands.executeCommand('selectAll');
+        vscode.commands.executeCommand('extension.sortJsonArrayCustom');
+        // Wait for quick open
+        await sleep(1000);
+        await selectQuickOpenItem('sort.cars.ts');
+        await selectQuickOpenItem('delete'); 
+        await sleep(1000);
+        
+        expect(fs.existsSync(path.join(globalStoragePath!, 'sort.cars.ts'))).to.be.false
+    });
+
 
 });
