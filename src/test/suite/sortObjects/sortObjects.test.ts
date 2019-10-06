@@ -14,7 +14,7 @@ suite('Sort objects', () => {
   });
 
   test('should sort using name and age', async () => {
-    await triggerSortCommandExpectSuccess(ALL, [JIMMY, JOHN, JOHN_PAUL, ROBERT], async function operateQuickOpen() {
+    await triggerSortCommandExpectSuccess('extension.sortJsonArray', ALL, [JIMMY, JOHN, JOHN_PAUL, ROBERT], async function operateQuickOpen() {
       // Wait for quick pick to become visible
       await sleep(500);
       await vscode.commands.executeCommand('workbench.action.quickOpenSelectNext')

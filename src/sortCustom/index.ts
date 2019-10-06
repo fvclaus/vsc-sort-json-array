@@ -3,17 +3,18 @@ import { loadSortFn } from './loadSortFn';
 import * as vscode from 'vscode';
 import * as glob from 'glob';
 import * as fs from 'fs';
+import { generateUniqueSortModuleName } from './generateUniqueSortModuleName';
 
 
-function trySortModule(path: string, array: any[]): Promise<any[]> {
+function trySortModule(window: typeof vscode.window, path: string, array: any[]): Promise<any[]> {
     return new Promise((resolve, reject) => {
         const fail = (errors: string[]) => {
-            errors.forEach(vscode.window.showErrorMessage);
+            errors.forEach(window.showErrorMessage);
             reject(errors);
         };
         const errors = validateSortModule(path);
         if (errors.length === 0) {
-            vscode.window.showInformationMessage('Sort module is valid.');
+            window.showInformationMessage('Sort module is valid.');
             const sortFn = loadSortFn(path);
             const arrayCopy = array.slice();
             try {
@@ -28,18 +29,6 @@ function trySortModule(path: string, array: any[]): Promise<any[]> {
             fail(errors);
         }
     });
-}
-
-function generateNewFilename(globalStoragePath: string) {
-    const numberedSortModuleRegex = /sort\.(\d+)\.ts/;
-    const sortModules = glob.sync(`sort.*.ts`, {
-        cwd: globalStoragePath
-    })
-        .filter(module => module.match(numberedSortModuleRegex))
-        .map(module => parseInt((module.match(numberedSortModuleRegex) as any[])[1]));
-    sortModules.sort((a, b) => b - a);
-    sortModules.push(0);
-    return `sort.${sortModules[0] + 1}.ts`;
 }
 
 function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputChannel: vscode.OutputChannel, window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]): Promise<any[]> {
@@ -69,7 +58,7 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
         let module: string = moduleChoice.label;
         let actionChoice: string | undefined;
         if (module === 'New sort module') {
-            module = generateNewFilename(extensionContext.globalStoragePath);
+            module = generateUniqueSortModuleName(extensionContext.globalStoragePath);
             actionChoice = 'edit';
         }
         else {
@@ -88,7 +77,7 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                 await window.showTextDocument(document);
                 const onSave = workspace.onDidSaveTextDocument(e => {
                     if (e.fileName === path) {
-                        trySortModule(path, array)
+                        trySortModule(window, path, array)
                             .then(sortedArray => {
                                 outputChannel.clear();
                                 outputChannel.appendLine('Sort preview:');
@@ -103,14 +92,14 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                     if (sortModuleEditors.length === 0) {
                         onSave.dispose();
                         onClose.dispose();
-                        trySortModule(path, array)
+                        trySortModule(window, path, array)
                             .then(resolve)
                             .catch(reject);
                     }
                 });
                 break;
             case 'apply':
-                trySortModule(path, array)
+                trySortModule(window, path, array)
                     .then(resolve)
                     .catch(reject);
                 break;

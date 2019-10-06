@@ -5,7 +5,7 @@ const expect = chai.expect;
 
 const window = vscode.window;
 
-export async function triggerSortCommandExpectSuccess(array: any[], expectedArray: any[], userInputs?: () => Promise<any> | undefined) {
+export async function triggerSortCommandExpectSuccess(command: string, array: any[], expectedArray: any[], userInputs?: () => Promise<any> | undefined) {
     const document = await vscode.workspace.openTextDocument({
       language: 'JSON',
       content: JSON.stringify(array, null, 2)
@@ -15,12 +15,12 @@ export async function triggerSortCommandExpectSuccess(array: any[], expectedArra
     // The sort command may require input from the user. We cannot 'await' it, because it will hang indefinetely.
     let result;
     if (userInputs) {
-      const resultPromise = vscode.commands.executeCommand('extension.sortJsonArray');
+      const resultPromise = vscode.commands.executeCommand(command);
       await userInputs();
       result = await resultPromise;
 
     } else {
-      result = await vscode.commands.executeCommand('extension.sortJsonArray');
+      result = await vscode.commands.executeCommand(command);
     }
     // Wait here is required to update the editor?
     await sleep(1000);

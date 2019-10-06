@@ -55,6 +55,10 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
     }
 }
 
+export interface ExtensionApi {
+    getGlobalStoragePath: () => string;
+}
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -69,6 +73,12 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(ascendingSort);
     context.subscriptions.push(descendingSort);
     context.subscriptions.push(customSort);
+
+    return {
+        getGlobalStoragePath() {
+            return context.globalStoragePath;
+        }
+    }
 }
 
 // this method is called when your extension is deactivated

@@ -48,7 +48,7 @@ export function validateSortModule(path: string): string[] {
             }
         });
         if (!hasSortFunction) {
-            errors.push('This file must define a sort(a, b) function.');
+            errors.push('The module must define a sort(a, b) function.');
         }
         return errors;
     }
