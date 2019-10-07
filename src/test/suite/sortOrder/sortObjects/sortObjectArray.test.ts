@@ -1,8 +1,8 @@
 
-import { SortOrder } from '../../../sortOrder/SortOrder';
+import { SortOrder } from '../../../../sortOrder/SortOrder';
 import { ALL, JOHN, ROBERT, JOHN_PAUL, JIMMY } from './lz';
 import chai = require('chai');
-import { sortObjectArray } from '../../../sortOrder/sortObjects/sortObjectArray';
+import { sortObjectArray } from '../../../../sortOrder/sortObjects/sortObjectArray';
 const expect = chai.expect;
 
 suite('Sort object array', () => {    

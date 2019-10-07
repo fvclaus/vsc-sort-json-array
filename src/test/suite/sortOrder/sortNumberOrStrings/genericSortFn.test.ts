@@ -1,7 +1,7 @@
 
 import chai = require('chai');
-import { genericSortFn } from '../../../sortOrder/sortNumberOrStrings/genericSortFn';
-import { SortOrder } from '../../../sortOrder/SortOrder';
+import { genericSortFn } from '../../../../sortOrder/sortNumberOrStrings/genericSortFn';
+import { SortOrder } from '../../../../sortOrder/SortOrder';
 const expect = chai.expect;
 
 suite('Determine array type', () => {

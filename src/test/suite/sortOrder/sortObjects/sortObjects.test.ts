@@ -1,12 +1,12 @@
 import * as vscode from 'vscode'
 import { ALL, JIMMY, JOHN_PAUL, JOHN, ROBERT } from './lz';
 
-import { triggerSortCommandExpectSuccess } from '../triggerSortCommandExpectSucccess';
+import { triggerSortCommandExpectSuccess } from '../../triggerSortCommandExpectSucccess';
 
 import { afterEach } from 'mocha';
-import { sleep } from '../sleep';
+import { sleep } from '../../sleep';
 
-import { triggerSortCommandExpectFailure } from '../triggerSortCommandExpectFailure';
+import { triggerSortCommandExpectFailure } from '../../triggerSortCommandExpectFailure';
 
 suite('Sort objects', () => {
   afterEach(async () => {

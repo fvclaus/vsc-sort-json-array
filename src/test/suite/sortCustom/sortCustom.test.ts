@@ -64,9 +64,6 @@ function rm(path: string): Promise<any> {
 }
 
 function mvDir(from: string, to: string): Promise<any> {
-    /* const matches = glob.sync('*', {
-        cwd: from
-    }); */
     return new Promise((resolve, reject) => {
         mvFile(from, to, {mkdirp: true}, error => {
             if (error) {
@@ -76,13 +73,6 @@ function mvDir(from: string, to: string): Promise<any> {
             }
         });
     })
-    /* matches.forEach(match => {
-        mvFile(path.join(from, match), path.join(to, match), error => {
-            if (error) {
-                console.error(error);
-            }
-        });
-    }); */
 }
 
 async function moveExistingSortModules(globalStoragePath: string): Promise<string> {

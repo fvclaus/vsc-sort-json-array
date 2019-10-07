@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { triggerSortCommandExpectSuccess } from '../triggerSortCommandExpectSucccess';
+import { triggerSortCommandExpectSuccess } from '../../triggerSortCommandExpectSucccess';
 
 import { afterEach } from 'mocha';
 
