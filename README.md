@@ -1,5 +1,3 @@
-![](https://github.com/fvclaus/vsc-sort-json-array/workflows/tests/badge.svg)
-
 # sort-json-array
 
 Sorts a json/js array by common property or by custom function and replace the array in-place. Also works for numbers and string arrays. Nested objects and mixed arrays are only supported by custom function.
