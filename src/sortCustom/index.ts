@@ -6,29 +6,35 @@ import * as fs from 'fs';
 import { generateUniqueSortModuleName } from './generateUniqueSortModuleName';
 
 
-function trySortModule(window: typeof vscode.window, path: string, array: any[]): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-        const fail = (errors: string[]) => {
-            errors.forEach(window.showErrorMessage);
-            reject(errors);
-        };
-        const errors = validateSortModule(path);
-        if (errors.length === 0) {
-            window.showInformationMessage('Sort module is valid.');
-            const sortFn = loadSortFn(path);
-            const arrayCopy = array.slice();
-            try {
-                arrayCopy.sort(sortFn);
-                resolve(arrayCopy);
+function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: any[]): Promise<any[]> {
+    const sortPromise = new Promise((resolve, reject) => {
+        window.withProgress({
+            location: vscode.ProgressLocation.Window,
+            title: `Validating and applying sort module ${moduleName}`
+            // Window does not support progress.
+        }, (progress) => {
+             const fail = (errors: string[]) => {
+                reject(errors.map(error => `Module ${moduleName}: ${error}`));
+            };
+            const errors = validateSortModule(path);
+            if (errors.length === 0) {
+                const sortFn = loadSortFn(path);
+                const arrayCopy = array.slice();
+                try {
+                    arrayCopy.sort(sortFn);
+                    resolve(arrayCopy);
+                }
+                catch (e) {
+                    fail([`Error while sorting array: ${e}`]);
+                }
             }
-            catch (e) {
-                fail([`Error while sorting array: ${e}`]);
+            else {
+                fail(errors);
             }
-        }
-        else {
-            fail(errors);
-        }
+            return sortPromise;
+        })
     });
+    return sortPromise as Promise<any>;
 }
 
 function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputChannel: vscode.OutputChannel, window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]): Promise<any[]> {
@@ -55,10 +61,10 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
         if (!moduleChoice) {
             return;
         }
-        let module: string = moduleChoice.label;
+        let moduleName: string = moduleChoice.label;
         let actionChoice: string | undefined;
-        if (module === 'New sort module') {
-            module = generateUniqueSortModuleName(extensionContext.globalStoragePath);
+        if (moduleName === 'New sort module') {
+            moduleName = generateUniqueSortModuleName(extensionContext.globalStoragePath);
             actionChoice = 'edit';
         }
         else {
@@ -69,7 +75,7 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
         if (!actionChoice) {
             return;
         }
-        const path = `${extensionContext.globalStoragePath}/${module}`;
+        const path = `${extensionContext.globalStoragePath}/${moduleName}`;
         switch (actionChoice) {
             case 'edit':
                 fs.openSync(path, 'a+');
@@ -77,14 +83,15 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                 await window.showTextDocument(document);
                 const onSave = workspace.onDidSaveTextDocument(e => {
                     if (e.fileName === path) {
-                        trySortModule(window, path, array)
+                        trySortModule(window, path, moduleName, array)
                             .then(sortedArray => {
                                 outputChannel.clear();
                                 outputChannel.appendLine('Sort preview:');
                                 outputChannel.appendLine(JSON.stringify(sortedArray, null, 2));
                                 outputChannel.show(true);
+                                window.showInformationMessage(`Module ${moduleName} is valid`);
                             })
-                            .catch(e => { });
+                            .catch((errors: string[]) => errors.forEach(window.showErrorMessage));
                     }
                 });
                 const onClose = window.onDidChangeVisibleTextEditors(e => {
@@ -92,18 +99,18 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                     if (sortModuleEditors.length === 0) {
                         onSave.dispose();
                         onClose.dispose();
-                        trySortModule(window, path, array)
+                        trySortModule(window, path, moduleName, array)
                             .then(resolve)
                             .catch(reject);
                     }
                 });
                 break;
             case 'apply':
-                trySortModule(window, path, array)
+                trySortModule(window, path, moduleName, array)
                     .then(resolve)
                     .catch(reject);
                 break;
-            case 'rename': 
+            case 'rename':
                 const newModuleName = await window.showInputBox({
                     prompt: 'New sort module name including .ts',
                     value: moduleChoice.label,
@@ -117,9 +124,9 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                 if (newModuleName) {
                     try {
                         fs.renameSync(path, `${extensionContext.globalStoragePath}/${newModuleName}`);
-                        window.showInformationMessage(`Renamed module ${moduleChoice.label} to ${newModuleName}.`);
+                        window.showInformationMessage(`Renamed module ${moduleName} to ${newModuleName}.`);
                     } catch (e) {
-                        window.showErrorMessage(`Cannot rename module ${moduleChoice.label}: ${e}`);
+                        window.showErrorMessage(`Cannot rename module ${moduleName}: ${e}`);
                     }
                     pickModuleAndAction(extensionContext, outputChannel, window, workspace, array)
                         .then(resolve)
@@ -127,7 +134,7 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
 
                 }
                 break;
-            case 'delete': 
+            case 'delete':
                 try {
                     fs.unlinkSync(path);
                     try {

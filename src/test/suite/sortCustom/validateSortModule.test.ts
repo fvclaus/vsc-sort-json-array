@@ -20,7 +20,7 @@ suite('Validate sort module', () => {
 
     test('should detect missing sort function', () => {
         const errors = validateSortModule(createSourceModulePath(`sortModule.noSortFunction.ts`));
-        expect(errors).to.have.members(['The module must define a sort(a, b) function.'])
+        expect(errors).to.have.members(['Must define a sort(a, b) function.'])
     })
 
     test('should detect invalid typescript', () => {
@@ -36,7 +36,7 @@ suite('Validate sort module', () => {
         } catch(e) {
             // Ignore errors
         }
-        expect(errors).to.have.members(['The module does not compile. Please check the problems view.']);
+        expect(errors).to.have.members(['Does not compile. Please check the problems view.']);
     });
 
 });

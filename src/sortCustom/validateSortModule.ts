@@ -28,7 +28,7 @@ export function validateSortModule(path: string): string[] {
 
     const diagnostics = compileModule(path);
     if (diagnostics.length > 0) {
-        return ['The module does not compile. Please check the problems view.'];
+        return ['Does not compile. Please check the problems view.'];
     } else {
         const sourceFile = ts.createSourceFile(path, fs.readFileSync(path).toString(), ts.ScriptTarget.ES2015);
         let errors: string[] = [];
@@ -48,7 +48,7 @@ export function validateSortModule(path: string): string[] {
             }
         });
         if (!hasSortFunction) {
-            errors.push('The module must define a sort(a, b) function.');
+            errors.push('Must define a sort(a, b) function.');
         }
         return errors;
     }

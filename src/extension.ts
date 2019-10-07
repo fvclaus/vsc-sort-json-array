@@ -10,9 +10,15 @@ import { sortAscending, sortDescending } from './sortOrder';
 function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]) => Promise<any[]>): () => Promise<any[]> {
     return () => {
         return new Promise((resolve, reject) => {
-            const fail = (errorMessage: string) => {
-                window.showErrorMessage(errorMessage);
-                reject(new Error(errorMessage));
+            const fail = (error: string | string[]) => {
+                let errors : string[];
+                if (typeof error === 'string') {
+                    errors = [error];
+                } else {
+                    errors = error;
+                }
+                errors.forEach(window.showErrorMessage);
+                reject(new Error(errors.join(', ')));
             }
             const window = vscode.window;
             const workspace = vscode.workspace;
