@@ -5,14 +5,10 @@ Sorts a json/js array by common property or by custom function and replace the a
 ## Demo
 
 * Sort array of objects ascending or descending by one or more properties to produce a deterministic sort result:  
-![Sort by property](doc/sortOrderExample.gif)
-
 
 * Sort array using custom function:  
-![Sort by custon function](doc/sortCustomExample.gif)
 
 * Manage sort modules:  
-![Sort by custon function](doc/sortCustomModuleManagementExample.gif)
 
 
 ## Features

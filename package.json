@@ -2,7 +2,7 @@
     "name": "sort-json-array",
     "displayName": "Sort JSON array",
     "description": "Sorts any type of json array by value, object property or custom function",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "publisher": "fvclaus",
     "engines": {
         "vscode": "^1.31.0",
