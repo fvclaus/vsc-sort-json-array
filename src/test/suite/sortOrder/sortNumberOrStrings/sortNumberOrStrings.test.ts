@@ -10,11 +10,11 @@ suite('Sort number or strings', () => {
   });
 
   test('should sort numbers', async () => {
-    await triggerSortCommandExpectSuccess('extension.sortJsonArray', [100, 1, 99], [1, 99, 100])
+    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', [100, 1, 99], [1, 99, 100])
   });
 
   test('should sort strings', async () => {
-    await triggerSortCommandExpectSuccess('extension.sortJsonArray', ['foo', 'bar', 'car'], ['bar', 'car', 'foo']);
+    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', ['foo', 'bar', 'car'], ['bar', 'car', 'foo']);
   });
 
 });

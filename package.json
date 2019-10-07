@@ -15,7 +15,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.sortJsonArray",
+        "onCommand:extension.sortJsonArrayAscending",
         "onCommand:extension.sortJsonArrayDescending",
         "onCommand:extension.sortJsonArrayCustom"
     ],
@@ -23,7 +23,7 @@
     "contributes": {
         "commands": [
             {
-                "command": "extension.sortJsonArray",
+                "command": "extension.sortJsonArrayAscending",
                 "title": "Sort JSON array"
             },
             {
