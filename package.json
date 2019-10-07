@@ -1,15 +1,25 @@
 {
     "name": "sort-json-array",
-    "displayName": "sort-json-array",
-    "description": "Sorts a json array by property",
-    "version": "1.0.0",
+    "displayName": "Sort json array",
+    "description": "Sorts any type of json array by value, object property or custom function",
+    "version": "1.0.1",
     "publisher": "fvclaus",
     "engines": {
         "vscode": "^1.31.0",
         "nvm": "v12.10.0"
     },
+    "bugs": {
+        "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
+        "email": "f.v.claus@googlemail.com"
+    },
+    "homepage": "https://github.com/fvclaus/vsc-sort-json-array",
     "repository": {
         "url": "https://github.com/fvclaus/vsc-sort-json-array"
+    },
+    "icon": "icon.png",
+    "galleryBanner": {
+        "color": "#C80000",
+        "theme": "dark"
     },
     "categories": [
         "Other"
