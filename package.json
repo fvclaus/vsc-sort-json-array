@@ -2,7 +2,7 @@
     "name": "sort-json-array",
     "displayName": "sort-json-array",
     "description": "Sorts a json array by property",
-    "version": "0.0.2",
+    "version": "1.0.0",
     "publisher": "fvclaus",
     "engines": {
         "vscode": "^1.31.0",
@@ -24,7 +24,7 @@
         "commands": [
             {
                 "command": "extension.sortJsonArrayAscending",
-                "title": "Sort JSON array"
+                "title": "Sort JSON array ascending"
             },
             {
                 "command": "extension.sortJsonArrayDescending",
