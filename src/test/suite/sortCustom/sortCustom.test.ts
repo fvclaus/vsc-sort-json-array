@@ -164,7 +164,7 @@ suite('Sort custom', () => {
                 }
             }`;
             // Wait for new sort module to become open
-            writeCurrentDocument(sortByDecadeAndPs);
+            await writeCurrentDocument(sortByDecadeAndPs);
             await vscode.commands.executeCommand('workbench.action.files.save');
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
             await sleep(100);

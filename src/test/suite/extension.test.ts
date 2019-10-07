@@ -1,7 +1,6 @@
 import { afterEach } from 'mocha';
 
 import * as vscode from 'vscode'
-import { sleep } from './sleep';
 import chai = require('chai');
 const expect = chai.expect;
 // You can import and use all API from the 'vscode' module
