@@ -1,7 +1,5 @@
-# Change Log
-All notable changes to the "sort-json-array" extension will be documented in this file.
+<a name="1.1.0"></a>
+## 1.1.0
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-- Initial release
+### Features 
+* Adds default implemention with some documentation for new sort modules
