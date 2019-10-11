@@ -5,8 +5,7 @@
     "version": "1.1.0",
     "publisher": "fvclaus",
     "engines": {
-        "vscode": "^1.31.0",
-        "nvm": "v12.10.0"
+        "vscode": "^1.31.0"
     },
     "bugs": {
         "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
