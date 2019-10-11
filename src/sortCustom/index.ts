@@ -3,7 +3,7 @@ import { loadSortFn } from './loadSortFn';
 import * as vscode from 'vscode';
 import * as glob from 'glob';
 import * as fs from 'fs';
-import { generateUniqueSortModuleName } from './generateUniqueSortModuleName';
+import { createNewSortModule } from './generateUniqueSortModuleName';
 
 
 function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: any[]): Promise<any[]> {
@@ -64,7 +64,7 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
         let moduleName: string = moduleChoice.label;
         let actionChoice: string | undefined;
         if (moduleName === 'New sort module') {
-            moduleName = generateUniqueSortModuleName(extensionContext.globalStoragePath);
+            moduleName = createNewSortModule(extensionContext.globalStoragePath);
             actionChoice = 'edit';
         }
         else {

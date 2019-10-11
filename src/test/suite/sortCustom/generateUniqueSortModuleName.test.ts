@@ -4,7 +4,7 @@ import { afterEach } from 'mocha';
 import * as temp from 'temp';
 import * as fs from 'fs';
 import * as path from 'path';
-import { generateUniqueSortModuleName } from '../../../sortCustom/generateUniqueSortModuleName';
+import { createNewSortModule } from '../../../sortCustom/generateUniqueSortModuleName';
 import * as rimraf from 'rimraf';
 
 suite('Generate unique sort module name', () => {
@@ -36,7 +36,7 @@ suite('Generate unique sort module name', () => {
     ].forEach(([modules, expectedModuleName]) => {
         test('should ignore other naming conventions', () => {
             storageLocation = generateModuleFiles(modules as string[]);
-            const uniqueSortModuleName = generateUniqueSortModuleName(storageLocation);
+            const uniqueSortModuleName = createNewSortModule(storageLocation);
             expect(uniqueSortModuleName).to.equal(expectedModuleName);
         });
     })
