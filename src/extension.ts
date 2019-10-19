@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import TextEditor = vscode.TextEditor;
 import { sortCustom } from './sortCustom';
 import { sortAscending, sortDescending } from './sortOrder';
+import { findArrayInText } from './findArrayInText';
 
 // Return value was implemented to improve testability.
 function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]) => Promise<any[]>): () => Promise<any[]> {
@@ -26,18 +27,31 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
             if (!window.activeTextEditor) {
                 fail('No text editor is active');
             } else {
-                let editor = window.activeTextEditor as TextEditor;
+                const editor = window.activeTextEditor as TextEditor;
+                const { document } = editor;
                 let selection = editor.selection;
-                let text = editor.document.getText(selection);
+                const selectedText = document.getText(selection);
+                const detectedText = findArrayInText(document.getText(), document.offsetAt(selection.active));
+                if (detectedText) {
+                    editor.selection = selection = new vscode.Selection(
+                        document.positionAt(detectedText.start),
+                        document.positionAt(detectedText.end)
+                    )
+                }
+                const text = (detectedText && detectedText.text) || selectedText
 
                 try {
                     let parsedJson = JSON.parse(text);
                     if (parsedJson.constructor === Array) {
                         const parsedArray = (parsedJson as any[]);
+                        if (parsedArray.length === 0) {
+                            fail("This is an empty array. No sort needed ;)")
+                            return
+                        }
                         sortFn(window, workspace, parsedArray)
                             .then(sortedArray => {
                                 const workspaceEdit = new vscode.WorkspaceEdit();
-                                workspaceEdit.replace(editor.document.uri, selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
+                                workspaceEdit.replace(document.uri, selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
                                 workspace.applyEdit(workspaceEdit)
                                     .then(wasSuccess => {
                                         if (wasSuccess) {
@@ -46,13 +60,10 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
                                         }
                                     });
                             })
-                            .catch(error => {
-                                fail(error)
-                            })
+                            .catch(fail)
                     } else {
                         fail(`Selection is a ${parsedJson.constructor} not an array.`);
                     }
-
                 } catch (error) {
                     fail('Cannot parse selection as JSON.');
                 }
