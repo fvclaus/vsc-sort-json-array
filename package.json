@@ -4,6 +4,7 @@
     "description": "Sorts any type of json array by value, object property or custom function",
     "version": "1.1.1",
     "publisher": "fvclaus",
+    "license": "BSD-3-Clause",
     "engines": {
         "vscode": "^1.31.0"
     },
