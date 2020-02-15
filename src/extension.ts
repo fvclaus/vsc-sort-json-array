@@ -6,12 +6,26 @@ import TextEditor = vscode.TextEditor;
 import { sortCustom } from './sortCustom';
 import { sortAscending, sortDescending } from './sortOrder';
 
+export interface SelectionRange {
+
+	/**
+	 * The [range](#Range) of this selection range.
+	 */
+	range: vscode.Range;
+
+	/**
+	 * The parent selection range containing this range. Therefore `parent.range` must contain `this.range`.
+	 */
+	parent?: SelectionRange;
+
+}
+
 // Return value was implemented to improve testability.
 function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]) => Promise<any[]>): () => Promise<any[]> {
     return () => {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const fail = (error: string | string[]) => {
-                let errors : string[];
+                let errors: string[];
                 if (typeof error === 'string') {
                     errors = [error];
                 } else {
@@ -26,35 +40,52 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
             if (!window.activeTextEditor) {
                 fail('No text editor is active');
             } else {
-                let editor = window.activeTextEditor as TextEditor;
-                let selection = editor.selection;
-                let text = editor.document.getText(selection);
-
-                try {
-                    let parsedJson = JSON.parse(text);
-                    if (parsedJson.constructor === Array) {
-                        const parsedArray = (parsedJson as any[]);
-                        sortFn(window, workspace, parsedArray)
-                            .then(sortedArray => {
-                                const workspaceEdit = new vscode.WorkspaceEdit();
-                                workspaceEdit.replace(editor.document.uri, selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
-                                workspace.applyEdit(workspaceEdit)
-                                    .then(wasSuccess => {
-                                        if (wasSuccess) {
-                                            window.showInformationMessage('Sucessfully sorted array!');
-                                            resolve(sortedArray);
-                                        }
-                                    });
-                            })
-                            .catch(error => {
-                                fail(error)
-                            })
-                    } else {
-                        fail(`Selection is a ${parsedJson.constructor} not an array.`);
+                const editor = window.activeTextEditor as TextEditor;
+                const document = editor.document
+                let selection : vscode.Range = editor.selection;
+                if (selection.isEmpty) {
+                    const selectionRanges : SelectionRange[]  = await vscode.commands.executeCommand('vscode.executeSelectionRangeProvider', document.uri, [(selection as vscode.Selection).active]) as SelectionRange[]
+                    let current : SelectionRange | undefined = selectionRanges[0]
+                    while (current !== undefined) {
+                        const text = document.getText(current.range)
+                        if (text[0] === '[' && text[text.length - 1] === ']') {
+                            selection = new vscode.Range(current.range.start, current.range.end)
+                            break                            
+                        }
+                        current = current.parent
                     }
+                    if (!selection) {                        
+                        fail('Did not found enclosing array')
+                    }
+                
+                    let text = document.getText(selection);
 
-                } catch (error) {
-                    fail('Cannot parse selection as JSON.');
+                    try {
+                        let parsedJson = JSON.parse(text);
+                        if (parsedJson.constructor === Array) {
+                            const parsedArray = (parsedJson as any[]);
+                            sortFn(window, workspace, parsedArray)
+                                .then(sortedArray => {
+                                    const workspaceEdit = new vscode.WorkspaceEdit();
+                                    workspaceEdit.replace(document.uri, selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
+                                    workspace.applyEdit(workspaceEdit)
+                                        .then(wasSuccess => {
+                                            if (wasSuccess) {
+                                                window.showInformationMessage('Sucessfully sorted array!');
+                                                resolve(sortedArray);
+                                            }
+                                        });
+                                })
+                                .catch(error => {
+                                    fail(error)
+                                })
+                        } else {
+                            fail(`Selection is a ${parsedJson.constructor} not an array.`);
+                        }
+
+                    } catch (error) {
+                        fail('Cannot parse selection as JSON.');
+                    }
                 }
             }
         });
