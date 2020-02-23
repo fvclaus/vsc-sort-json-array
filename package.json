@@ -56,8 +56,8 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "rimraf out/; tsc -p ./",
-        "watch": "rimraf out/; tsc -watch -p ./",
+        "compile": "./bin/compile.sh",
+        "watch": "./bin/compile.sh --watch",
         "test": "npm run compile && node ./out/test/runTest.js"
     },
     "dependencies": {
