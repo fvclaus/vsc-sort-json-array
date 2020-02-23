@@ -15,6 +15,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mvFile from 'mv';
 import * as rimraf from 'rimraf';
+import openNewJsonDocument from '../openNewJsonDocument';
 
 
 const B2 = {
@@ -96,9 +97,13 @@ async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: s
 
 async function activateExtension() {
     try {
-        await vscode.commands.executeCommand('extension.sortJsonArrayCustom');
+        // Open empty document. Otherwise we dependent on the current editor content of the previous test.
+        // If the cursor position is inside and object array a Quickpick may appear and hang forever.
+        await openNewJsonDocument('')
+        // Must not activate sortJsonCustom. It will show a Quickpick and hang forever
+        await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
     } catch (e) {
-
+        console.log(`Error activating extension: ${e}`)
     }
 }
 
@@ -116,6 +121,7 @@ suite('Sort custom', () => {
 
     before(async () => {
         const extensionId = 'fvclaus.sort-json-array';
+        // If no command of this extension was executed before, .getExtension will return undefined.
         await activateExtension();
         const extensionApi: ExtensionApi = vscode.extensions.getExtension(extensionId)!.exports;
         globalStoragePath = extensionApi.getGlobalStoragePath();

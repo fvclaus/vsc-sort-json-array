@@ -19,7 +19,7 @@
             "preLaunchTask": "npm-watch"
         },
         {
-            "name": "Extension Tests",
+            "name": "Extension Tests (all)",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
@@ -33,13 +33,21 @@
             "preLaunchTask": "npm-compile"
         },
         {
-            "name": "Extension Tests (Mocha)",
-            "type": "node",
+            "name": "Extension Tests (current file)",
+            "type": "extensionHost",
             "request": "launch",
-            "runtimeExecutable": "${workspaceFolder}/out/test/runTest.js",
+            "runtimeExecutable": "${execPath}",
+            "env": {
+                "MOCHA_TEST_PATTERN": "${file}"
+            },
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/out/test/suite"
+            ],
             "outFiles": [
                 "${workspaceFolder}/out/test/**/*.js"
-            ]
+            ],
+            "preLaunchTask": "npm-compile"
         }
     ]
 }

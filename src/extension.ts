@@ -5,20 +5,22 @@ import * as vscode from 'vscode';
 import TextEditor = vscode.TextEditor;
 import { sortCustom } from './sortCustom';
 import { sortAscending, sortDescending } from './sortOrder';
+import { searchEnclosingArray } from './searchEnclosingArray';
 
 export interface SelectionRange {
 
 	/**
 	 * The [range](#Range) of this selection range.
 	 */
-	range: vscode.Range;
+    range: vscode.Range;
 
 	/**
 	 * The parent selection range containing this range. Therefore `parent.range` must contain `this.range`.
 	 */
-	parent?: SelectionRange;
+    parent?: SelectionRange;
 
 }
+
 
 // Return value was implemented to improve testability.
 function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]) => Promise<any[]>): () => Promise<any[]> {
@@ -42,51 +44,46 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
             } else {
                 const editor = window.activeTextEditor as TextEditor;
                 const document = editor.document
-                let selection : vscode.Range = editor.selection;
+                let selection: vscode.Range = editor.selection;
+                const cursorPosition = (selection as vscode.Selection).active
                 if (selection.isEmpty) {
-                    const selectionRanges : SelectionRange[]  = await vscode.commands.executeCommand('vscode.executeSelectionRangeProvider', document.uri, [(selection as vscode.Selection).active]) as SelectionRange[]
-                    let current : SelectionRange | undefined = selectionRanges[0]
-                    while (current !== undefined) {
-                        const text = document.getText(current.range)
-                        if (text[0] === '[' && text[text.length - 1] === ']') {
-                            selection = new vscode.Range(current.range.start, current.range.end)
-                            break                            
-                        }
-                        current = current.parent
-                    }
-                    if (!selection) {                        
-                        fail('Did not found enclosing array')
-                    }
-                
-                    let text = document.getText(selection);
-
-                    try {
-                        let parsedJson = JSON.parse(text);
-                        if (parsedJson.constructor === Array) {
-                            const parsedArray = (parsedJson as any[]);
-                            sortFn(window, workspace, parsedArray)
-                                .then(sortedArray => {
-                                    const workspaceEdit = new vscode.WorkspaceEdit();
-                                    workspaceEdit.replace(document.uri, selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
-                                    workspace.applyEdit(workspaceEdit)
-                                        .then(wasSuccess => {
-                                            if (wasSuccess) {
-                                                window.showInformationMessage('Sucessfully sorted array!');
-                                                resolve(sortedArray);
-                                            }
-                                        });
-                                })
-                                .catch(error => {
-                                    fail(error)
-                                })
-                        } else {
-                            fail(`Selection is a ${parsedJson.constructor} not an array.`);
-                        }
-
-                    } catch (error) {
-                        fail('Cannot parse selection as JSON.');
-                    }
+                    selection = await searchEnclosingArray(document, editor.selection)
                 }
+                if (selection.isEmpty) {
+                    fail('No active selection and no enclosing array could be found!')
+                }
+
+                let text = document.getText(selection);
+
+                try {
+                    let parsedJson = JSON.parse(text);
+                    if (parsedJson.constructor === Array) {
+                        const parsedArray = (parsedJson as any[]);
+                        sortFn(window, workspace, parsedArray)
+                            .then(sortedArray => {
+                                const workspaceEdit = new vscode.WorkspaceEdit();
+                                workspaceEdit.replace(document.uri, selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
+                                workspace.applyEdit(workspaceEdit)
+                                    .then(wasSuccess => {
+                                        if (wasSuccess) {
+                                            // Restore cursor position
+                                            editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
+                                            window.showInformationMessage('Sucessfully sorted array!');
+                                            resolve(sortedArray);
+                                        }
+                                    });
+                            })
+                            .catch(error => {
+                                fail(error)
+                            })
+                    } else {
+                        fail(`Selection is a ${parsedJson.constructor} not an array.`);
+                    }
+
+                } catch (error) {
+                    fail('Cannot parse selection as JSON.');
+                }
+
             }
         });
     }
