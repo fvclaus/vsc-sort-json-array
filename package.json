@@ -56,8 +56,8 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "./bin/compile.sh",
-        "watch": "./bin/compile.sh --watch",
+        "compile": "node bin/compile.js",
+        "watch": "node bin/compile.js --watch",
         "test": "npm run compile && node ./out/test/runTest.js"
     },
     "dependencies": {
