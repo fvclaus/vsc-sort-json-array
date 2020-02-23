@@ -1,5 +1,7 @@
 import * as ts from 'typescript';
-import * as fs from 'fs';
+import * as temp from 'temp';
+import { unlinkSync, unlink } from 'fs';
+import withTempFile from './unlinkTempfile';
 
 function validateSortFunction(node: ts.FunctionDeclaration): string[] {
     const errors = [];
@@ -15,41 +17,49 @@ function validateSortFunction(node: ts.FunctionDeclaration): string[] {
     return errors;
 }
 
-function compileModule(path: string): ts.Diagnostic[] {
-    const program = ts.createProgram([path], {
 
-    })
-    let emitResult = program.emit();
-    return ts.getPreEmitDiagnostics(program)
-        .concat(emitResult.diagnostics);
+function validateSourceFile(sourceFile: ts.SourceFile) {
+    let errors: string[] = [];
+    let hasSortFunction = false;
+    sourceFile.forEachChild(node => {
+        switch (node.kind) {
+            case ts.SyntaxKind.FunctionDeclaration:
+                const functionDeclaration = node as ts.FunctionDeclaration;
+                const functionName = functionDeclaration.name;
+                if (functionName && functionName.escapedText === 'sort') {
+                    const sortFunctionErrors = validateSortFunction(functionDeclaration)
+                        .map(error => `Sort function is invalid: ${error}`);
+                    errors = [...sortFunctionErrors];
+                    hasSortFunction = true;
+                }
+                break;
+        }
+    });
+    if (!hasSortFunction) {
+        errors.push('Must define a sort(a, b) function.');
+    }
+    return errors;
 }
 
 export function validateSortModule(path: string): string[] {
 
-    const diagnostics = compileModule(path);
-    if (diagnostics.length > 0) {
-        return ['Does not compile. Please check the problems view.'];
-    } else {
-        const sourceFile = ts.createSourceFile(path, fs.readFileSync(path).toString(), ts.ScriptTarget.ES2015);
-        let errors: string[] = [];
-        let hasSortFunction = false;
-        sourceFile.forEachChild(node => {
-            switch (node.kind) {
-                case ts.SyntaxKind.FunctionDeclaration:
-                    const functionDeclaration = node as ts.FunctionDeclaration;
-                    const functionName = functionDeclaration.name;
-                    if (functionName && functionName.escapedText === 'sort') {
-                        const sortFunctionErrors = validateSortFunction(functionDeclaration)
-                            .map(error => `Sort function is invalid: ${error}`);
-                        errors = [...sortFunctionErrors];
-                        hasSortFunction = true;
-                    }
-                    break;
+    return withTempFile(tempFilePath => {
+        const program = ts.createProgram({
+            rootNames: [path], options: {
+                outFile: tempFilePath,
+                target: ts.ScriptTarget.ES2015,
+                module: ts.ModuleKind.System
             }
-        });
-        if (!hasSortFunction) {
-            errors.push('Must define a sort(a, b) function.');
+        })
+        const emitResult = program.emit()
+        const diagnostics = ts.getPreEmitDiagnostics(program)
+            .concat(emitResult.diagnostics);
+
+        if (diagnostics.length > 0) {
+            return ['Does not compile. Please check the problems view.'];
+        } else {
+            return validateSourceFile(program.getSourceFile(path) as ts.SourceFile)
         }
-        return errors;
-    }
+    }, (e) => [`Does not compile: ${e}`])
+
 }
