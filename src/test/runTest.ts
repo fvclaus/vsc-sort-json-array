@@ -15,7 +15,9 @@ async function main() {
 		// Download VS Code, unzip it and run the integration test
 		// 1.31.0 was first version to provide globalStoragePath.
 		// Use 1.38.0, becaues lower version would not close editor when tests are finished. 
-		await runTests({ version:'1.38.0', extensionDevelopmentPath, extensionTestsPath });
+		await runTests({ version: process.env.VSCODE_VERSION? process.env.VSCODE_VERSION : '1.38.0', 
+			extensionDevelopmentPath, 
+			extensionTestsPath });
 	} catch (err) {
 		console.error('Failed to run tests');
 		process.exit(1);

@@ -6,7 +6,7 @@
     "publisher": "fvclaus",
     "license": "BSD-3-Clause",
     "engines": {
-        "vscode": "^1.31.0"
+        "vscode": "^1.38.0"
     },
     "bugs": {
         "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
