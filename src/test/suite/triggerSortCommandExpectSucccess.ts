@@ -3,6 +3,7 @@ import chai = require('chai');
 import { sleep } from './sleep';
 const expect = chai.expect;
 import openNewJsonDocument from './openNewJsonDocument'
+import nextTick from '../nextTick';
 
 export async function triggerSortCommandExpectSuccess(command: string, array: any[], expectedArray: any[], userInputs?: () => Promise<any> | undefined) {
   const {
@@ -13,6 +14,8 @@ export async function triggerSortCommandExpectSuccess(command: string, array: an
   let result;
   if (userInputs) {
     const resultPromise = vscode.commands.executeCommand(command);
+    // Wait for quick open
+    await nextTick();
     await userInputs();
     result = await resultPromise;
   } else {

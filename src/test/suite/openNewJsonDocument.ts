@@ -7,10 +7,12 @@ const window = vscode.window;
 
 const ZERO_POSITION = new vscode.Position(0, 0)
 
-async function insertText(editor: vscode.TextEditor, content: string) {
+export async function replaceTextInCurrentEditor(content: string) {
+    const editor = (vscode.window.activeTextEditor as vscode.TextEditor);
     return new Promise((resolve) => {
         editor.edit(edit => {
-            edit.replace(new vscode.Range(ZERO_POSITION, ZERO_POSITION), content);
+            const all = new vscode.Range(ZERO_POSITION, new vscode.Position(editor.document.lineCount + 1, 0));
+            edit.replace(all, content);
             resolve();
         })
     })
@@ -25,7 +27,7 @@ export default async function openNewJsonDocument(text: string) {
     const document = await vscode.workspace.openTextDocument(tempFile.path);
     const editor = await window.showTextDocument(document);
     // Mark file as dirty to bypass preview mode that would open the sort module in the current tab.
-    await insertText(editor, text);
+    await replaceTextInCurrentEditor(text);
     editor.selection = new vscode.Selection(ZERO_POSITION, ZERO_POSITION)
     await nextTick()
     return {
