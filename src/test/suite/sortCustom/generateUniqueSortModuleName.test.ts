@@ -27,9 +27,9 @@ suite('Generate unique sort module name', () => {
                 // Ignore errors.
             }
         }
-    })
+    });
 
-    const t = [
+    [
         [['sort.foo.ts', 'sort.bar.ts'], 'sort.1.ts'],
         [['sort.1.ts', 'sort.2.ts'], 'sort.3.ts'],
         [[], 'sort.1.ts']

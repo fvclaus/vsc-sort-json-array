@@ -13,13 +13,13 @@ suite('Validate sort module', () => {
         ['wrongReturnType', 'Must have return type \'number\'']
     ].forEach(([moduleName, expectedError]) => {
         test(`should detect errors in ${moduleName}`, () => {
-            const errors = validateSortModule(createSourceModulePath(`sortModule.${moduleName}.ts`));
+            const errors = validateSortModule(createSourceModulePath(`sortModules/sortModule.${moduleName}.ts`));
             expect(errors).to.have.members([`Sort function is invalid: ${expectedError}.`])
         });
     });
 
     test('should detect missing sort function', () => {
-        const errors = validateSortModule(createSourceModulePath(`sortModule.noSortFunction.ts`));
+        const errors = validateSortModule(createSourceModulePath(`sortModules/sortModule.noSortFunction.ts`));
         expect(errors).to.have.members(['Must define a sort(a, b) function.'])
     })
 
