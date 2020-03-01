@@ -7,10 +7,11 @@ import { afterEach } from 'mocha';
 
 import { triggerSortCommandExpectFailure } from '../../triggerSortCommandExpectFailure';
 import nextTick from '../../nextTick';
+import { closeActiveEditor } from '../../textEditorUtils';
 
 suite('Sort objects', () => {
   afterEach(async () => {
-    await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    await closeActiveEditor();
   });
 
   test('should sort using name and age', async () => {

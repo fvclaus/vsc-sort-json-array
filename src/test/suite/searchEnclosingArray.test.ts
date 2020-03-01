@@ -1,6 +1,7 @@
 import chai = require('chai');
 const expect = chai.expect;
-import openNewJsonDocument from './openNewJsonDocument';
+import { afterEach } from 'mocha';
+import { closeActiveEditor, openNewJsonDocument } from './textEditorUtils';
 import stringify from './stringify';
 import { searchEnclosingArray } from '../../searchEnclosingArray';
 import * as vscode from 'vscode'
@@ -14,7 +15,11 @@ suite('Find enclosing array', () => {
         editor.selection = new vscode.Selection(position, position);
         await nextTick()
         return position
-    }
+    };
+
+    afterEach(async () => {
+        await closeActiveEditor();
+    });
 
     [
         [

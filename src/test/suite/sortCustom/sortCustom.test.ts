@@ -13,8 +13,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import nextTick from '../nextTick';
 import { getGlobalStoragePath } from './getGlobalStoragePath';
-import { replaceTextInCurrentEditor } from '../openNewJsonDocument';
-import { rm, mvDir, createSourceModulePath } from './fileUtils';
+import { replaceTextInCurrentEditor, closeActiveEditor } from '../textEditorUtils';
+import { rm, mvDir, createSourceModulePath } from './storagePathFsUtils';
 
 
 const B2 = {
@@ -98,7 +98,7 @@ suite('Sort custom', () => {
         } catch (e) {
             console.log(`Error while removing test module ${testModulePath}: ${e}`)
         }
-        vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+        await closeActiveEditor();
     });
 
     function createTestModule() {

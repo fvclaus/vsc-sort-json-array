@@ -3,7 +3,7 @@ import { validateSortModule } from '../../../sortCustom/validateSortModule';
 const expect = chai.expect;
 import * as temp from 'temp';
 import * as fs from 'fs';
-import { createSourceModulePath } from './fileUtils';
+import { createSourceModulePath } from './storagePathFsUtils';
 
 suite('Validate sort module', () => {
 

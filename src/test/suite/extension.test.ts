@@ -2,6 +2,7 @@ import { afterEach } from 'mocha';
 
 import * as vscode from 'vscode'
 import chai = require('chai');
+import { closeActiveEditor } from './textEditorUtils';
 const expect = chai.expect;
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
@@ -13,7 +14,7 @@ const window = vscode.window;
 
 suite('Extension Test Suite', () => {
 	afterEach(async () => {
-		await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+		await closeActiveEditor();
 	});
 
 	test('Invalid json', async () => {

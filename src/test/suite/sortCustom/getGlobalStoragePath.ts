@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import openNewJsonDocument from "../openNewJsonDocument";
+import {openNewJsonDocument, closeActiveEditor} from "../textEditorUtils";
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -17,6 +17,7 @@ export async function getExtensionApi() {
     } catch (e) {
         console.log(`Error activating extension: ${e}`)
     }
+    await closeActiveEditor();
     // If no command of this extension was executed before, .getExtension will return undefined.
     return vscode.extensions.getExtension(extensionId)!.exports;
 }

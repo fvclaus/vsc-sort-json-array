@@ -1,6 +1,6 @@
 import chai = require('chai');
 import { loadSortFn } from '../../../sortCustom/loadSortFn';
-import { createSourceModulePath } from './fileUtils';
+import { createSourceModulePath } from './storagePathFsUtils';
 const expect = chai.expect;
 
 suite('Load sort fn', () => {

@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import * as temp from 'temp';
 import * as fs from 'fs';
 import nextTick from './nextTick';
+import { TextEditor } from 'vscode';
 
 const window = vscode.window;
 
@@ -18,7 +19,20 @@ export async function replaceTextInCurrentEditor(content: string) {
     })
 }
 
-export default async function openNewJsonDocument(text: string) {
+export async function closeActiveEditor() {
+    const editor = vscode.window.activeTextEditor as TextEditor
+    const document = editor.document
+    const uri = document.uri
+    await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
+    fs.unlink(uri.path, (err) => {
+        if (err) {
+            console.info(`Cannot delete file ${uri.path}: ${err}`)
+        }
+    })
+    await nextTick()
+}
+
+export async function openNewJsonDocument(text: string) {
     const tempFile = temp.openSync({
         suffix: '.json'
     });
