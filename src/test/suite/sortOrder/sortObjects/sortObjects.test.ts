@@ -7,6 +7,7 @@ import { afterEach } from 'mocha';
 import { sleep } from '../../sleep';
 
 import { triggerSortCommandExpectFailure } from '../../triggerSortCommandExpectFailure';
+import nextTick from '../../../nextTick';
 
 suite('Sort objects', () => {
   afterEach(async () => {
@@ -16,10 +17,10 @@ suite('Sort objects', () => {
   test('should sort using name and age', async () => {
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', ALL, [JIMMY, JOHN, JOHN_PAUL, ROBERT], async function operateQuickOpen() {
       // Wait for quick pick to become visible
-      await sleep(500);
+      await nextTick();
       await vscode.commands.executeCommand('workbench.action.quickOpenSelectNext')
       await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem')
-      await sleep(500);
+      await nextTick();
       return vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
     });
   });

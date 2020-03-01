@@ -1,6 +1,5 @@
 import * as vscode from 'vscode'
 import chai = require('chai');
-import { sleep } from './sleep';
 const expect = chai.expect;
 import openNewJsonDocument from './openNewJsonDocument'
 import nextTick from '../nextTick';
@@ -22,7 +21,7 @@ export async function triggerSortCommandExpectSuccess(command: string, array: an
     result = await vscode.commands.executeCommand(command);
   }
   // Wait here is required to update the editor?
-  await sleep(1000);
+  await nextTick();
   const actualArray = JSON.parse(editor.document.getText())
   expect(actualArray).to.deep.equal(expectedArray);
   expect(actualArray).to.deep.equal(result);

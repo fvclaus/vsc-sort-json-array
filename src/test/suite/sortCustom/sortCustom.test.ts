@@ -3,7 +3,6 @@ import * as vscode from 'vscode'
 import { triggerSortCommandExpectSuccess } from '../triggerSortCommandExpectSucccess';
 
 import { afterEach, after, before } from 'mocha';
-import { sleep } from '../sleep';
 
 
 import chai = require('chai');
@@ -136,7 +135,7 @@ suite('Sort custom', () => {
             await replaceTextInCurrentEditor(sortByDecadeAndPs);
             await vscode.commands.executeCommand('workbench.action.files.save');
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-            await sleep(100);
+            await nextTick();
         });
     });
 
