@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import chai = require('chai');
 const expect = chai.expect;
 import openNewJsonDocument from './openNewJsonDocument'
-import nextTick from '../nextTick';
+import nextTick from './nextTick';
 
 export async function triggerSortCommandExpectSuccess(command: string, array: any[], expectedArray: any[], userInputs?: () => Promise<any> | undefined) {
   const {

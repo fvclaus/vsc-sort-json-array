@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import * as temp from 'temp';
 import * as fs from 'fs';
-import nextTick from '../nextTick';
+import nextTick from './nextTick';
 
 const window = vscode.window;
 

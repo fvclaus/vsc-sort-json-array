@@ -11,7 +11,7 @@ const expect = chai.expect;
 import * as temp from 'temp';
 import * as fs from 'fs';
 import * as path from 'path';
-import nextTick from '../../nextTick';
+import nextTick from '../nextTick';
 import { getGlobalStoragePath } from './getGlobalStoragePath';
 import { replaceTextInCurrentEditor } from '../openNewJsonDocument';
 import { rm, mvDir, createSourceModulePath } from './fileUtils';

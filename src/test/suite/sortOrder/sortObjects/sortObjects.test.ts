@@ -4,10 +4,9 @@ import { ALL, JIMMY, JOHN_PAUL, JOHN, ROBERT } from './lz';
 import { triggerSortCommandExpectSuccess } from '../../triggerSortCommandExpectSucccess';
 
 import { afterEach } from 'mocha';
-import { sleep } from '../../sleep';
 
 import { triggerSortCommandExpectFailure } from '../../triggerSortCommandExpectFailure';
-import nextTick from '../../../nextTick';
+import nextTick from '../../nextTick';
 
 suite('Sort objects', () => {
   afterEach(async () => {

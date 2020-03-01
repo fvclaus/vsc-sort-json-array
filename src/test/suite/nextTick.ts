@@ -1,4 +1,4 @@
-import { sleep } from "./suite/sleep";
+import { sleep } from "./sleep";
 
 export default async function nextTick () {
     // This is the time vscode needs to update the document/editor

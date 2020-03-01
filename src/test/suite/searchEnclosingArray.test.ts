@@ -4,7 +4,7 @@ import openNewJsonDocument from './openNewJsonDocument';
 import stringify from './stringify';
 import { searchEnclosingArray } from '../../searchEnclosingArray';
 import * as vscode from 'vscode'
-import nextTick from '../nextTick';
+import nextTick from './nextTick';
 
 suite('Find enclosing array', () => {
 
