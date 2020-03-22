@@ -5,17 +5,26 @@ import * as vscode from 'vscode';
 import TextEditor = vscode.TextEditor;
 import { sortCustom } from './sortCustom';
 import { sortAscending, sortDescending } from './sortOrder';
+import parseArray from './parseArray';
+import serializeArray from './serializeArray';
+
+function getFileExtension (filename: string): string {
+    const fileSegments = filename.split('.')
+    return fileSegments.length > 0 ? fileSegments.pop()! : 'json'
+}
 
 // Return value was implemented to improve testability.
 function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]) => Promise<any[]>): () => Promise<any[]> {
     return () => {
         return new Promise((resolve, reject) => {
-            const fail = (error: string | string[]) => {
+            const fail = (error: string | Error | string[]) => {
                 let errors : string[];
                 if (typeof error === 'string') {
                     errors = [error];
+                } else if (error instanceof Error) {
+                    errors = [error.message];
                 } else {
-                    errors = error;
+                    errors = error
                 }
                 errors.forEach(window.showErrorMessage);
                 reject(new Error(errors.join(', ')));
@@ -28,16 +37,19 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
             } else {
                 let editor = window.activeTextEditor as TextEditor;
                 let selection = editor.selection;
-                let text = editor.document.getText(selection);
-
+                let text = editor.document.getText(selection)
+                const fileExtension = getFileExtension(editor.document.fileName)
+                
                 try {
-                    let parsedJson = JSON.parse(text);
+                    let parsedJson = parseArray(text, fileExtension);
                     if (parsedJson.constructor === Array) {
                         const parsedArray = (parsedJson as any[]);
                         sortFn(window, workspace, parsedArray)
                             .then(sortedArray => {
                                 const workspaceEdit = new vscode.WorkspaceEdit();
-                                workspaceEdit.replace(editor.document.uri, selection, JSON.stringify(sortedArray, null, editor.options.tabSize));
+                                const serializedArray = serializeArray(sortedArray, fileExtension,
+                                    typeof editor.options.tabSize === 'number' ? editor.options.tabSize : undefined)
+                                workspaceEdit.replace(editor.document.uri, selection, serializedArray);
                                 workspace.applyEdit(workspaceEdit)
                                     .then(wasSuccess => {
                                         if (wasSuccess) {
@@ -54,7 +66,7 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
                     }
 
                 } catch (error) {
-                    fail('Cannot parse selection as JSON.');
+                    fail(`Cannot parse selection as JSON. Reason: ${error}`);
                 }
             }
         });
