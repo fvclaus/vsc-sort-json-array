@@ -1,17 +1,30 @@
 # Sort JSON array
 
-Sorts a json/js array by common property or by custom function and replace the array in-place. Also works for numbers and string arrays. Nested objects and mixed arrays are only supported by custom function.
+Sorts a selected json array by common property or by custom function and replace the array in-place. Also works for numbers and string arrays. Nested objects and mixed arrays are only supported by custom function. 
+
+## Supported arrays and file type combinations
+
+Definition of array types:
+- JSON: Valid JSON array (including `[]`). JS arrays that use unquoted or single quoted properties are currently not supported
+- JSON lines format: Multiple lines each containing a valid JSON object. Selection of an arbitrary number of lines is supported
+
+The following table shows which type of array is supported in which type of file. The table is applied top to bottom and the first match on the current file type will determine the supported array.
+
+| File type    | Supported arrays
+| ------------- |:-------------:|
+| .jsonl      | JSON lines format |
+| any  | JSON      |
+
 
 ## Demo
 
-* Sort array of objects ascending or descending by one or more properties to produce a deterministic sort result:  
+#### Sort array of objects ascending or descending by one or more properties to produce a deterministic sort result:  
 ![Sort by property](doc/sortOrderExample.gif)
 
-
-* Sort array using custom function:  
+#### Sort array using custom function:  
 ![Sort by custon function](doc/sortCustomExample.gif)
 
-* Manage sort modules:  
+#### Manage sort modules:  
 ![Sort by custon function](doc/sortCustomModuleManagementExample.gif)
 
 
