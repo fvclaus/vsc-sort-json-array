@@ -16,13 +16,6 @@
         "type": "git",
         "url": "https://github.com/fvclaus/vsc-sort-json-array.git"
     },
-    "badges": [
-        {
-            "url": "https://github.com/fvclaus/vsc-sort-json-array/workflows/tests/badge.svg",
-            "href": "https://github.com/fvclaus/vsc-sort-json-array/actions?workflow=tests",
-            "description": "Tests"
-        }
-    ],
     "icon": "icon.png",
     "galleryBanner": {
         "color": "#C80000",
