@@ -42,12 +42,24 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
     return new Promise(async (resolve, reject) => {
         const sortModules: vscode.QuickPickItem[] = glob.sync('*.ts', {
             cwd: extensionContext.globalStoragePath
-        }).map(module => {
+        })
+        .map(module => path.join(extensionContext.globalStoragePath, module))
+        .filter(modulePath => {
+            try {
+                fs.accessSync(modulePath, fs.constants.W_OK);
+                return true;
+            } catch (e) {
+                console.error(`Skipping module ${modulePath}: ${e}`);
+                return false;
+            }
+        })
+        .map(modulePath => {
             return {
-                label: module,
-                detail: fs.readFileSync(path.join(extensionContext.globalStoragePath, module)).toString()
+                label: modulePath,
+                detail: fs.readFileSync(modulePath).toString()
             };
         });
+
         let moduleChoice: vscode.QuickPickItem | undefined;
         if (sortModules.length > 0) {
             // TODO Extract to constant.
