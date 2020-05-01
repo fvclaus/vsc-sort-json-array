@@ -15,3 +15,8 @@ jobs:
           node-version: '12.10'
       - run: npm install
       - run: npm run test
+        env:
+          VSCODE_VERSION: "1.38.0"
+      - run: npm run test
+        env:
+          VSCODE_VERSION: "1.43.0"

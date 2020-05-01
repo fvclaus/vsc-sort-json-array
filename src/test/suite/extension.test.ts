@@ -28,7 +28,7 @@ suite('Extension Test Suite', () => {
 			await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
 		} catch (e) {
 			hasError = true;
-			expect(e.message).to.equal('Cannot parse selection as JSON.')
+			expect(e.message).to.be.a('string').and.satisfy((msg:string) => msg.startsWith('Cannot parse selection as JSON.'))
 		}
 		expect(hasError).to.be.true
 	});
