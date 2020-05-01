@@ -3,6 +3,7 @@ import { loadSortFn } from './loadSortFn';
 import * as vscode from 'vscode';
 import * as glob from 'glob';
 import * as fs from 'fs';
+import * as path from 'path';
 import { createNewSortModule } from './generateUniqueSortModuleName';
 
 
@@ -32,7 +33,7 @@ function trySortModule(window: typeof vscode.window, path: string, moduleName: s
                 fail(errors);
             }
             return sortPromise;
-        })
+        });
     });
     return sortPromise as Promise<any>;
 }
@@ -44,7 +45,7 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
         }).map(module => {
             return {
                 label: module,
-                detail: fs.readFileSync(`${extensionContext.globalStoragePath}/${module}`).toString()
+                detail: fs.readFileSync(path.join(extensionContext.globalStoragePath, module)).toString()
             };
         });
         let moduleChoice: vscode.QuickPickItem | undefined;
@@ -75,15 +76,15 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
         if (!actionChoice) {
             return;
         }
-        const path = `${extensionContext.globalStoragePath}/${moduleName}`;
+        const modulePath = path.join(extensionContext.globalStoragePath, moduleName);
         switch (actionChoice) {
             case 'edit':
-                fs.openSync(path, 'a+');
-                const document = await workspace.openTextDocument(path);
+                fs.openSync(modulePath, 'a+');
+                const document = await workspace.openTextDocument(modulePath);
                 await window.showTextDocument(document);
                 const onSave = workspace.onDidSaveTextDocument(e => {
-                    if (e.fileName === path) {
-                        trySortModule(window, path, moduleName, array)
+                    if (e.fileName === modulePath) {
+                        trySortModule(window, modulePath, moduleName, array)
                             .then(sortedArray => {
                                 outputChannel.clear();
                                 outputChannel.appendLine('Sort preview:');
@@ -95,18 +96,18 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                     }
                 });
                 const onClose = window.onDidChangeVisibleTextEditors(e => {
-                    const sortModuleEditors = e.filter(textEditor => textEditor.document.fileName === path);
+                    const sortModuleEditors = e.filter(textEditor => textEditor.document.fileName === modulePath);
                     if (sortModuleEditors.length === 0) {
                         onSave.dispose();
                         onClose.dispose();
-                        trySortModule(window, path, moduleName, array)
+                        trySortModule(window, modulePath, moduleName, array)
                             .then(resolve)
                             .catch(reject);
                     }
                 });
                 break;
             case 'apply':
-                trySortModule(window, path, moduleName, array)
+                trySortModule(window, modulePath, moduleName, array)
                     .then(resolve)
                     .catch(reject);
                 break;
@@ -123,23 +124,23 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
                 });
                 if (newModuleName) {
                     try {
-                        fs.renameSync(path, `${extensionContext.globalStoragePath}/${newModuleName}`);
+                        fs.renameSync(modulePath, path.join(extensionContext.globalStoragePath, newModuleName));
                         window.showInformationMessage(`Renamed module ${moduleName} to ${newModuleName}.`);
                     } catch (e) {
                         window.showErrorMessage(`Cannot rename module ${moduleName}: ${e}`);
                     }
                     pickModuleAndAction(extensionContext, outputChannel, window, workspace, array)
                         .then(resolve)
-                        .catch(reject)
+                        .catch(reject);
 
                 }
                 break;
             case 'delete':
                 try {
-                    fs.unlinkSync(path);
+                    fs.unlinkSync(modulePath);
                     try {
                         // Try to remove transpiled version.
-                        fs.unlinkSync(path.replace('.ts', '.js'));
+                        fs.unlinkSync(modulePath.replace('.ts', '.js'));
                     } catch (e) {
                         // Ignore errors
                     }
@@ -161,5 +162,5 @@ export function sortCustom(extensionContext: vscode.ExtensionContext): (window: 
         }
         const outputChannel = window.createOutputChannel('Sort preview');
         return pickModuleAndAction(extensionContext, outputChannel, window, workspace, array);
-    }
+    };
 }
