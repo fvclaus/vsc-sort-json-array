@@ -12,10 +12,11 @@ async function main() {
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, './suite/index');
 
+		const version = process.env.VSCODE_VERSION || '1.44.0';
 		// Download VS Code, unzip it and run the integration test
 		// 1.31.0 was first version to provide globalStoragePath.
 		// Use 1.38.0, becaues lower version would not close editor when tests are finished. 
-		await runTests({ version: process.env.VSCODE_VERSION? process.env.VSCODE_VERSION : '1.38.0', 
+		await runTests({ version, 
 			extensionDevelopmentPath, 
 			extensionTestsPath });
 	} catch (err) {
