@@ -93,7 +93,9 @@ suite('Sort custom', () => {
 
 
     afterEach(async () => {
+        console.log("afterEach start");
         fs.readdirSync(globalStoragePath).forEach(moduleName => {
+            console.log(`Deleting ${moduleName}`);
             const modulePath = path.join(globalStoragePath, moduleName);
             try {
                 fs.unlinkSync(modulePath);
@@ -101,6 +103,7 @@ suite('Sort custom', () => {
                 console.log(`Error while removing test module ${modulePath}: ${e}`);
             }
         });
+        console.log("afterEach end globalStoragePath ", fs.readdirSync(globalStoragePath).join(","));
         await closeActiveEditor();
     });
 
@@ -139,6 +142,7 @@ suite('Sort custom', () => {
             await vscode.commands.executeCommand('workbench.action.files.save');
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
             await nextTick();
+            console.log("globalStoragePath end custom function", fs.readdirSync(globalStoragePath).join(","));
         });
     });
 
