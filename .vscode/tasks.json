@@ -16,20 +16,6 @@
                 "kind": "build",
                 "isDefault": true
             }
-        },
-        {
-            "type": "npm",
-            "script": "compile",
-            "label": "npm-compile",
-            "problemMatcher": "$tsc",
-            "isBackground": false,
-            "presentation": {
-                "reveal": "always"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
         }
     ]
 }

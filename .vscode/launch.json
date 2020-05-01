@@ -30,7 +30,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/test/**/*.js"
             ],
-            "preLaunchTask": "npm-compile"
+            "preLaunchTask": "npm-watch"
         },
         {
             "name": "Extension Tests (current file)",
@@ -48,7 +48,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/test/**/*.js"
             ],
-            "preLaunchTask": "npm-compile"
+            "preLaunchTask": "npm-watch"
         }
     ]
 }
