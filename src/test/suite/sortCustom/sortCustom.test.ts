@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { triggerSortCommandExpectSuccess } from '../triggerSortCommandExpectSucccess';
 
-import { afterEach, after, before } from 'mocha';
+import { afterEach, after, before, beforeEach } from 'mocha';
 
 
 import chai = require('chai');
@@ -74,15 +74,14 @@ suite('Sort custom', () => {
 
     let globalStoragePath: string;
     let tempDir: string;
-    const testModuleName = `sort.test-${new Date().getTime()}.ts`;
     let testModulePath: string;
-
+    let testModuleName: string;
+    
     before(async () => {
         globalStoragePath = await getGlobalStoragePath();
         tempDir = await moveExistingSortModules(globalStoragePath);
-        testModulePath = path.join(globalStoragePath, testModuleName);
     });
-
+    
     after(async () => {
         if (globalStoragePath && tempDir) {
             try {
@@ -91,6 +90,11 @@ suite('Sort custom', () => {
                 console.error(`Error while moving sort modules back: ${e}`);
             }
         }
+    });
+    
+    beforeEach(() => {
+        testModuleName = `sort.test-${new Date().getTime()}.ts`;
+        testModulePath = path.join(globalStoragePath, testModuleName);
     });
 
 
