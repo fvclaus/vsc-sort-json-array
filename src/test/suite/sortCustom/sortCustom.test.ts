@@ -156,6 +156,7 @@ suite('Sort custom', () => {
     }
 
     test('should rename module', async () => {
+        console.log("globalStoragePath ", fs.readdirSync(globalStoragePath).join(","));
         await setupCommandTest();
         await selectQuickOpenItem(testModuleName!);
         await selectQuickOpenItem('rename');
