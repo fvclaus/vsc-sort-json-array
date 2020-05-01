@@ -6,6 +6,7 @@
         {
             "type": "npm",
             "script": "watch",
+            "label": "npm-watch",
             "problemMatcher": "$tsc-watch",
             "isBackground": true,
             "presentation": {
@@ -19,36 +20,9 @@
         {
             "type": "npm",
             "script": "compile",
+            "label": "npm-compile",
             "problemMatcher": "$tsc",
             "isBackground": false,
-            "presentation": {
-                "reveal": "always"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "type": "shell",
-            "command": "nvm run compile",
-            "label": "npm-compile",            
-            "problemMatcher": "$tsc",
-            "isBackground": false,  
-            "presentation": {
-                "reveal": "always"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "type": "shell",
-            "command": "nvm run watch",
-            "label": "npm-watch",            
-            "problemMatcher": "$tsc-watch",
-            "isBackground": true,  
             "presentation": {
                 "reveal": "always"
             },
