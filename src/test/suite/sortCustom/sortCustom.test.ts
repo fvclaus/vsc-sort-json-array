@@ -1,11 +1,9 @@
-import * as vscode from 'vscode'
+import * as vscode from 'vscode';
 
 import { triggerSortCommandExpectSuccess } from '../triggerSortCommandExpectSucccess';
 
-import { afterEach, after, before } from 'mocha';
-import { sleep } from '../sleep';
+import { afterEach, after, before, beforeEach } from 'mocha';
 
-import { ExtensionApi } from '../../../extension';
 
 import chai = require('chai');
 const expect = chai.expect;
@@ -13,8 +11,12 @@ const expect = chai.expect;
 import * as temp from 'temp';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as mvFile from 'mv';
-import * as rimraf from 'rimraf';
+import nextTick from '../nextTick';
+import { getGlobalStoragePath } from './getGlobalStoragePath';
+import { replaceTextInCurrentEditor, closeActiveEditor } from '../textEditorUtils';
+import { rm, mvDir, createSourceModulePath } from './storagePathFsUtils';
+import * as os from 'os';
+import { sleep } from '../sleep';
 
 
 const B2 = {
@@ -39,53 +41,17 @@ const B2 = {
     };
 
 
-function writeCurrentDocument(content: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        const activeEditor = (vscode.window.activeTextEditor as vscode.TextEditor);
-        activeEditor.edit(edit => {
-            const all = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(activeEditor.document.lineCount, 0));
-            edit.replace(all, content);
-            resolve(true);
-        });
-    })
-}
-
-function rm(path: string): Promise<any> {
-    
-    return new Promise((resolve, reject) => {
-        rimraf(path, error => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
-        });
-    });
-}
-
-function mvDir(from: string, to: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-        mvFile(from, to, {mkdirp: true}, error => {
-            if (error) {
-                reject(error);                
-            } else {
-                resolve();
-            }
-        });
-    })
-}
-
 async function moveExistingSortModules(globalStoragePath: string): Promise<string> {
     const tempDir = temp.mkdirSync();
     // tempDir must not exists, otherwise mv() will try to open() it.
     fs.rmdirSync(tempDir);
-    try {
-        // Make sure the global storage folder exists.
+    if (!fs.existsSync(globalStoragePath)) {
         fs.mkdirSync(globalStoragePath);
-    } catch (e) {
-
     }
     await mvDir(globalStoragePath, tempDir);
+    if (!fs.existsSync(globalStoragePath)) {
+        fs.mkdirSync(globalStoragePath);
+    }
     return tempDir;
 }
 
@@ -94,34 +60,28 @@ async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: s
     await mvDir(tempDir, globalStoragePath);
 }
 
-async function activateExtension() {
-    try {
-        await vscode.commands.executeCommand('extension.sortJsonArrayCustom');
-    } catch (e) {
 
-    }
-}
 
 async function selectQuickOpenItem(item: string) {
     await vscode.commands.executeCommand('workbench.action.focusQuickOpen');
     await vscode.env.clipboard.writeText(item);
     await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
     await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
+    await nextTick();
 }
 
 suite('Sort custom', () => {
 
-    let globalStoragePath: string | undefined;
-    let tempDir: string | undefined;
-
+    let globalStoragePath: string;
+    let tempDir: string;
+    let testModulePath: string;
+    let testModuleName: string;
+    
     before(async () => {
-        const extensionId = 'fvclaus.sort-json-array';
-        await activateExtension();
-        const extensionApi: ExtensionApi = vscode.extensions.getExtension(extensionId)!.exports;
-        globalStoragePath = extensionApi.getGlobalStoragePath();
+        globalStoragePath = await getGlobalStoragePath();
         tempDir = await moveExistingSortModules(globalStoragePath);
     });
-
+    
     after(async () => {
         if (globalStoragePath && tempDir) {
             try {
@@ -131,16 +91,37 @@ suite('Sort custom', () => {
             }
         }
     });
+    
+    beforeEach(() => {
+        testModuleName = `sort.test-${new Date().getTime()}.ts`;
+        testModulePath = path.join(globalStoragePath, testModuleName);
+    });
 
 
     afterEach(async () => {
-        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+        fs.readdirSync(globalStoragePath).forEach(moduleName => {
+            const modulePath = path.join(globalStoragePath, moduleName);
+            try {
+                fs.accessSync(modulePath, fs.constants.W_OK);
+                fs.unlinkSync(modulePath);
+            } catch (e) {
+                console.log(`Error while removing test module ${modulePath}: ${e}`);
+            }
+        });
+        await closeActiveEditor();
     });
 
+    function createTestModule() {
+        fs.writeFileSync(testModulePath!, fs.readFileSync(createSourceModulePath('sortModule')), { flag: 'w' });
+        expect(fs.existsSync(testModulePath!)).to.be.true;
+    }
+
+
     test('should sort using custom function', async () => {
+        createTestModule();
         await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
-            // Wait for quick open
-            await sleep(1000);
+            await selectQuickOpenItem(testModuleName);
+            await selectQuickOpenItem('edit');
             const sortByDecadeAndPs = `
             interface CarSpec {
                 model: string;
@@ -164,43 +145,44 @@ suite('Sort custom', () => {
                 }
             }`;
             // Wait for new sort module to become open
-            await writeCurrentDocument(sortByDecadeAndPs);
+            await replaceTextInCurrentEditor(sortByDecadeAndPs);
+            await nextTick();
             await vscode.commands.executeCommand('workbench.action.files.save');
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-            await sleep(100);
-        });
-    });
-
-    test('should rename and apply file', async () => {
-
-        await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
-            // Wait for quick open
+            // Wait until array is sorted.
             await sleep(1000);
-            await selectQuickOpenItem('sort.1.ts');
-            await selectQuickOpenItem('rename');
-            // Rename module
-            await selectQuickOpenItem('sort.cars.ts');
-            // Select renamed module
-            await selectQuickOpenItem('sort.cars.ts');
-            await selectQuickOpenItem('apply');
         });
     });
 
-    test('should delete file', async() => {
+    async function setupCommandTest() {
+        createTestModule();
         const document = await vscode.workspace.openTextDocument({
             language: 'JSON',
             content: '[1, 2, 3, 4]'
-        })
+        });
         await vscode.window.showTextDocument(document);
         await vscode.commands.executeCommand('selectAll');
         vscode.commands.executeCommand('extension.sortJsonArrayCustom');
         // Wait for quick open
-        await sleep(1000);
+        await nextTick();
+    }
+
+    test('should rename module', async () => {
+        await setupCommandTest();
+        await selectQuickOpenItem(testModuleName!);
+        await selectQuickOpenItem('rename');
+        // Rename module
         await selectQuickOpenItem('sort.cars.ts');
-        await selectQuickOpenItem('delete'); 
-        await sleep(1000);
-        
-        expect(fs.existsSync(path.join(globalStoragePath!, 'sort.cars.ts'))).to.be.false
+        expect(fs.existsSync(testModulePath!)).to.be.false;
+        expect(fs.existsSync(path.join(globalStoragePath!, 'sort.cars.ts'))).to.be.true;
+    });
+
+    test('should delete module', async () => {
+        await setupCommandTest();
+        await selectQuickOpenItem(testModuleName);
+        await selectQuickOpenItem('delete');
+        await nextTick();
+        expect(fs.existsSync(testModulePath!)).to.be.false;
     });
 
 

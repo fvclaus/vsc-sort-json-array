@@ -1,6 +1,7 @@
 name: tests
 on: [push, pull_request]
 
+
 jobs:
   build:
     name: tests
@@ -16,7 +17,4 @@ jobs:
       - run: npm install
       - run: npm run test
         env:
-          VSCODE_VERSION: "1.38.0"
-      - run: npm run test
-        env:
-          VSCODE_VERSION: "1.43.0"
+          VSCODE_VERSION: "1.44.0"

@@ -5,41 +5,47 @@ import * as vscode from 'vscode';
 import TextEditor = vscode.TextEditor;
 import { sortCustom } from './sortCustom';
 import { sortAscending, sortDescending } from './sortOrder';
+import { searchEnclosingArray } from './searchEnclosingArray';
 import parseArray from './parseArray';
 import serializeArray from './serializeArray';
-
-function getFileExtension (filename: string): string {
-    const fileSegments = filename.split('.')
-    return fileSegments.length > 0 ? fileSegments.pop()! : 'json'
-}
+import { FileExtension } from './fileExtension';
 
 // Return value was implemented to improve testability.
 function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]) => Promise<any[]>): () => Promise<any[]> {
     return () => {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const fail = (error: string | Error | string[]) => {
-                let errors : string[];
+                let errors: string[];
                 if (typeof error === 'string') {
                     errors = [error];
                 } else if (error instanceof Error) {
                     errors = [error.message];
                 } else {
-                    errors = error
+                    errors = error;
                 }
                 errors.forEach(window.showErrorMessage);
                 reject(new Error(errors.join(', ')));
-            }
+            };
             const window = vscode.window;
             const workspace = vscode.workspace;
             // The code you place here will be executed every time your command is executed
             if (!window.activeTextEditor) {
-                fail('No text editor is active');
+                return fail('No text editor is active');
             } else {
-                let editor = window.activeTextEditor as TextEditor;
-                let selection = editor.selection;
-                let text = editor.document.getText(selection)
-                const fileExtension = getFileExtension(editor.document.fileName)
-                
+                const editor = window.activeTextEditor as TextEditor;
+                const document = editor.document;
+                const fileExtension = FileExtension.getFileExtension(document.fileName);
+                let selection: vscode.Range = editor.selection;
+                const cursorPosition = (selection as vscode.Selection).active;
+                if (selection.isEmpty) {
+                    selection = await searchEnclosingArray(document, editor.selection, fileExtension);
+                }
+                if (selection.isEmpty) {
+                    return fail('No active selection and no enclosing array could be found!');
+                }
+
+                let text = document.getText(selection);
+
                 try {
                     let parsedJson = parseArray(text, fileExtension);
                     if (parsedJson.constructor === Array) {
@@ -48,29 +54,32 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
                             .then(sortedArray => {
                                 const workspaceEdit = new vscode.WorkspaceEdit();
                                 const serializedArray = serializeArray(sortedArray, fileExtension,
-                                    typeof editor.options.tabSize === 'number' ? editor.options.tabSize : undefined)
+                                    typeof editor.options.tabSize === 'number' ? editor.options.tabSize : undefined);
                                 workspaceEdit.replace(editor.document.uri, selection, serializedArray);
                                 workspace.applyEdit(workspaceEdit)
                                     .then(wasSuccess => {
                                         if (wasSuccess) {
+                                            // Restore cursor position
+                                            editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
                                             window.showInformationMessage('Sucessfully sorted array!');
                                             resolve(sortedArray);
                                         }
                                     });
                             })
                             .catch(error => {
-                                fail(error)
-                            })
+                                return fail(error);
+                            });
                     } else {
-                        fail(`Selection is a ${parsedJson.constructor} not an array.`);
+                        return fail(`Selection is a ${parsedJson.constructor} not an array.`);
                     }
 
                 } catch (error) {
-                    fail(`Cannot parse selection as JSON. Reason: ${error}`);
+                    return fail(`Cannot parse selection as JSON. Reason: ${error}`);
                 }
+
             }
         });
-    }
+    };
 }
 
 export interface ExtensionApi {
@@ -96,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
         getGlobalStoragePath() {
             return context.globalStoragePath;
         }
-    }
+    };
 }
 
 // this method is called when your extension is deactivated

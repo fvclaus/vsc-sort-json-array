@@ -3,10 +3,11 @@ import * as vscode from 'vscode'
 import { triggerSortCommandExpectSuccess } from '../../triggerSortCommandExpectSucccess';
 
 import { afterEach } from 'mocha';
+import { closeActiveEditor } from '../../textEditorUtils';
 
 suite('Sort number or strings', () => {
   afterEach(async () => {
-    await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    await closeActiveEditor();
   });
 
   test('should sort numbers', async () => {

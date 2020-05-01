@@ -4,22 +4,23 @@ import { ALL, JIMMY, JOHN_PAUL, JOHN, ROBERT } from './lz';
 import { triggerSortCommandExpectSuccess } from '../../triggerSortCommandExpectSucccess';
 
 import { afterEach } from 'mocha';
-import { sleep } from '../../sleep';
 
 import { triggerSortCommandExpectFailure } from '../../triggerSortCommandExpectFailure';
+import nextTick from '../../nextTick';
+import { closeActiveEditor } from '../../textEditorUtils';
 
 suite('Sort objects', () => {
   afterEach(async () => {
-    await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    await closeActiveEditor();
   });
 
   test('should sort using name and age', async () => {
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', ALL, [JIMMY, JOHN, JOHN_PAUL, ROBERT], async function operateQuickOpen() {
       // Wait for quick pick to become visible
-      await sleep(500);
+      await nextTick();
       await vscode.commands.executeCommand('workbench.action.quickOpenSelectNext')
       await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem')
-      await sleep(500);
+      await nextTick();
       return vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
     });
   });

@@ -1,19 +1,20 @@
-import chai = require('chai')
+import chai = require('chai');
 import serializeArray from "../../serializeArray";
+import { FileExtension } from '../../fileExtension';
 
-const expect = chai.expect
+const expect = chai.expect;
 
 suite('serializeArray', () => {
 	
-    [
-        [[1, 2, 3], 'json', '[1,2,3]'],
-        [[{id: 1}, {id: 2}], 'json', '[{"id":1},{"id":2}]'],
-        [[{id: 1}, {id: 2}], 'jsonl', '{"id":1}\n{"id":2}']
-    ].forEach((testDefinition) => {
-        test(`should serialize array ${testDefinition[2]}`, () => {
-            const serializedArray = serializeArray(testDefinition[0] as any[], testDefinition[1] as string);
-            expect(serializedArray).to.deep.equal(testDefinition[2])
+    ([
+        [[1, 2, 3], FileExtension.JSON, '[1,2,3]'],
+        [[{id: 1}, {id: 2}], FileExtension.JSON, '[{"id":1},{"id":2}]'],
+        [[{id: 1}, {id: 2}], FileExtension.JSONL, '{"id":1}\n{"id":2}']
+    ] as [any[], FileExtension, string][]).forEach(([array, fileExtension, expectedArray]) => {
+        test(`should serialize array ${expectedArray}`, () => {
+            const serializedArray = serializeArray(array, fileExtension);
+            expect(serializedArray).to.deep.equal(expectedArray);
         });
-    })
+    });
 
 });

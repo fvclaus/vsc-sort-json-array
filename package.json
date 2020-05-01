@@ -6,7 +6,7 @@
     "publisher": "fvclaus",
     "license": "BSD-3-Clause",
     "engines": {
-        "vscode": "^1.31.0"
+        "vscode": "^1.38.0"
     },
     "bugs": {
         "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
@@ -49,8 +49,8 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
+        "compile": "node bin/compile.js",
+        "watch": "node bin/compile.js --watch",
         "test": "npm run compile && node ./out/test/runTest.js"
     },
     "dependencies": {
@@ -70,7 +70,7 @@
         "@types/vscode": "1.31.0",
         "chai": "^4.2.0",
         "mocha": "^6.1.4",
-        "rimraf": "^3.0.0",
+        "rimraf": "^3.0.2",
         "tslint": "^5.20.0",
         "vscode-test": "^1.2.0"
     }
