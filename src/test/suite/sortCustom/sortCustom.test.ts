@@ -15,6 +15,7 @@ import nextTick from '../nextTick';
 import { getGlobalStoragePath } from './getGlobalStoragePath';
 import { replaceTextInCurrentEditor, closeActiveEditor } from '../textEditorUtils';
 import { rm, mvDir, createSourceModulePath } from './storagePathFsUtils';
+import * as os from 'os';
 
 
 const B2 = {
@@ -94,9 +95,16 @@ suite('Sort custom', () => {
 
     afterEach(async () => {
         console.log("afterEach start");
+        console.log(os.userInfo());
         fs.readdirSync(globalStoragePath).forEach(moduleName => {
             console.log(`Deleting ${moduleName}`);
             const modulePath = path.join(globalStoragePath, moduleName);
+            fs.access(modulePath, fs.constants.R_OK, (err) => {
+                console.log(`${modulePath} ${err ? 'is not readable' : 'is readable'}`);
+            });
+            fs.access(modulePath, fs.constants.W_OK, (err) => {
+                console.log(`${modulePath} ${err ? 'is not writable' : 'is writable'}`);
+            });
             try {
                 fs.unlinkSync(modulePath);
             } catch (e) {
@@ -114,6 +122,8 @@ suite('Sort custom', () => {
 
 
     test('should sort using custom function', async () => {
+        console.log(`${new Date()}: Start of custom function`);
+        console.log("globalStoragePath start custom function", fs.readdirSync(globalStoragePath).join(","));
         await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
             const sortByDecadeAndPs = `
             interface CarSpec {
@@ -137,9 +147,12 @@ suite('Sort custom', () => {
                     return decadeDifference;
                 }
             }`;
+            console.log(`${new Date()}: Inside trigger`);
             // Wait for new sort module to become open
             await replaceTextInCurrentEditor(sortByDecadeAndPs);
+            console.log(`${new Date()}: Before save`);
             await vscode.commands.executeCommand('workbench.action.files.save');
+            console.log(`${new Date()}: Before close`);
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
             await nextTick();
             console.log("globalStoragePath end custom function", fs.readdirSync(globalStoragePath).join(","));
