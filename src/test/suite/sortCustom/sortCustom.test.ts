@@ -16,6 +16,7 @@ import { getGlobalStoragePath } from './getGlobalStoragePath';
 import { replaceTextInCurrentEditor, closeActiveEditor } from '../textEditorUtils';
 import { rm, mvDir, createSourceModulePath } from './storagePathFsUtils';
 import * as os from 'os';
+import { sleep } from '../sleep';
 
 
 const B2 = {
@@ -124,7 +125,10 @@ suite('Sort custom', () => {
     test('should sort using custom function', async () => {
         console.log(`${new Date()}: Start of custom function`);
         console.log("globalStoragePath start custom function", fs.readdirSync(globalStoragePath).join(","));
+        createTestModule();
         await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
+            await selectQuickOpenItem(testModuleName);
+            await selectQuickOpenItem('edit');
             const sortByDecadeAndPs = `
             interface CarSpec {
                 model: string;
@@ -150,11 +154,13 @@ suite('Sort custom', () => {
             console.log(`${new Date()}: Inside trigger`);
             // Wait for new sort module to become open
             await replaceTextInCurrentEditor(sortByDecadeAndPs);
+            await nextTick();
             console.log(`${new Date()}: Before save`);
             await vscode.commands.executeCommand('workbench.action.files.save');
             console.log(`${new Date()}: Before close`);
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-            await nextTick();
+            // Wait until array is sorted.
+            await sleep(1000);
             console.log("globalStoragePath end custom function", fs.readdirSync(globalStoragePath).join(","));
         });
     });
