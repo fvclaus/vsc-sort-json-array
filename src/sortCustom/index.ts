@@ -43,19 +43,20 @@ function pickModuleAndAction(extensionContext: vscode.ExtensionContext, outputCh
         const sortModules: vscode.QuickPickItem[] = glob.sync('*.ts', {
             cwd: extensionContext.globalStoragePath
         })
-        .map(module => path.join(extensionContext.globalStoragePath, module))
-        .filter(modulePath => {
+        .map(module => ({module, modulePath: path.join(extensionContext.globalStoragePath, module)}))
+        .filter(({module, modulePath}) => {
+            console.log("Module ", module, modulePath);
             try {
                 fs.accessSync(modulePath, fs.constants.W_OK);
                 return true;
             } catch (e) {
-                console.error(`Skipping module ${modulePath}: ${e}`);
+                console.error(`Skipping module ${module}: ${e}`);
                 return false;
             }
         })
-        .map(modulePath => {
+        .map(({module, modulePath}) => {
             return {
-                label: modulePath,
+                label: module,
                 detail: fs.readFileSync(modulePath).toString()
             };
         });
