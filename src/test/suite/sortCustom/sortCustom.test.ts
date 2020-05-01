@@ -110,7 +110,7 @@ suite('Sort custom', () => {
     }
 
 
-    test('should sort using custom function', async () => {
+    test.skip('should sort using custom function', async () => {
         await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
             const sortByDecadeAndPs = `
             interface CarSpec {
