@@ -99,10 +99,7 @@ suite('Sort custom', () => {
 
 
     afterEach(async () => {
-        console.log("afterEach start");
-        console.log(os.userInfo());
         fs.readdirSync(globalStoragePath).forEach(moduleName => {
-            console.log(`Deleting ${moduleName}`);
             const modulePath = path.join(globalStoragePath, moduleName);
             try {
                 fs.accessSync(modulePath, fs.constants.W_OK);
@@ -111,7 +108,6 @@ suite('Sort custom', () => {
                 console.log(`Error while removing test module ${modulePath}: ${e}`);
             }
         });
-        console.log("afterEach end globalStoragePath ", fs.readdirSync(globalStoragePath).join(","));
         await closeActiveEditor();
     });
 
@@ -122,8 +118,6 @@ suite('Sort custom', () => {
 
 
     test('should sort using custom function', async () => {
-        console.log(`${new Date()}: Start of custom function`);
-        console.log("globalStoragePath start custom function", fs.readdirSync(globalStoragePath).join(","));
         createTestModule();
         await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
             await selectQuickOpenItem(testModuleName);
@@ -150,17 +144,13 @@ suite('Sort custom', () => {
                     return decadeDifference;
                 }
             }`;
-            console.log(`${new Date()}: Inside trigger`);
             // Wait for new sort module to become open
             await replaceTextInCurrentEditor(sortByDecadeAndPs);
             await nextTick();
-            console.log(`${new Date()}: Before save`);
             await vscode.commands.executeCommand('workbench.action.files.save');
-            console.log(`${new Date()}: Before close`);
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
             // Wait until array is sorted.
             await sleep(1000);
-            console.log("globalStoragePath end custom function", fs.readdirSync(globalStoragePath).join(","));
         });
     });
 
@@ -178,7 +168,6 @@ suite('Sort custom', () => {
     }
 
     test('should rename module', async () => {
-        console.log("globalStoragePath ", fs.readdirSync(globalStoragePath).join(","));
         await setupCommandTest();
         await selectQuickOpenItem(testModuleName!);
         await selectQuickOpenItem('rename');
