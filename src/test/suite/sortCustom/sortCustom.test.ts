@@ -100,13 +100,8 @@ suite('Sort custom', () => {
         fs.readdirSync(globalStoragePath).forEach(moduleName => {
             console.log(`Deleting ${moduleName}`);
             const modulePath = path.join(globalStoragePath, moduleName);
-            fs.access(modulePath, fs.constants.R_OK, (err) => {
-                console.log(`${modulePath} ${err ? 'is not readable' : 'is readable'}`);
-            });
-            fs.access(modulePath, fs.constants.W_OK, (err) => {
-                console.log(`${modulePath} ${err ? 'is not writable' : 'is writable'}`);
-            });
             try {
+                fs.accessSync(modulePath, fs.constants.W_OK);
                 fs.unlinkSync(modulePath);
             } catch (e) {
                 console.log(`Error while removing test module ${modulePath}: ${e}`);
