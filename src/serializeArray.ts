@@ -1,10 +1,12 @@
-export default function serializeArray(array: any[], fileExtension: string, tabSize?: number) {
+import { FileExtension } from "./fileExtension";
+
+export default function serializeArray(array: any[], fileExtension: FileExtension, tabSize?: number) {
     switch (fileExtension) {
-        case "jsonl": {
+        case FileExtension.JSONL: {
             return array.map(element => JSON.stringify(element))
-                .join('\n')
+                .join('\n');
         }
         default: 
-            return JSON.stringify(array, null, tabSize)
+            return JSON.stringify(array, null, tabSize);
     }
 }

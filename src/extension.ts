@@ -8,26 +8,7 @@ import { sortAscending, sortDescending } from './sortOrder';
 import { searchEnclosingArray } from './searchEnclosingArray';
 import parseArray from './parseArray';
 import serializeArray from './serializeArray';
-
-export interface SelectionRange {
-
-	/**
-	 * The [range](#Range) of this selection range.
-	 */
-    range: vscode.Range;
-
-	/**
-	 * The parent selection range containing this range. Therefore `parent.range` must contain `this.range`.
-	 */
-    parent?: SelectionRange;
-
-}
-
-
-function getFileExtension (filename: string): string {
-    const fileSegments = filename.split('.');
-    return fileSegments.length > 0 ? fileSegments.pop()! : 'json';
-}
+import { FileExtension } from './fileExtension';
 
 // Return value was implemented to improve testability.
 function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: any[]) => Promise<any[]>): () => Promise<any[]> {
@@ -49,21 +30,21 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
             const workspace = vscode.workspace;
             // The code you place here will be executed every time your command is executed
             if (!window.activeTextEditor) {
-                fail('No text editor is active');
+                return fail('No text editor is active');
             } else {
                 const editor = window.activeTextEditor as TextEditor;
                 const document = editor.document;
+                const fileExtension = FileExtension.getFileExtension(document.fileName);
                 let selection: vscode.Range = editor.selection;
                 const cursorPosition = (selection as vscode.Selection).active;
                 if (selection.isEmpty) {
-                    selection = await searchEnclosingArray(document, editor.selection);
+                    selection = await searchEnclosingArray(document, editor.selection, fileExtension);
                 }
                 if (selection.isEmpty) {
-                    fail('No active selection and no enclosing array could be found!');
+                    return fail('No active selection and no enclosing array could be found!');
                 }
 
                 let text = document.getText(selection);
-                const fileExtension = getFileExtension(editor.document.fileName);
 
                 try {
                     let parsedJson = parseArray(text, fileExtension);
@@ -86,14 +67,14 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
                                     });
                             })
                             .catch(error => {
-                                fail(error);
+                                return fail(error);
                             });
                     } else {
-                        fail(`Selection is a ${parsedJson.constructor} not an array.`);
+                        return fail(`Selection is a ${parsedJson.constructor} not an array.`);
                     }
 
                 } catch (error) {
-                    fail(`Cannot parse selection as JSON. Reason: ${error}`);
+                    return fail(`Cannot parse selection as JSON. Reason: ${error}`);
                 }
 
             }
