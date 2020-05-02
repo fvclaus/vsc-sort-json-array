@@ -2,11 +2,11 @@
     "name": "sort-json-array",
     "displayName": "Sort JSON array",
     "description": "Sorts any type of json array by value, object property or custom function",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "publisher": "fvclaus",
     "license": "BSD-3-Clause",
     "engines": {
-        "vscode": "^1.38.0"
+        "vscode": "^1.44.0"
     },
     "bugs": {
         "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
