@@ -18,9 +18,14 @@ suite('Find enclosing array', () => {
         return position;
     };
 
+    const version = vscode.version;
+
 
     afterEach(async () => {
         await closeActiveEditor();
+        Object.defineProperty(vscode, "version", {
+            value: version
+        });
     });
 
     ([
@@ -97,4 +102,30 @@ suite('Find enclosing array', () => {
                 expect(enclosingArray.end).to.deep.equal(expectedEnd ? expectedEnd : document.lineAt(document.lineCount - 1).range.end);
             });
         });
+
+    async function expectError(content: string, msgPrefix: string) {
+        const {
+            document,
+        } = await openNewJsonDocument(content);
+        const position = new vscode.Position(0, 0);
+        let hasError = false;
+        try {
+            await searchEnclosingArray(document, new vscode.Selection(position, position), FileExtension.JSON);
+        } catch(e) {
+            expect(e.message).to.satisfy((msg: string) => msg.startsWith(msgPrefix));
+            hasError = true;
+        }
+        expect(hasError).to.be.true;
+    }
+
+    test('should fail for vscode < 1.44', async () => {
+        Object.defineProperty(vscode, "version", {
+            value: "1.38"
+        });
+        await expectError("foo", 'Auto detection does not work in version');
+    });
+
+    test('should fail for empty selection', async () => {
+        await expectError('{"a": 1}', 'No enclosing array could be found');        
+    });
 });

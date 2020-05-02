@@ -18,7 +18,7 @@ function selectAll(document: vscode.TextDocument) {
     return new vscode.Range(new vscode.Position(0, 0), document.lineAt(document.lineCount - 1).range.end);
 }
 
-async function selectEnclosingArray(document: vscode.TextDocument, selection: vscode.Selection) {
+async function selectArray(document: vscode.TextDocument, selection: vscode.Selection): Promise<vscode.Range> {
     const selectionRanges: SelectionRange[] = await vscode.commands.executeCommand('vscode.executeSelectionRangeProvider', document.uri, [selection.active]) as SelectionRange[];
     let current: SelectionRange | undefined = selectionRanges[0];
     while (current !== undefined) {
@@ -32,11 +32,27 @@ async function selectEnclosingArray(document: vscode.TextDocument, selection: vs
 
 }
 
-export async function searchEnclosingArray(document: vscode.TextDocument, selection: vscode.Selection, fileExtension: FileExtension): Promise<vscode.Range> {
+function doesVersionSupportSelectionRangeProvider() {
+    const [major, minor] = vscode.version.split(".").map(versionFragment => parseInt(versionFragment, 10));
+    return major >=1 && minor >= 44;
+}
+
+export async function searchEnclosingArray(document: vscode.TextDocument, activeSelection: vscode.Selection, fileExtension: FileExtension): Promise<vscode.Range> {
+    if (!doesVersionSupportSelectionRangeProvider()) {
+        throw new Error("Auto detection does not work in versions < 1.44, due to a bug in the vscode API. " +
+        "Unfortunately, I forgot to increment the required vscode runtime when I published the auto detect feature.");
+    }
+    let selection: vscode.Range;
     switch (fileExtension) {
         case FileExtension.JSONL: 
-            return selectAll(document);
+            selection =  selectAll(document);
+            break;
         default:
-            return selectEnclosingArray(document, selection);
+            selection = await selectArray(document, activeSelection);
+            break;
     }
+    if (selection.isEmpty) {
+        throw new Error('No enclosing array could be found!');
+    }
+    return selection;
 }

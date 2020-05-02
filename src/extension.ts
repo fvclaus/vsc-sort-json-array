@@ -24,7 +24,8 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
                     errors = error;
                 }
                 errors.forEach(window.showErrorMessage);
-                reject(new Error(errors.join(', ')));
+                // Must resolve, otherwise vsc will display another error message
+                resolve(undefined);
             };
             const window = vscode.window;
             const workspace = vscode.workspace;
@@ -32,51 +33,38 @@ function sort(sortFn: (window: typeof vscode.window, workspace: typeof vscode.wo
             if (!window.activeTextEditor) {
                 return fail('No text editor is active');
             } else {
-                const editor = window.activeTextEditor as TextEditor;
-                const document = editor.document;
-                const fileExtension = FileExtension.getFileExtension(document.fileName);
-                let selection: vscode.Range = editor.selection;
-                const cursorPosition = (selection as vscode.Selection).active;
-                if (selection.isEmpty) {
-                    selection = await searchEnclosingArray(document, editor.selection, fileExtension);
-                }
-                if (selection.isEmpty) {
-                    return fail('No active selection and no enclosing array could be found!');
-                }
-
-                let text = document.getText(selection);
-
                 try {
-                    let parsedJson = parseArray(text, fileExtension);
-                    if (parsedJson.constructor === Array) {
-                        const parsedArray = (parsedJson as any[]);
-                        sortFn(window, workspace, parsedArray)
-                            .then(sortedArray => {
-                                const workspaceEdit = new vscode.WorkspaceEdit();
-                                const serializedArray = serializeArray(sortedArray, fileExtension,
-                                    typeof editor.options.tabSize === 'number' ? editor.options.tabSize : undefined);
-                                workspaceEdit.replace(editor.document.uri, selection, serializedArray);
-                                workspace.applyEdit(workspaceEdit)
-                                    .then(wasSuccess => {
-                                        if (wasSuccess) {
-                                            // Restore cursor position
-                                            editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
-                                            window.showInformationMessage('Sucessfully sorted array!');
-                                            resolve(sortedArray);
-                                        }
-                                    });
-                            })
-                            .catch(error => {
-                                return fail(error);
-                            });
-                    } else {
-                        return fail(`Selection is a ${parsedJson.constructor} not an array.`);
+                    const editor = window.activeTextEditor as TextEditor;
+                    const document = editor.document;
+                    const fileExtension = FileExtension.getFileExtension(document.fileName);
+
+                    let selection: vscode.Range = editor.selection;
+                    // Must store cursor position before changing selection
+                    const cursorPosition = (selection as vscode.Selection).active;
+                    if (selection.isEmpty) {
+                        selection = await searchEnclosingArray(document, editor.selection, fileExtension);
                     }
-
+                    
+                    let text = document.getText(selection);
+                    const parsedArray = parseArray(text, fileExtension);
+                    
+                    const sortedArray = await sortFn(window, workspace, parsedArray);
+                    const workspaceEdit = new vscode.WorkspaceEdit();
+                    const serializedArray = serializeArray(sortedArray, fileExtension,
+                        typeof editor.options.tabSize === 'number' ? editor.options.tabSize : undefined);
+                    workspaceEdit.replace(editor.document.uri, selection, serializedArray);
+                    const success = await workspace.applyEdit(workspaceEdit);
+                    if (success) {
+                        // Restore cursor position
+                        editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
+                        window.showInformationMessage('Sucessfully sorted array!');
+                        resolve(sortedArray);
+                    } else {
+                        fail('Could not apply workspace edit');
+                    }
                 } catch (error) {
-                    return fail(`Cannot parse selection as JSON. Reason: ${error}`);
+                    return fail(error);
                 }
-
             }
         });
     };

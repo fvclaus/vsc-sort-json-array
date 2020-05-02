@@ -2,7 +2,10 @@ import { afterEach } from 'mocha';
 
 import * as vscode from 'vscode';
 import chai = require('chai');
-import { closeActiveEditor } from './textEditorUtils';
+import { closeActiveEditor, openNewJsonDocument } from './textEditorUtils';
+import sinon = require('sinon');
+import { FileExtension } from '../../fileExtension';
+import stringifyArray from './stringify';
 const expect = chai.expect;
 
 
@@ -14,19 +17,25 @@ suite('Extension Test Suite', () => {
 	});
 
 	test('Invalid json', async () => {
-		const document = await vscode.workspace.openTextDocument({
-			language: 'JSON',
-			content: '[\'foo, 2, 3]'
-		});
-		await window.showTextDocument(document);
+		await openNewJsonDocument('[\'foo, 2, 3]');
+		const showErrorMessageSpy = sinon.spy(window, "showErrorMessage");
 		await vscode.commands.executeCommand('selectAll');
-		let hasError = false;
-		try {
-			await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
-		} catch (e) {
-			hasError = true;
-			expect(e.message).to.be.a('string').and.satisfy((msg:string) => msg.startsWith('Cannot parse selection as JSON.'));
-		}
-		expect(hasError).to.be.true;
+		await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
+		expect(showErrorMessageSpy.lastCall.args[0]).to.satisfy((msg: string) => msg.startsWith('Cannot parse selection as JSON.'));
+	});
+
+	test('Valid json', async () => {
+		const {editor} = await openNewJsonDocument(stringifyArray([
+			{
+				id: 3,
+			},  {
+				id: 4
+			}, {
+				id: 1
+			}], FileExtension.JSON));
+		const position = new vscode.Position(2, 4);
+		editor.selection = new vscode.Selection(position, position);
+		const sortedArray = await vscode.commands.executeCommand('extension.sortJsonArrayAscending') as {id: number}[] ;
+		expect(sortedArray.map(el => el.id)).to.deep.equal([1, 3, 4]);
 	});
 });
