@@ -40,7 +40,8 @@ function doesVersionSupportSelectionRangeProvider() {
 export async function searchEnclosingArray(document: vscode.TextDocument, activeSelection: vscode.Selection, fileExtension: FileExtension): Promise<vscode.Range> {
     if (!doesVersionSupportSelectionRangeProvider()) {
         throw new Error("Auto detection does not work in versions < 1.44, due to a bug in the vscode API. " +
-        "Unfortunately, I forgot to increment the required vscode runtime when I published the auto detect feature.");
+        "Unfortunately, I forgot to increment the required vscode runtime when I published the auto detect feature. " + 
+        "You can either upgrade your vscode or manually select the array.");
     }
     let selection: vscode.Range;
     switch (fileExtension) {

@@ -1,3 +1,7 @@
+<a name="2.0.3"></a>
+## 2.0.3
+* Clarifies auto detection error message
+
 <a name="2.0.2"></a>
 ## 2.0.2
 * Adds error message for auto detection on vscode < 1.44
