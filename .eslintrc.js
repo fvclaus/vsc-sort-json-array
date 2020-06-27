@@ -20,6 +20,8 @@ module.exports = {
     'google'
   ],
   "rules": {
+    // CI pipeline runs on windows with CRLF
+    "linebreak-style": ["off"],
     "no-undef": ["error"],
     "max-len": ["error", {"code": 160}],
     "require-jsdoc": ["off"],
