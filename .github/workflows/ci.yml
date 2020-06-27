@@ -15,6 +15,7 @@ jobs:
         with:
           node-version: '12.10'
       - run: npm install
+      - run: npm run lint
       - run: npm run test
         env:
           VSCODE_VERSION: "1.44.0"
