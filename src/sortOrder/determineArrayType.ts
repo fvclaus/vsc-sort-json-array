@@ -3,20 +3,19 @@ export enum ArrayType {
     string,
     number
 }
-function determineType(item: any) {
-    if (item === null || item === undefined) {
-        return undefined;
-    }
-    const arrayTypeString = typeof item as keyof typeof ArrayType;
+function determineType(item: unknown | undefined) {
+  if (item == null) {
+    return undefined;
+  }
+  const arrayTypeString = typeof item as keyof typeof ArrayType;
 
-    return ArrayType[arrayTypeString];
-
+  return ArrayType[arrayTypeString];
 }
-export function determineArrayType(array: any[]): ArrayType | undefined { 
-    if (array.length === 0) {
-        return undefined;
-    }
-    return array
-        .map(determineType)
-        .reduce((arrayType, itemType) => arrayType === itemType? arrayType : undefined as any);
+export function determineArrayType(array: unknown[]): ArrayType | undefined {
+  if (array.length === 0) {
+    return undefined;
+  }
+  return array
+      .map(determineType)
+      .reduce((arrayType, itemType) => arrayType === itemType? arrayType : undefined);
 }
