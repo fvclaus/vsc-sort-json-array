@@ -52,15 +52,19 @@
         "compile": "rimraf out/ && tsc --listEmittedFiles -p ./ --outDir out/",
         "watch": "rimraf out/ && tsc --watch --outDir out/",
         "test": "npm run compile && node ./out/test/runTest.js",
-        "lint": "eslint \"src/**/*.ts\""
+        "lint": "eslint \"src/**/*.ts\"",
+        "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4",
+        "antlr4:benchmark": "npm run compile && node out/test/suite/parser/runParserBenchmark.js"
     },
     "dependencies": {
-        "typescript": "^3.6.1",
+        "antlr4ts": "^0.5.0-alpha.3",
         "glob": "^7.1.4",
         "mv": "^2.1.1",
-        "temp": "^0.9.0"
+        "temp": "^0.9.0",
+        "typescript": "^3.6.1"
     },
     "devDependencies": {
+        "@types/benchmark": "^1.0.33",
         "@types/chai": "^4.2.3",
         "@types/glob": "^7.1.1",
         "@types/mocha": "^5.2.6",
@@ -72,6 +76,8 @@
         "@types/vscode": "1.31.0",
         "@typescript-eslint/eslint-plugin": "^3.4.0",
         "@typescript-eslint/parser": "^3.4.0",
+        "antlr4ts-cli": "^0.5.0-alpha.3",
+        "benchmark": "^2.1.4",
         "chai": "^4.2.0",
         "eslint": "^7.3.1",
         "eslint-config-google": "^0.14.0",

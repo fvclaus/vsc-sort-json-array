@@ -49,6 +49,19 @@
                 "${workspaceFolder}/out/test/**/*.js"
             ],
             "preLaunchTask": "npm-watch"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Parser Benchmark",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "preLaunchTask": "npm: compile",
+            "program": "${workspaceFolder}/out/test/suite/parser/runParserBenchmark.js",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
         }
     ]
 }
