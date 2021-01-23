@@ -35,7 +35,7 @@ module.exports = {
     "env": {
       "mocha": true
     },
-    "files": ["*.test.ts", "*.vsc-test.ts"],
+    "files": ["*.test.ts", "*.vsc-test.ts", "*.benchmark-test.ts"],
     "extends": ["plugin:mocha/recommended"],
     "rules": {
       "mocha/no-setup-in-describe": ["off"],

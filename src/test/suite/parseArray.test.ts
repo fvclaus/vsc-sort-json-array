@@ -4,6 +4,7 @@ import {FileExtension} from '../../fileExtension';
 
 const expect = chai.expect;
 
+// TODO Rename. 2 files are named parseArray.
 suite('parseArray', function() {
   ([
     ['[1, 2, 3]', FileExtension.JSON, [1, 2, 3]],
@@ -20,16 +21,7 @@ suite('parseArray', function() {
     try {
       parseArray('["1, 2, 3]', FileExtension.JSON);
     } catch (e) {
-      expect(e.message).to.satisfy((msg: string) => msg.startsWith('Cannot parse selection as JSON.'));
-      done();
-    }
-  });
-
-  test('should throw if json is not array', function(done) {
-    try {
-      parseArray('{"a": 1}', FileExtension.JSON);
-    } catch (e) {
-      expect(e.message).to.equal('Selection is a function Object() { [native code] } not an array.');
+      expect(e.message).to.satisfy((msg: string) => msg.startsWith('Cannot parse selection as JSON array.'));
       done();
     }
   });

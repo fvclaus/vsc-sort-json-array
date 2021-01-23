@@ -49,6 +49,8 @@ suite('parseArray', function() {
     ['[1{}]'],
     ['[{"a"}]'],
     ['[{"foo": 1, , }]'],
+    ['"1"'],
+    ['{}'],
     ['[[]'],
   ] as [string][]).forEach(([json]) => {
     test(`should not parse ${json}`, function() {

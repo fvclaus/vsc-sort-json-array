@@ -49,7 +49,7 @@ suite('parseJsonBenchmark', function() {
   ([
     [() => [1, '4', false, null, {bar: 'foo'}, [1]], 'small', 0.001],
     [() => generateObjectArray(50), 'medium', 0.1],
-    // [() => generateObjectArray(500), 'large', 0.5],
+    [() => generateObjectArray(500), 'large', 0.5],
   ] as [() => unknown[], string, number][]).forEach(([arrayFn, name, expectedMaxMeanExecutionTime]) => {
     test(`should run below expected time for ${name} dataset`, function(done) {
       const arrayString = JSON.stringify(arrayFn(), null, 2);
