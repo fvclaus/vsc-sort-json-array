@@ -26,6 +26,7 @@ module.exports = {
     "max-len": ["error", {"code": 160}],
     "require-jsdoc": ["off"],
     "no-console": ["off"],
+    "@typescript-eslint/explicit-function-return-type": ["warn", {"allowExpressions": true}],  
     // We disallow number, because 0 and undefined have different meanings.
     // The problem with nullableObject is that it also applies to generics. If the generic turns out to be a number, we are in trouble.
     "@typescript-eslint/strict-boolean-expressions": ["error", {"allowString": true, "allowNumber": false, "allowNullableObject": false}]
@@ -34,7 +35,7 @@ module.exports = {
     "env": {
       "mocha": true
     },
-    "files": ["*.test.ts"],
+    "files": ["*.test.ts", "*.vsc-test.ts"],
     "extends": ["plugin:mocha/recommended"],
     "rules": {
       "mocha/no-setup-in-describe": ["off"],

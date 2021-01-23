@@ -15,11 +15,12 @@ value
    | NUMBER    
    | 'true'      
    | 'false'     
-   | 'null'      
+   | 'null'
+   | 'undefined'
    ;
 
 obj
-   : OPENING_CURLIES pair (',' pair)* CLOSING_CURLIES
+   : OPENING_CURLIES pair (',' pair)* ','? CLOSING_CURLIES
    | OPENING_CURLIES CLOSING_CURLIES
    ;
 
@@ -33,19 +34,24 @@ pair
 COLON: ':';
 
 arr
-   : '[' value (',' value)* ']'
+   : '[' value (',' value)* ','? ']'
    | '[' ']'
    ;
 
 STRING
-   : '"' STRINGCHARS '"'
-   | '\'' STRINGCHARS '\''
+   : '"' STRINGCHARS_DOUBLE '"'
+   | '\'' STRINGCHARS_SINGLE '\''
    ;
 
-fragment STRINGCHARS
-   : (ESC | SAFECODEPOINT)*
+fragment STRINGCHARS_DOUBLE
+   : ('\\' (["\\/bfnrt] | UNICODE)) |  ~ ["\\\u0000-\u001F]*
    ;
 
+fragment STRINGCHARS_SINGLE
+   : ('\\' (['\\/bfnrt] | UNICODE)) |  ~ ['\\\u0000-\u001F]*
+   ;
+
+// TODO Template
 fragment ESC
    : '\\' (["\\/bfnrt] | UNICODE)
    ;
@@ -55,6 +61,7 @@ fragment UNICODE
 fragment HEX
    : [0-9a-fA-F]
    ;
+// TODO Template
 fragment SAFECODEPOINT
    : ~ ["\\\u0000-\u001F]
    ;

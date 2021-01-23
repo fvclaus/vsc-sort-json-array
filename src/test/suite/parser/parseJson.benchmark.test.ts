@@ -1,6 +1,5 @@
 import * as Benchmark from 'benchmark';
-import parseLooseJson from '../../../parser/parseLooseJson';
-import fakeParseJSON from '../../../parser/fakeParser';
+import parseArray from '../../../parser/parseArray';
 
 
 function getRandomArbitrary(min: number, max: number): number {
@@ -46,32 +45,36 @@ function generateObjectArray(numberOfObjects: number, numberOfProperties = 20) {
       .map(() => generateObject(numberOfProperties));
 }
 
-([
-  [() => [1, '4', false, null, {bar: 'foo'}, [1]], 'small'],
-  [() => generateObjectArray(50), 'medium'],
-  [() => generateObjectArray(2000), 'large'],
-] as [() => unknown[], string][]).forEach(([arrayFn, name]) => {
-  const arrayString = JSON.stringify(arrayFn(), null, 2);
-  // add tests
-  const suite = new Benchmark.Suite(name);
-  suite
-      .add(`parseJson#${name}`, () => {
-        JSON.parse(arrayString);
-      })
-      .add(`antlr4#${name}`, () => {
-        parseLooseJson(arrayString);
-      })
-      .add(`fakeParseJson#${name}`, () => {
-        fakeParseJSON(arrayString);
-      })
-      // TODO Test stripped down version of fakeParseJson
-  // add listeners
-      .on('cycle', function(event: any) {
-        console.log(String(event.target));
-      })
-      .on('complete', function(this: any) {
-        console.log('Fastest is ' + this.filter('fastest').map('name'));
-      })
-  // run async
-      .run({'async': false});
+suite('parseJsonBenchmark', function() {
+  ([
+    [() => [1, '4', false, null, {bar: 'foo'}, [1]], 'small', 0.001],
+    [() => generateObjectArray(50), 'medium', 0.1],
+    // [() => generateObjectArray(500), 'large', 0.5],
+  ] as [() => unknown[], string, number][]).forEach(([arrayFn, name, expectedMaxMeanExecutionTime]) => {
+    test(`should run below expected time for ${name} dataset`, function(done) {
+      const arrayString = JSON.stringify(arrayFn(), null, 2);
+      new Benchmark.Suite(name)
+          .add(`antlr4#${name}`, () => {
+            parseArray(arrayString);
+          }, {
+            maxTime: 1,
+            async: true,
+            minSamples: 2,
+            initCount: 1,
+          })
+          .on('cycle', function(event: Benchmark.Event) {
+            const stats = event.target.stats;
+            if (stats == null) {
+              throw new Error(`Expected stats to be defined`);
+            }
+            if (stats.mean > expectedMaxMeanExecutionTime) {
+              done(new Error(`stats.mean ${stats.mean} greater than ${expectedMaxMeanExecutionTime}`));
+            } else {
+              done();
+            }
+          })
+          .run();
+    });
+  });
 });
+
