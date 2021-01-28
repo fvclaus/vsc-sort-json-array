@@ -1,5 +1,10 @@
 name: tests
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
 
 
 jobs:
@@ -16,12 +21,14 @@ jobs:
           node-version: '12.10'
       - run: npm install
       - run: npm run lint
-      - run: npm run test
+      - run: npm run test:unit
+      - run: npm run test:benchmark
+      - run: npm run test:vsc
         env:
           VSCODE_VERSION: "1.44.0"
-      - run: npm run test
+      - run: npm run test:vsc
         env:
           VSCODE_VERSION: "1.45.0"
-      - run: npm run test
+      - run: npm run test:vsc
         env:
           VSCODE_VERSION: "1.46.0"

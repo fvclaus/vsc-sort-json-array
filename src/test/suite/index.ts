@@ -1,6 +1,10 @@
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
+// TODO @types/source-map-support breaks the ts compilation
+// import * as sourceMapSupport from 'source-map-support';
+
+// sourceMapSupport.install();
 
 function getGlobPattern(testsRoot: string): string {
   // Use this in launch.json to execute the current test file or from the command line
@@ -12,7 +16,7 @@ function getGlobPattern(testsRoot: string): string {
         .replace('.ts', '.js');
     globPattern = path.relative(testsRoot, pathToTranspiledModule);
   } else {
-    globPattern = '**/**/*.test.js';
+    globPattern = '**/**/*.vsc-test.js';
   }
 
   console.log(`Using glob pattern ${globPattern} to find tests. Override with env variable MOCHA_TEST_PATTERN`);
