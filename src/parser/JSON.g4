@@ -85,7 +85,7 @@ fragment EXP
 // \- since - means "range" inside [...]
 
 WS
-   : [ \t\n\r] + -> skip
+   : [ \t\n\r\u00A0] + -> skip
    ;
 
 // handle characters which failed to match any other token

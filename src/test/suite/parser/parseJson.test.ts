@@ -28,8 +28,9 @@ suite('parseArray', function() {
     ['[{\'foo\': 2}]', [{'foo': 2}]],
     ['[\'\u00e9\']', ['é']],
     ['[1e10, 1e-10, 1E10, 1E-10, -1e-10]', [1e10, 1e-10, 1e10, 1e-10, -1e-10]],
+    ['[\u00A0"whitespace"]', ['whitespace']],
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
-    test(`should parse ${json}`, function() {
+    test.only(`should parse ${json}`, function() {
       const numbers = parseArray(json);
       expect(numbers).to.deep.equal(expectedArray);
     });

@@ -55,7 +55,8 @@
         "test:unit": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.test.js'",
         "test:benchmark": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.benchmark-test.js'",
         "lint": "eslint \"src/**/*.ts\"",
-        "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4"
+        "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4",
+        "antlr4:grun": ""
     },
     "dependencies": {
         "antlr4ts": "^0.5.0-alpha.4",
