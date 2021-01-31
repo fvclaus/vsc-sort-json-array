@@ -1,4 +1,4 @@
-<a name="3.0.0></a>
+<a name="3.0.0"></a>
 ## 3.0.0
 * Adds custom JSON parser that is able to parse single quotes and dangling commas
 
