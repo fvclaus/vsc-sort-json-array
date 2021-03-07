@@ -1,6 +1,6 @@
 
 import {expect} from 'chai';
-import parseArray from '../../../parser/parseArray';
+import parseArray, {stringTextToStringValue} from '../../../parser/parseArray';
 
 
 suite('parseArray', function() {
@@ -10,7 +10,7 @@ suite('parseArray', function() {
     ['[]', []],
     ['[ \t\n\r]', []],
     ['[""]', ['']],
-    ['["\\\\ \\b \\f \\n \\r \\t"]', ['\\\\ \\b \\f \\n \\r \\t']],
+    ['["\\\\ \\b \\f \\n \\r \\t"]', ['\\ \b \f \n \r \t']],
     ['[null, undefined]', [null, undefined]],
     ['[1, 2, 3]', [1, 2, 3]],
     ['[1.5, \'foo\', 2, -3.5]', [1.5, 'foo', 2, -3.5]],
@@ -18,7 +18,7 @@ suite('parseArray', function() {
     ['["foo", "bar"]', ['foo', 'bar']],
     ['[{"foo": 1}]', [{foo: 1}]],
     ['[{ "foo" : 1}]', [{foo: 1}]],
-    [`["foo'", 'foo"', "\\r\\n", '\u00E9']`, ['foo\'', 'foo"', '\\r\\n', 'é']],
+    [`["foo'", 'foo"', "\\r\\n", '\u00E9']`, ['foo\'', 'foo"', '\r\n', 'é']],
     ['[{"foo": [{"bar1": 1}, {"bar2": 2}]}]', [{foo: [{bar1: 1}, {bar2: 2}]}]],
     ['[true,                 false, null]', [true, false, null]],
     ['[{"foo": 1,}]', [{foo: 1}]],
@@ -28,6 +28,7 @@ suite('parseArray', function() {
     ['[{\'foo\': 2}]', [{'foo': 2}]],
     ['[\'\u00e9\']', ['é']],
     ['[1e10, 1e-10, 1E10, 1E-10, -1e-10]', [1e10, 1e-10, 1e10, 1e-10, -1e-10]],
+    ['["F:\\\\Apps\\\\a"]', ['F:\\Apps\\a']],
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
     test(`should parse ${json}`, function() {
       const numbers = parseArray(json);
@@ -55,6 +56,17 @@ suite('parseArray', function() {
   ] as [string][]).forEach(([json]) => {
     test(`should not parse ${json}`, function() {
       expect(() => parseArray(json)).to.throw();
+    });
+  });
+
+  ([
+    ['nothingSpecial', 'nothingSpecial'],
+    ['\\b\\f\\\\\n\\r\\t\'', '\b\f\\\n\r\t\''],
+    ['a\u0300: a with grave accent', 'à: a with grave accent'],
+    ['\\uD83D\\uDE00', '😀'],
+  ] as [string, string][]).forEach(([stringText, stringValue]) => {
+    test(`should convert string text ${stringText} to string value`, function() {
+      expect(stringTextToStringValue(stringText)).to.equal(stringValue);
     });
   });
 

@@ -71,9 +71,71 @@ class JsonVisitor {
   }
 
   makeString(ctx: TerminalNode): string {
-    return ctx.text.slice(1, ctx.toString().length - 1);
+    // Remove quotes.
+    const stringText = ctx.text.slice(1, ctx.toString().length - 1);
+    // This is about 10x slower than eval() when converting unicode characters.
+    // It is about 2x slower when converting ASCII.
+    // I have to decided to keep it, because it aligns better with the grammar.
+    return stringTextToStringValue(stringText);
   }
 }
+
+const ESCAPE_SEQUENCE_TO_VALUE: {[key in string]: string} = {
+  'b': '\b',
+  't': '\t',
+  'n': '\n',
+  // TODO Support
+  'v': '\v',
+  'f': '\f',
+  'r': '\r',
+};
+
+export enum STRING_TEXT_MODE {
+  TEXT,
+  ESCAPE,
+  UNICODE
+}
+
+function stringTextToStringValue(stringText: string) : string {
+  let mode : STRING_TEXT_MODE = STRING_TEXT_MODE.TEXT;
+  let stringValue = '';
+  for (let i = 0; i < stringText.length; i++) {
+    const currentChar = stringText[i];
+    switch (mode) {
+      case STRING_TEXT_MODE.TEXT: {
+        if (currentChar == '\\') {
+          mode = STRING_TEXT_MODE.ESCAPE;
+        } else {
+          stringValue += currentChar;
+        }
+        break;
+      }
+      case STRING_TEXT_MODE.ESCAPE: {
+        if (currentChar == 'u') {
+          mode = STRING_TEXT_MODE.UNICODE;
+        } else {
+          stringValue += ESCAPE_SEQUENCE_TO_VALUE[currentChar] || currentChar;
+          mode = STRING_TEXT_MODE.TEXT;
+        }
+        break;
+      }
+      case STRING_TEXT_MODE.UNICODE: {
+        const hex = parseInt(stringText.substr(i, 4), 16);
+        i += 3;
+        stringValue += String.fromCodePoint(hex);
+        mode = STRING_TEXT_MODE.TEXT;
+        break;
+      }
+      default: {
+        throw new Error(`Unknown mode ${mode}`);
+      }
+    }
+  }
+  return stringValue;
+}
+
+
+export {stringTextToStringValue};
 
 
 // Generate antlr classes with npm run antrl4

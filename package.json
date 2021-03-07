@@ -49,7 +49,7 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "rimraf out/ && tsc --listEmittedFiles -p ./ --outDir out/",
+        "compile": "rimraf out/ && tsc -p ./ --outDir out/",
         "watch": "rimraf out/ && tsc --watch --outDir out/",
         "test:vsc": "npm run compile && node ./out/test/runTest.js",
         "test:unit": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.test.js'",

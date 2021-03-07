@@ -1,3 +1,7 @@
+<a name="3.0.1"></a>
+## 3.0.1
+* Fixes wrong handling of escape characters #17
+
 <a name="3.0.0"></a>
 ## 3.0.0
 * Adds custom JSON parser that is able to parse single quotes and dangling commas
