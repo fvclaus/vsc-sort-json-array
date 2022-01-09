@@ -9,7 +9,7 @@ export default function withTempFile<T>(fn: (path: string) => T, catchFn: (e: Er
   try {
     return fn(tempFile.path);
   } catch (e) {
-    return catchFn(e);
+    return catchFn(e as Error);
   } finally {
     unlink(tempFile.path, ((err) => {
       if (err != null) {

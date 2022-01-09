@@ -30,8 +30,8 @@ export function run(): Promise<void> {
     ui: 'tdd',
     // ts compilation is slow...
     timeout: timeout,
+    color: true,
   });
-  mocha.useColors(true);
 
   console.log(`Using timeout ${timeout}. Override with env variable MOCHA_TIMEOUT`);
 

@@ -16,7 +16,7 @@ function validateSortFunction(node: ts.FunctionDeclaration): string[] {
 }
 
 
-function validateSourceFile(sourceFile: ts.SourceFile) {
+function validateSourceFile(sourceFile: ts.SourceFile): string[] {
   let errors: string[] = [];
   let hasSortFunction = false;
   sourceFile.forEachChild((node) => {
@@ -47,6 +47,11 @@ export function validateSortModule(path: string): string[] {
         outFile: tempFilePath,
         target: ts.ScriptTarget.ES2015,
         module: ts.ModuleKind.System,
+        // Make sure tsc does not pick up types from a tsconfig.json in a parent folder
+        types: [],
+        skipDefaultLibCheck: true,
+        skipLibCheck: true,
+        noResolve: true
       },
     });
     const emitResult = program.emit();

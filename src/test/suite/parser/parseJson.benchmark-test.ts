@@ -6,13 +6,13 @@ function getRandomArbitrary(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
 
-function getRandomInt(min: number, max: number) {
+function getRandomInt(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function generateUuidV4() {
+function generateUuidV4(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0; const v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
@@ -20,7 +20,7 @@ function generateUuidV4() {
 }
 
 
-function generateObject(numberOfProperties = 20) {
+function generateObject(numberOfProperties = 20): object {
   return Array.from(new Array(numberOfProperties).keys())
       .reduce((obj, i) => {
         const randomProperty = getRandomInt(0, 1);
@@ -40,7 +40,7 @@ function generateObject(numberOfProperties = 20) {
       }, {} as {[key: string]: unknown});
 }
 
-function generateObjectArray(numberOfObjects: number, numberOfProperties = 20) {
+function generateObjectArray(numberOfObjects: number, numberOfProperties = 20): object[] {
   return Array.from(new Array(numberOfObjects).keys())
       .map(() => generateObject(numberOfProperties));
 }

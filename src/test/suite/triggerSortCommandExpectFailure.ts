@@ -17,7 +17,7 @@ export async function triggerSortCommandExpectFailure(content: string, expectedE
     await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
   } catch (e) {
     hasError = true;
-    expect(e.message).to.equal(expectedErrorMessage);
+    expect((e as Error).message).to.equal(expectedErrorMessage);
   }
   expect(hasError).to.be.true;
 }
