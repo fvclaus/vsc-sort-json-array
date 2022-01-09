@@ -9,7 +9,7 @@ import {FileExtension} from '../../fileExtension';
 import stringifyArray from './stringify';
 
 suite('Find enclosing array', function() {
-  const positionCursorAtText = async (document: vscode.TextDocument, editor: vscode.TextEditor, text: string) => {
+  const positionCursorAtText = async (document: vscode.TextDocument, editor: vscode.TextEditor, text: string): Promise<vscode.Position> => {
     const offset = document.getText().indexOf(text);
     const position = document.positionAt(offset);
     editor.selection = new vscode.Selection(position, position);
@@ -102,7 +102,7 @@ suite('Find enclosing array', function() {
         });
       });
 
-  async function expectError(content: string, msgPrefix: string) {
+  async function expectError(content: string, msgPrefix: string): Promise<void> {
     const {
       document,
     } = await openNewJsonDocument(content);
@@ -111,18 +111,11 @@ suite('Find enclosing array', function() {
     try {
       await searchEnclosingArray(document, new vscode.Selection(position, position), FileExtension.JSON);
     } catch (e) {
-      expect(e.message).to.satisfy((msg: string) => msg.startsWith(msgPrefix));
+      expect((e as Error).message).to.satisfy((msg: string) => msg.startsWith(msgPrefix));
       hasError = true;
     }
     expect(hasError).to.be.true;
   }
-
-  test('should fail for vscode < 1.44', async function() {
-    Object.defineProperty(vscode, 'version', {
-      value: '1.38',
-    });
-    await expectError('foo', 'Auto detection does not work in version');
-  });
 
   test('should fail for empty selection', async function() {
     await expectError('{"a": 1}', 'No enclosing array could be found');

@@ -11,13 +11,13 @@ export async function triggerSortCommandExpectFailure(content: string, expectedE
     content: content,
   });
   await window.showTextDocument(document);
-  await vscode.commands.executeCommand('selectAll');
+  await vscode.commands.executeCommand('editor.action.selectAll');
   let hasError = false;
   try {
     await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
   } catch (e) {
     hasError = true;
-    expect(e.message).to.equal(expectedErrorMessage);
+    expect((e as Error).message).to.equal(expectedErrorMessage);
   }
   expect(hasError).to.be.true;
 }

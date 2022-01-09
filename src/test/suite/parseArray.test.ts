@@ -21,7 +21,7 @@ suite('parseArray', function() {
     try {
       parseArray('["1, 2, 3]', FileExtension.JSON);
     } catch (e) {
-      expect(e.message).to.satisfy((msg: string) => msg.startsWith('Cannot parse selection as JSON array.'));
+      expect((e as Error).message).to.satisfy((msg: string) => msg.startsWith('Cannot parse selection as JSON array.'));
       done();
     }
   });

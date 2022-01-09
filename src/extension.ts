@@ -15,7 +15,7 @@ function sort(
     sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: unknown[]) => Promise<unknown[] | undefined>):
     () => Promise<unknown[] | undefined> {
   return async function() {
-    const fail = (error: string | Error | string[]) => {
+    const fail = (error: string | Error | string[]): undefined => {
       let errors: string[];
       if (typeof error === 'string') {
         errors = [error];
@@ -68,7 +68,7 @@ function sort(
           return fail('Could not apply workspace edit');
         }
       } catch (error) {
-        return fail(error);
+        return fail(error as Error);
       }
     }
   };

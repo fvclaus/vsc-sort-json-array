@@ -1,7 +1,7 @@
 import {FileExtension} from './fileExtension';
 import {default as parseJsonArray} from './parser/parseArray';
 
-function applyPreFilter(array: string, fileExtension: FileExtension) {
+function applyPreFilter(array: string, fileExtension: FileExtension): string {
   switch (fileExtension) {
     case FileExtension.JSONL: {
       return '[' +
@@ -20,6 +20,6 @@ export default function parseArray(array: string, fileExtension: FileExtension) 
   try {
     return parseJsonArray(applyPreFilter(array, fileExtension));
   } catch (e) {
-    throw new Error(`Cannot parse selection as JSON array. Reason: ${e.message}`);
+    throw new Error(`Cannot parse selection as JSON array. Reason: ${(e as Error).message}`);
   }
 }

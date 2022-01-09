@@ -1,6 +1,6 @@
 import {FileExtension} from '../../fileExtension';
 
-function stringify(a: unknown) {
+function stringify(a: unknown): string {
   return JSON.stringify(a, null, 2);
 }
 

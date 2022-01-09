@@ -1,0 +1,7 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+  "sortJsonArray.collation.caseFirst": "false",
+  "sortJsonArray.collation.ignorePunctuation": false,
+  "sortJsonArray.collation.numeric": false,
+  "sortJsonArray.collation.locales": []
+}

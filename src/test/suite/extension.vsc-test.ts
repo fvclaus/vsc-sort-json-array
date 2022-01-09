@@ -19,7 +19,7 @@ suite('Extension Test Suite', function() {
   test('Invalid json', async function() {
     await openNewJsonDocument('[\'foo, 2, 3]');
     const showErrorMessageSpy = sinon.spy(window, 'showErrorMessage');
-    await vscode.commands.executeCommand('selectAll');
+    await vscode.commands.executeCommand('editor.action.selectAll');
     await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
     expect(showErrorMessageSpy.lastCall.args[0]).to.satisfy((msg: string) => msg.startsWith('Cannot parse selection as JSON array.'));
   });

@@ -14,7 +14,7 @@ export interface SelectionRange {
     parent?: SelectionRange;
 }
 
-function selectAll(document: vscode.TextDocument) {
+function selectAll(document: vscode.TextDocument): vscode.Range {
   return new vscode.Range(new vscode.Position(0, 0), document.lineAt(document.lineCount - 1).range.end);
 }
 
@@ -32,18 +32,9 @@ async function selectArray(document: vscode.TextDocument, selection: vscode.Sele
   return selection;
 }
 
-function doesVersionSupportSelectionRangeProvider() {
-  const [major, minor] = vscode.version.split('.').map((versionFragment) => parseInt(versionFragment, 10));
-  return major >=1 && minor >= 44;
-}
 
 export async function searchEnclosingArray(document: vscode.TextDocument, activeSelection: vscode.Selection, fileExtension: FileExtension):
      Promise<vscode.Range> {
-  if (!doesVersionSupportSelectionRangeProvider()) {
-    throw new Error('Auto detection does not work in versions < 1.44, due to a bug in the vscode API. ' +
-        'Unfortunately, I forgot to increment the required vscode runtime when I published the auto detect feature. ' +
-        'You can either upgrade your vscode or manually select the array.');
-  }
   let selection: vscode.Range;
   switch (fileExtension) {
     case FileExtension.JSONL:

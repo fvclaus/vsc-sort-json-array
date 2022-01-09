@@ -54,13 +54,13 @@ async function moveExistingSortModules(globalStoragePath: string): Promise<strin
   return tempDir;
 }
 
-async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: string) {
+async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: string): Promise<void> {
   await rm(globalStoragePath);
   await mvDir(tempDir, globalStoragePath);
 }
 
 
-async function selectQuickOpenItem(item: string) {
+async function selectQuickOpenItem(item: string): Promise<void> {
   await vscode.commands.executeCommand('workbench.action.focusQuickOpen');
   await vscode.env.clipboard.writeText(item);
   await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
@@ -108,7 +108,7 @@ suite('Sort custom', function() {
     await closeActiveEditor();
   });
 
-  function createTestModule() {
+  function createTestModule(): void {
     fs.writeFileSync(testModulePath, fs.readFileSync(createSourceModulePath('sortModule')), {flag: 'w'});
     expect(fs.existsSync(testModulePath)).to.be.true;
   }
@@ -152,14 +152,14 @@ suite('Sort custom', function() {
     });
   });
 
-  async function setupCommandTest() {
+  async function setupCommandTest(): Promise<void> {
     createTestModule();
     const document = await vscode.workspace.openTextDocument({
       language: 'JSON',
       content: '[1, 2, 3, 4]',
     });
     await vscode.window.showTextDocument(document);
-    await vscode.commands.executeCommand('selectAll');
+    await vscode.commands.executeCommand('editor.action.selectAll');
     vscode.commands.executeCommand('extension.sortJsonArrayCustom');
     // Wait for quick open
     await nextTick();

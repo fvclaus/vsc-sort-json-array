@@ -3,7 +3,7 @@ export enum ArrayType {
     string,
     number
 }
-function determineType(item: unknown | undefined) {
+function determineType(item: unknown | undefined): ArrayType | undefined {
   if (item == null) {
     return undefined;
   }

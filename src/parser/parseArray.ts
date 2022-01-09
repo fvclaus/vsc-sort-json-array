@@ -148,6 +148,7 @@ export default function parseArray(text: string): unknown[] {
   const parser = new JSONParser(tokenStream);
   parser.removeErrorListeners();
   parser.addErrorListener({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     syntaxError(recognizer: Recognizer<Token, ATNSimulator>, offendingSymbol, line, charPositionInLine, msg, e) {
       errors.push(new Error(msg));
     },

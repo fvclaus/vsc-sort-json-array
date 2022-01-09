@@ -13,11 +13,10 @@ module.exports = {
   "plugins": [
     '@typescript-eslint'
   ],
-  "ignorePatterns": ["**/generated/**", ".eslintrc.js"],
+  "ignorePatterns": ["**/generated/**", ".eslintrc.js", "**/out/**"],
   "extends": [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'google'
+    'plugin:@typescript-eslint/recommended'
   ],
   "rules": {
     // CI pipeline runs on windows with CRLF
