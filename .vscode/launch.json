@@ -28,9 +28,9 @@
                 "VSCODE_VERSION": "1.63.0"
             },
             "args": [
-                "${workspaceFolder}/src/test/workspace",
-                "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/suite",
+              "${workspaceFolder}/src/test/workspace",
+              "--extensionDevelopmentPath=${workspaceFolder}",
+              "--extensionTestsPath=${workspaceFolder}/out/test/suite"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"

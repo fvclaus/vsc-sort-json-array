@@ -8,7 +8,7 @@ import { ExtensionConfiguration } from '../../../../sortOrder';
 
 async function updateConfiguration(expectedConfiguration: ExtensionConfiguration): Promise<void> {
   const actualConfiguration = vscode.workspace.getConfiguration("sortJsonArray.collation");
-  await actualConfiguration.update("locale", expectedConfiguration.collation.locale);
+  await actualConfiguration.update("locales", expectedConfiguration.collation.locales);
   await actualConfiguration.update("caseFirst", expectedConfiguration.collation.caseFirst);
   await actualConfiguration.update("ignorePunctuation", expectedConfiguration.collation.ignorePunctuation);
   await actualConfiguration.update("numeric", expectedConfiguration.collation.numeric);
@@ -19,7 +19,7 @@ suite('Sort number or strings', function() {
     await closeActiveEditor();
     await updateConfiguration({
       collation: {
-        locale: "system",
+        locales: [],
         ignorePunctuation: false,
         numeric: false,
         caseFirst: "false"
@@ -41,7 +41,7 @@ suite('Sort number or strings', function() {
         caseFirst: "upper",
         numeric: true,
         ignorePunctuation: true,
-        locale: "da"
+        locales: ["da"]
       }
     })
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', [

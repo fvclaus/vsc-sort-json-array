@@ -48,10 +48,13 @@
         ],
         "configuration": {
           "properties": {
-            "sortJsonArray.collation.locale": { 
-              "type": "string",
-              "description": "Which locale to use for sorting. The sort order for characters such as ö is different in some languages (for example Swedish and German). Use system for system default",
-              "default": "system",
+            "sortJsonArray.collation.locales": { 
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Which locale to use for sorting. The sort order for characters such as ö is different in some languages (for example Swedish and German). Leave empty to use system default",
+              "default": [],
               "order": 1
             },
             "sortJsonArray.collation.caseFirst": {

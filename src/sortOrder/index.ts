@@ -7,14 +7,14 @@ import {genericSortFn} from './sortNumberOrStrings/genericSortFn';
 import {stringSortFn} from './sortNumberOrStrings/stringSortFn';
 
 
-type CollationLocale = string | 'system';
+type CollationLocale = string[];
 type CollactionCaseFirst = 'upper' | 'lower' | 'false'
 export interface ExtensionConfiguration {
   collation: {
     ignorePunctuation: boolean,
     caseFirst: CollactionCaseFirst
     numeric: boolean,
-    locale: CollationLocale
+    locales: CollationLocale
   }
 }
 
@@ -30,7 +30,7 @@ function getExtensionConfiguration() : ExtensionConfiguration {
       ignorePunctuation: config.get('ignorePunctuation') as boolean,
       caseFirst: config.get('caseFirst') as CollactionCaseFirst,
       numeric: config.get('numeric') as boolean,
-      locale: config.get('locale') as CollationLocale,
+      locales: config.get('locales') as CollationLocale,
     },
   };
 }
@@ -45,7 +45,7 @@ async function sortArray(window: typeof vscode.window, array: unknown[], sortOrd
   const extensionConfiguration = getExtensionConfiguration();
   const sortConfiguration: SortConfiguration = {
     collator: new Intl.Collator(
-      extensionConfiguration.collation.locale == 'system'? undefined : extensionConfiguration.collation.locale,
+      extensionConfiguration.collation.locales.length === 0? undefined : extensionConfiguration.collation.locales,
       extensionConfiguration.collation),
     order: sortOrder,
   };
