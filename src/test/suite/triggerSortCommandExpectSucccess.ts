@@ -12,7 +12,7 @@ export async function triggerSortCommandExpectSuccess(
   const {
     editor,
   } = await openNewJsonDocument(JSON.stringify(array, null, 2));
-  await vscode.commands.executeCommand('selectAll');
+  await vscode.commands.executeCommand('editor.action.selectAll');
   // The sort command may require input from the user. We cannot 'await' it, because it will hang indefinetely.
   let result;
   if (userInputs != null) {

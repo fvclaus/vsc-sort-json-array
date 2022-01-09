@@ -11,7 +11,7 @@ export async function triggerSortCommandExpectFailure(content: string, expectedE
     content: content,
   });
   await window.showTextDocument(document);
-  await vscode.commands.executeCommand('selectAll');
+  await vscode.commands.executeCommand('editor.action.selectAll');
   let hasError = false;
   try {
     await vscode.commands.executeCommand('extension.sortJsonArrayAscending');

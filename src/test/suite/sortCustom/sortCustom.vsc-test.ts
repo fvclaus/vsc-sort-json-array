@@ -159,7 +159,7 @@ suite('Sort custom', function() {
       content: '[1, 2, 3, 4]',
     });
     await vscode.window.showTextDocument(document);
-    await vscode.commands.executeCommand('selectAll');
+    await vscode.commands.executeCommand('editor.action.selectAll');
     vscode.commands.executeCommand('extension.sortJsonArrayCustom');
     // Wait for quick open
     await nextTick();
