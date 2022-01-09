@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 1
       - uses: actions/setup-node@v1
         with:
-          node-version: '12.10'
+          node-version: '14.15.5'
       - run: npm install
       - run: npm run lint
       - run: npm run test:unit
@@ -28,7 +28,4 @@ jobs:
           VSCODE_VERSION: "1.44.0"
       - run: npm run test:vsc
         env:
-          VSCODE_VERSION: "1.45.0"
-      - run: npm run test:vsc
-        env:
-          VSCODE_VERSION: "1.46.0"
+          VSCODE_VERSION: "1.63.0"

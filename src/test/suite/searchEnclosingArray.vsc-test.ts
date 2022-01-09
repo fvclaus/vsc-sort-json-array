@@ -117,13 +117,6 @@ suite('Find enclosing array', function() {
     expect(hasError).to.be.true;
   }
 
-  test('should fail for vscode < 1.44', async function() {
-    Object.defineProperty(vscode, 'version', {
-      value: '1.38',
-    });
-    await expectError('foo', 'Auto detection does not work in version');
-  });
-
   test('should fail for empty selection', async function() {
     await expectError('{"a": 1}', 'No enclosing array could be found');
   });

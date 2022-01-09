@@ -2,11 +2,11 @@
     "name": "sort-json-array",
     "displayName": "Sort JSON array",
     "description": "Sorts any type of json array by value, object property or custom function",
-    "version": "3.0.1",
+    "version": "4.0.0",
     "publisher": "fvclaus",
     "license": "BSD-3-Clause",
     "engines": {
-        "vscode": "^1.38.0"
+        "vscode": "^1.44.0"
     },
     "bugs": {
         "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
@@ -45,7 +45,40 @@
                 "command": "extension.sortJsonArrayCustom",
                 "title": "Sort JSON array custom"
             }
-        ]
+        ],
+        "configuration": {
+          "properties": {
+            "sortJsonArray.collation.locale": { 
+              "type": "string",
+              "description": "Which locale to use for sorting. The sort order for characters such as ö is different in some languages (for example Swedish and German). Use system for system default",
+              "default": "system",
+              "order": 1
+            },
+            "sortJsonArray.collation.caseFirst": {
+              "type": "string",
+              "enum": ["upper", "lower", "false"],
+              "enumDescriptions": [
+                "Upper case first",
+                "Lower case first",
+                "Use locale's default"
+              ],
+              "default": "false",
+              "description": "Whether upper case or lower case should sort first",
+              "order": 2
+            },
+            "sortJsonArray.collation.ignorePunctuation": {
+              "type": "boolean",
+              "description": "Whether punctuation should be ignored, such that b <  \"b\" < c",
+              "order": 3
+            },
+            "sortJsonArray.collation.numeric": {
+              "type": "boolean",
+              "description": "Whether numeric collation should be used, such that \"1\" < \"2\" < \"10\"",
+              "default": false,
+              "order": 4
+            }
+          }
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

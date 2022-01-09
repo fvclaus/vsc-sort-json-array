@@ -13,7 +13,7 @@ suite('Determine array type', function() {
 
   ASCENDING_ARRAYS.forEach(([array, expectedArray]) => {
     test(`should sort array ${JSON.stringify(array)}`, function() {
-      array.sort(genericSortFn(SortOrder.ascending));
+      array.sort(genericSortFn({order: SortOrder.ascending, collator: new Intl.Collator()}));
       expect(array).to.deep.equal(expectedArray);
     });
   });
