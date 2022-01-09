@@ -47,40 +47,44 @@
             }
         ],
         "configuration": {
-          "properties": {
-            "sortJsonArray.collation.locales": { 
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "Which locale to use for sorting. The sort order for characters such as ö is different in some languages (for example Swedish and German). Leave empty to use system default",
-              "default": [],
-              "order": 1
-            },
-            "sortJsonArray.collation.caseFirst": {
-              "type": "string",
-              "enum": ["upper", "lower", "false"],
-              "enumDescriptions": [
-                "Upper case first",
-                "Lower case first",
-                "Use locale's default"
-              ],
-              "default": "false",
-              "description": "Whether upper case or lower case should sort first",
-              "order": 2
-            },
-            "sortJsonArray.collation.ignorePunctuation": {
-              "type": "boolean",
-              "description": "Whether punctuation should be ignored, such that b <  \"b\" < c",
-              "order": 3
-            },
-            "sortJsonArray.collation.numeric": {
-              "type": "boolean",
-              "description": "Whether numeric collation should be used, such that \"1\" < \"2\" < \"10\"",
-              "default": false,
-              "order": 4
+            "properties": {
+                "sortJsonArray.collation.locales": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Which locale to use for sorting. The sort order for characters such as ö is different in some languages (for example Swedish and German). Leave empty to use system default",
+                    "default": [],
+                    "order": 1
+                },
+                "sortJsonArray.collation.caseFirst": {
+                    "type": "string",
+                    "enum": [
+                        "upper",
+                        "lower",
+                        "false"
+                    ],
+                    "enumDescriptions": [
+                        "Upper case first",
+                        "Lower case first",
+                        "Use locale's default"
+                    ],
+                    "default": "false",
+                    "description": "Whether upper case or lower case should sort first",
+                    "order": 2
+                },
+                "sortJsonArray.collation.ignorePunctuation": {
+                    "type": "boolean",
+                    "description": "Whether punctuation should be ignored, such that b <  \"b\" < c",
+                    "order": 3
+                },
+                "sortJsonArray.collation.numeric": {
+                    "type": "boolean",
+                    "description": "Whether numeric collation should be used, such that \"1\" < \"2\" < \"10\"",
+                    "default": false,
+                    "order": 4
+                }
             }
-          }
         }
     },
     "scripts": {
@@ -110,7 +114,7 @@
         "@types/rimraf": "^3.0.2",
         "@types/sinon": "^10.0.6",
         "@types/temp": "^0.9.1",
-        "@types/vscode": "1.63.1",
+        "@types/vscode": "1.44.0",
         "@typescript-eslint/eslint-plugin": "^5.9.0",
         "@typescript-eslint/parser": "^5.9.0",
         "antlr4ts-cli": "^0.5.0-alpha.4",
@@ -126,5 +130,7 @@
         "tslint": "^5.20.1",
         "vscode-test": "^1.6.1"
     },
-    "contributors": ["Philipp Kursawe <phil.kursawe@gmail.com>"]
+    "contributors": [
+        "Philipp Kursawe <phil.kursawe@gmail.com>"
+    ]
 }
