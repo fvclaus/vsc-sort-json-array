@@ -1,5 +1,5 @@
-<a name="4.0.0"></a>
-## 4.0.0
+<a name="3.1.0"></a>
+## 3.1.0
 * Strings are sorted using lexicographic order instead of code point order #23
 
 <a name="3.0.1"></a>
