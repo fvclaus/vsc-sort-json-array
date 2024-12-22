@@ -33,10 +33,12 @@ jobs:
         with:
           node-version: '18.20.4'
       - run: npm install
-      - run: npm run test:vsc
+      - name: Run lowest supported version
+        run: npm run test:vsc
         env:
           VSCODE_VERSION: "1.44.0"
-      - run: npm run test:vsc
+      - name: Run newish version
+        run: npm run test:vsc
         env:
           VSCODE_VERSION: "1.96.2"
 
@@ -50,13 +52,15 @@ jobs:
         with:
           node-version: '18.20.4'
       - run: npm install
-      - env:
+      - name: Run lowest supported version
+        env:
           VSCODE_VERSION: "1.44.0"
         run: |
           export DISPLAY=':99.0'
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           npm run test:vsc
-      - env:
+      - name: Run newish version
+        env:
           VSCODE_VERSION: "1.96.2"
         run: |
           export DISPLAY=':99.0'
