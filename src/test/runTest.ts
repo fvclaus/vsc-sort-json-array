@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import {runTests} from 'vscode-test';
+import { runTests } from '@vscode/test-electron';
 
 async function main(): Promise<void> {
   try {
@@ -11,9 +11,8 @@ async function main(): Promise<void> {
     console.log(`Using workspacePath ${workspacePath}`)
 
     const version = process.env.VSCODE_VERSION != null? process.env.VSCODE_VERSION : '1.44.0';
+
     // Download VS Code, unzip it and run the integration test
-    // 1.31.0 was first version to provide globalStoragePath.
-    // Use 1.38.0, becaues lower version would not close editor when tests are finished.
     await runTests({version,
       extensionDevelopmentPath,
       extensionTestsPath,
