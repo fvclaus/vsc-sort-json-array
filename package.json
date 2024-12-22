@@ -1,136 +1,137 @@
 {
-    "name": "sort-json-array",
-    "displayName": "Sort JSON array",
-    "description": "Sorts any type of json array by value, object property or custom function",
-    "version": "3.1.0",
-    "publisher": "fvclaus",
-    "license": "BSD-3-Clause",
-    "engines": {
-        "vscode": "^1.44.0"
-    },
-    "bugs": {
-        "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
-        "email": "f.v.claus@googlemail.com"
-    },
-    "homepage": "https://github.com/fvclaus/vsc-sort-json-array/blob/master/README.md",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/fvclaus/vsc-sort-json-array.git"
-    },
-    "icon": "icon.png",
-    "galleryBanner": {
-        "color": "#C80000",
-        "theme": "dark"
-    },
-    "categories": [
-        "Other"
+  "name": "sort-json-array",
+  "displayName": "Sort JSON array",
+  "description": "Sorts any type of json array by value, object property or custom function",
+  "version": "3.1.0",
+  "publisher": "fvclaus",
+  "license": "BSD-3-Clause",
+  "engines": {
+    "vscode": "^1.44.0",
+    "node": ">=18.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
+    "email": "f.v.claus@googlemail.com"
+  },
+  "homepage": "https://github.com/fvclaus/vsc-sort-json-array/blob/master/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fvclaus/vsc-sort-json-array.git"
+  },
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#C80000",
+    "theme": "dark"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.sortJsonArrayAscending",
+    "onCommand:extension.sortJsonArrayDescending",
+    "onCommand:extension.sortJsonArrayCustom"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.sortJsonArrayAscending",
+        "title": "Sort JSON array ascending"
+      },
+      {
+        "command": "extension.sortJsonArrayDescending",
+        "title": "Sort JSON array descending"
+      },
+      {
+        "command": "extension.sortJsonArrayCustom",
+        "title": "Sort JSON array custom"
+      }
     ],
-    "activationEvents": [
-        "onCommand:extension.sortJsonArrayAscending",
-        "onCommand:extension.sortJsonArrayDescending",
-        "onCommand:extension.sortJsonArrayCustom"
-    ],
-    "main": "./out/extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "extension.sortJsonArrayAscending",
-                "title": "Sort JSON array ascending"
-            },
-            {
-                "command": "extension.sortJsonArrayDescending",
-                "title": "Sort JSON array descending"
-            },
-            {
-                "command": "extension.sortJsonArrayCustom",
-                "title": "Sort JSON array custom"
-            }
-        ],
-        "configuration": {
-            "properties": {
-                "sortJsonArray.collation.locales": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "description": "Which locale to use for sorting. The sort order for characters such as ö is different in some languages (for example Swedish and German). Leave empty to use system default",
-                    "default": [],
-                    "order": 1
-                },
-                "sortJsonArray.collation.caseFirst": {
-                    "type": "string",
-                    "enum": [
-                        "upper",
-                        "lower",
-                        "false"
-                    ],
-                    "enumDescriptions": [
-                        "Upper case first",
-                        "Lower case first",
-                        "Use locale's default"
-                    ],
-                    "default": "false",
-                    "description": "Whether upper case or lower case should sort first",
-                    "order": 2
-                },
-                "sortJsonArray.collation.ignorePunctuation": {
-                    "type": "boolean",
-                    "description": "Whether punctuation should be ignored, such that b <  \"b\" < c",
-                    "order": 3
-                },
-                "sortJsonArray.collation.numeric": {
-                    "type": "boolean",
-                    "description": "Whether numeric collation should be used, such that \"1\" < \"2\" < \"10\"",
-                    "default": false,
-                    "order": 4
-                }
-            }
+    "configuration": {
+      "properties": {
+        "sortJsonArray.collation.locales": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Which locale to use for sorting. The sort order for characters such as ö is different in some languages (for example Swedish and German). Leave empty to use system default",
+          "default": [],
+          "order": 1
+        },
+        "sortJsonArray.collation.caseFirst": {
+          "type": "string",
+          "enum": [
+            "upper",
+            "lower",
+            "false"
+          ],
+          "enumDescriptions": [
+            "Upper case first",
+            "Lower case first",
+            "Use locale's default"
+          ],
+          "default": "false",
+          "description": "Whether upper case or lower case should sort first",
+          "order": 2
+        },
+        "sortJsonArray.collation.ignorePunctuation": {
+          "type": "boolean",
+          "description": "Whether punctuation should be ignored, such that b <  \"b\" < c",
+          "order": 3
+        },
+        "sortJsonArray.collation.numeric": {
+          "type": "boolean",
+          "description": "Whether numeric collation should be used, such that \"1\" < \"2\" < \"10\"",
+          "default": false,
+          "order": 4
         }
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "rimraf out/ && tsc -p ./ --outDir out/",
-        "watch": "rimraf out/ && tsc --watch --outDir out/",
-        "test:vsc": "npm run compile && node ./out/test/runTest.js",
-        "test:unit": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.test.js'",
-        "test:benchmark": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.benchmark-test.js'",
-        "lint": "eslint \"src/**/*.ts\"",
-        "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4"
-    },
-    "dependencies": {
-        "antlr4ts": "^0.5.0-alpha.4",
-        "glob": "^7.2.0",
-        "mv": "^2.1.1",
-        "temp": "^0.9.4",
-        "typescript": "^4.5.4"
-    },
-    "devDependencies": {
-        "@types/benchmark": "^2.1.1",
-        "@types/chai": "^4.3.0",
-        "@types/glob": "^7.2.0",
-        "@types/mocha": "^9.0.0",
-        "@types/mv": "^2.1.2",
-        "@types/node": "^17.0.8",
-        "@types/rimraf": "^3.0.2",
-        "@types/sinon": "^10.0.6",
-        "@types/temp": "^0.9.1",
-        "@types/vscode": "1.44.0",
-        "@typescript-eslint/eslint-plugin": "^5.9.0",
-        "@typescript-eslint/parser": "^5.9.0",
-        "antlr4ts-cli": "^0.5.0-alpha.4",
-        "benchmark": "^2.1.4",
-        "chai": "^4.3.4",
-        "eslint": "^8.6.0",
-        "eslint-config-google": "^0.14.0",
-        "eslint-plugin-mocha": "^10.0.3",
-        "mocha": "^9.1.3",
-        "rimraf": "^3.0.2",
-        "sinon": "^12.0.1",
-        "source-map-support": "^0.5.21",
-        "tslint": "^5.20.1",
-        "vscode-test": "^1.6.1"
-    },
-    "contributors": [
-        "Philipp Kursawe <phil.kursawe@gmail.com>"
-    ]
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "rimraf out/ && tsc -p ./ --outDir out/",
+    "watch": "rimraf out/ && tsc --watch --outDir out/",
+    "test:vsc": "npm run compile && node ./out/test/runTest.js",
+    "test:unit": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.test.js'",
+    "test:benchmark": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.benchmark-test.js'",
+    "lint": "eslint \"src/**/*.ts\"",
+    "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4"
+  },
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4",
+    "glob": "^7.2.0",
+    "mv": "^2.1.1",
+    "temp": "^0.9.4",
+    "typescript": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/benchmark": "^2.1.1",
+    "@types/chai": "^4.3.0",
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.0.0",
+    "@types/mv": "^2.1.2",
+    "@types/node": "^17.0.8",
+    "@types/rimraf": "^3.0.2",
+    "@types/sinon": "^10.0.6",
+    "@types/temp": "^0.9.1",
+    "@types/vscode": "1.44.0",
+    "@typescript-eslint/eslint-plugin": "^5.9.0",
+    "@typescript-eslint/parser": "^5.9.0",
+    "@vscode/test-electron": "^2.4.1",
+    "antlr4ts-cli": "^0.5.0-alpha.4",
+    "benchmark": "^2.1.4",
+    "chai": "^4.3.4",
+    "eslint": "^8.6.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-mocha": "^10.0.3",
+    "mocha": "^9.1.3",
+    "rimraf": "^3.0.2",
+    "sinon": "^12.0.1",
+    "source-map-support": "^0.5.21",
+    "tslint": "^5.20.1"
+  },
+  "contributors": [
+    "Philipp Kursawe <phil.kursawe@gmail.com>"
+  ]
 }
