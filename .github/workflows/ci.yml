@@ -8,10 +8,8 @@ on:
 
 
 jobs:
-  build:
-    name: tests
-    # Run on windows because it provides a graphics server
-    runs-on: windows-latest
+  tests:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
         with:
@@ -23,9 +21,39 @@ jobs:
       - run: npm run lint
       - run: npm run test:unit
       - run: npm run test:benchmark
+
+  extension-test-windows:
+    # Run on windows because it provides a graphics server
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '18.20.4'
+      - run: npm install
       - run: npm run test:vsc
         env:
           VSCODE_VERSION: "1.44.0"
       - run: npm run test:vsc
         env:
           VSCODE_VERSION: "1.96.2"
+
+  extension-test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '18.20.4'
+      - run: npm install
+      - env:
+          VSCODE_VERSION: "1.44.0"
+        -run: |
+          sudo apt-get install xvfb
+          export DISPLAY=':99.0'
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          npm run test:vsc
