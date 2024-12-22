@@ -28,4 +28,4 @@ jobs:
           VSCODE_VERSION: "1.44.0"
       - run: npm run test:vsc
         env:
-          VSCODE_VERSION: "1.96.0"
+          VSCODE_VERSION: "1.96.2"
