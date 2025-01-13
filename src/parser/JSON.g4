@@ -1,4 +1,3 @@
-
 /** Taken from "The Definitive ANTLR 4 Reference" by Terence Parr */
 
 // Derived from http://json.org
@@ -10,11 +9,11 @@ json
 
 value
    : obj
-   | arr       
-   | STRING    
-   | NUMBER    
-   | 'true'      
-   | 'false'     
+   | arr
+   | STRING
+   | NUMBER
+   | 'true'
+   | 'false'
    | 'null'
    | 'undefined'
    ;
@@ -28,7 +27,8 @@ CLOSING_CURLIES: '}';
 OPENING_CURLIES: '{';
 
 pair
-   : STRING COLON value
+ // TODO Should support NUMBER as well
+   : (IDENTIFIER | STRING) COLON value
    ;
 
 COLON: ':';
@@ -44,11 +44,11 @@ STRING
    ;
 
 fragment STRINGCHARS_DOUBLE
-   : ('\\' (["\\/bfnrt] | UNICODE)) |  ~ ["\\\u0000-\u001F]*
+   : ('\\"' | ~["])*
    ;
 
 fragment STRINGCHARS_SINGLE
-   : ('\\' (['\\/bfnrt] | UNICODE)) |  ~ ['\\\u0000-\u001F]*
+  : ('\\\'' | ~['])*
    ;
 
 // TODO Template
@@ -87,6 +87,12 @@ fragment EXP
 WS
    : [ \t\n\r] + -> skip
    ;
+
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#identifiers
+IDENTIFIER
+  : [$_\p{ID_Start}][$\p{ID_Continue}]*
+;
 
 // handle characters which failed to match any other token
 ErrorCharacter : . ;

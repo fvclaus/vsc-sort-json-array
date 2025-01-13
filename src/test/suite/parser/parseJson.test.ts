@@ -1,7 +1,7 @@
 
 import {expect} from 'chai';
 import parseArray, {stringTextToStringValue} from '../../../parser/parseArray';
-
+import {suite, test} from 'mocha';
 
 suite('parseArray', function() {
   ([
@@ -19,6 +19,9 @@ suite('parseArray', function() {
     ['[{"foo": 1}]', [{foo: 1}]],
     ['[{ "foo" : 1}]', [{foo: 1}]],
     [`["foo'", 'foo"', "\\r\\n", '\u00E9']`, ['foo\'', 'foo"', '\r\n', 'é']],
+    // TODO This doesn't work. At least not in JSON
+    // String handling in JS and JSON is different. JSON needs double escapes, JS doesn't
+    // [`["\r", "\\r", "\\\r", "\\\\r"]`, ["\r", "\\r", "\\\r", "\\\\r"]],
     ['[{"foo": [{"bar1": 1}, {"bar2": 2}]}]', [{foo: [{bar1: 1}, {bar2: 2}]}]],
     ['[true,                 false, null]', [true, false, null]],
     ['[{"foo": 1,}]', [{foo: 1}]],
@@ -29,10 +32,13 @@ suite('parseArray', function() {
     ['[\'\u00e9\']', ['é']],
     ['[1e10, 1e-10, 1E10, 1E-10, -1e-10]', [1e10, 1e-10, 1e10, 1e-10, -1e-10]],
     ['["F:\\\\Apps\\\\a"]', ['F:\\Apps\\a']],
+    ['[{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]', 
+      [{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]],
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
     test(`should parse ${json}`, function() {
-      const numbers = parseArray(json);
+      const numbers = parseArray(json, {doubleEscape: true});
       expect(numbers).to.deep.equal(expectedArray);
+      expect(JSON.parse(json)).to.deep.equal(expectedArray);
     });
   });
 
@@ -55,7 +61,7 @@ suite('parseArray', function() {
     ['[[]'],
   ] as [string][]).forEach(([json]) => {
     test(`should not parse ${json}`, function() {
-      expect(() => parseArray(json)).to.throw();
+      expect(() => parseArray(json, {doubleEscape: true})).to.throw();
     });
   });
 
@@ -69,7 +75,6 @@ suite('parseArray', function() {
       expect(stringTextToStringValue(stringText)).to.equal(stringValue);
     });
   });
-
 
   // TODO Test positions with dangling commas
 });

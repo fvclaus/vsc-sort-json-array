@@ -1,4 +1,4 @@
-import parseArray from '../../parseArray';
+import processAndParseArray from '../../processAndParseArray';
 import chai = require('chai');
 import {FileExtension} from '../../fileExtension';
 
@@ -12,14 +12,14 @@ suite('parseArray', function() {
     ['\n{"id":1}\n{"id":2}\n', FileExtension.JSONL, [{id: 1}, {id: 2}]],
   ] as [string, FileExtension, unknown[]][]).forEach(([json, fileExtension, expectedArray]) => {
     test(`should parse valid json ${json}`, function() {
-      const array = parseArray(json, fileExtension);
+      const array = processAndParseArray(json, fileExtension);
       expect(array).to.deep.equal(expectedArray);
     });
   });
 
   test('should throw for invalid json', function(done) {
     try {
-      parseArray('["1, 2, 3]', FileExtension.JSON);
+      processAndParseArray('["1, 2, 3]', FileExtension.JSON);
     } catch (e) {
       expect((e as Error).message).to.satisfy((msg: string) => msg.startsWith('Cannot parse selection as JSON array.'));
       done();

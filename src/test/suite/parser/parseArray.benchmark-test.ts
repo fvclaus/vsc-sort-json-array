@@ -55,7 +55,7 @@ suite('parseJsonBenchmark', function() {
       const arrayString = JSON.stringify(arrayFn(), null, 2);
       new Benchmark.Suite(name)
           .add(`antlr4#${name}`, () => {
-            parseArray(arrayString);
+            parseArray(arrayString, {doubleEscape: false});
           }, {
             maxTime: 1,
             async: true,

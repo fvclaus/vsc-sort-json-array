@@ -10,6 +10,9 @@ import {ATNSimulator} from 'antlr4ts/atn/ATNSimulator';
 type Pair = [string, unknown];
 
 class JsonVisitor {
+  constructor(private config: ParserConfig) {
+
+  }
   visitJson(ctx: JsonContext): unknown[] {
     const arrContext = ctx.arr();
     return this.visitArr(arrContext);
@@ -23,7 +26,10 @@ class JsonVisitor {
         }, {} as {[key: string]: unknown});
   }
   visitPair(ctx: PairContext): Pair {
-    return [this.evalTerminalNode<string>(ctx.STRING()), this.visitValue(ctx.value())];
+    if (ctx.children == null || ctx.children.length !== 3) {
+      throw new Error('Expecting exactly three children');
+    }
+    return [this.evalTerminalNode(ctx.children[0] as TerminalNode), this.visitValue(ctx.value())];
   }
   visitArr(ctx: ArrContext): unknown[] {
     return ctx.value()
@@ -66,8 +72,16 @@ class JsonVisitor {
     }
   }
 
-  evalTerminalNode<T= unknown>(ctx: TerminalNode): T {
-    return eval(ctx.toString());
+  evalTerminalNode(ctx: TerminalNode): string {
+    switch (ctx.symbol.type) {
+      case JSONParser.IDENTIFIER: {
+        return ctx.toString();
+      } case JSONParser.STRING: {
+        return stringTextToStringValue(ctx.toString());
+      } default: {
+        throw new Error(`Unknown type ${ctx.symbol.type} for node ${ctx.toString()}`)
+      }
+    }
   }
 
   makeString(ctx: TerminalNode): string {
@@ -81,13 +95,16 @@ class JsonVisitor {
 }
 
 const ESCAPE_SEQUENCE_TO_VALUE: {[key in string]: string} = {
-  'b': '\b',
-  't': '\t',
-  'n': '\n',
-  // TODO Support
-  'v': '\v',
-  'f': '\f',
+  '0': '\0',
+  '"': '"',
+  "'": "'",
+  "\\": "\\",
   'r': '\r',
+  'n': '\n',
+  'v': '\v',
+  't': '\t',
+  'b': '\b',
+  'f': '\f',
 };
 
 export enum STRING_TEXT_MODE {
@@ -114,13 +131,17 @@ function stringTextToStringValue(stringText: string) : string {
         if (currentChar == 'u') {
           mode = STRING_TEXT_MODE.UNICODE;
         } else {
-          stringValue += ESCAPE_SEQUENCE_TO_VALUE[currentChar] || currentChar;
+          const escapeSequence = ESCAPE_SEQUENCE_TO_VALUE[currentChar];
+          if (!escapeSequence) {
+            throw new Error(`Unexpected escape sequence \\${currentChar} `)
+          }
+          stringValue += ESCAPE_SEQUENCE_TO_VALUE[currentChar];
           mode = STRING_TEXT_MODE.TEXT;
         }
         break;
       }
       case STRING_TEXT_MODE.UNICODE: {
-        const hex = parseInt(stringText.substr(i, 4), 16);
+        const hex = parseInt(stringText.substring(i, i + 4), 16);
         i += 3;
         stringValue += String.fromCodePoint(hex);
         mode = STRING_TEXT_MODE.TEXT;
@@ -131,15 +152,22 @@ function stringTextToStringValue(stringText: string) : string {
       }
     }
   }
+  if (mode == STRING_TEXT_MODE.ESCAPE || mode == STRING_TEXT_MODE.UNICODE) {
+    throw new Error(`Dangling backslash.`);
+  }
   return stringValue;
 }
 
 
 export {stringTextToStringValue};
 
+export type ParserConfig =  {
+  doubleEscape: boolean
+}
+
 
 // Generate antlr classes with npm run antrl4
-export default function parseArray(text: string): unknown[] {
+export default function parseArray(text: string, config: ParserConfig): unknown[] {
   const inputStream = CharStreams.fromString(text);
   const lexer = new JSONLexer(inputStream);
   lexer.removeErrorListeners();
@@ -157,6 +185,6 @@ export default function parseArray(text: string): unknown[] {
   if (errors.length > 0) {
     throw errors[0];
   }
-  const visitor = new JsonVisitor();
+  const visitor = new JsonVisitor(config);
   return visitor.visitJson(jsonContext);
 }

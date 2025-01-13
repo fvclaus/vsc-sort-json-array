@@ -6,7 +6,7 @@ import TextEditor = vscode.TextEditor;
 import {sortCustom} from './sortCustom';
 import {sortAscending, sortDescending} from './sortOrder';
 import {searchEnclosingArray} from './searchEnclosingArray';
-import parseArray from './parseArray';
+import processAndParseArray from './processAndParseArray';
 import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
 
@@ -47,7 +47,7 @@ function sort(
         }
 
         const text = document.getText(selection);
-        const parsedArray = parseArray(text, fileExtension);
+        const parsedArray = processAndParseArray(text, fileExtension);
 
         const sortedArray = await sortFn(window, workspace, parsedArray);
         if (sortedArray == null) {
