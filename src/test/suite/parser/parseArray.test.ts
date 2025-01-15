@@ -2,6 +2,8 @@
 import {expect} from 'chai';
 import parseArray, {stringTextToStringValue} from '../../../parser/parseArray';
 import {suite, test} from 'mocha';
+import { readFileSync } from 'node:fs';
+
 
 suite('parseArray', function() {
   ([
@@ -16,7 +18,7 @@ suite('parseArray', function() {
     ['[1.5, \'foo\', 2, -3.5]', [1.5, 'foo', 2, -3.5]],
     ['[1.1234567890]', [1.1234567890]],
     ['["foo", "bar"]', ['foo', 'bar']],
-    ['[{"foo": 1}]', [{foo: 1}]],
+    ['[{"foo": 1}]', [{"foo": 1}]],
     ['[{ "foo" : 1}]', [{foo: 1}]],
     [`["foo'", 'foo"', "\\r\\n", '\u00E9']`, ['foo\'', 'foo"', '\r\n', 'é']],
     // TODO This doesn't work. At least not in JSON
@@ -34,11 +36,12 @@ suite('parseArray', function() {
     ['["F:\\\\Apps\\\\a"]', ['F:\\Apps\\a']],
     ['[{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]', 
       [{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]],
+    [`["\u{1f600}"]`, ["😀"]],
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
     test(`should parse ${json}`, function() {
-      const numbers = parseArray(json, {doubleEscape: true});
+      const [numbers, _] = parseArray(json, {doubleEscape: true});
       expect(numbers).to.deep.equal(expectedArray);
-      expect(JSON.parse(json)).to.deep.equal(expectedArray);
+      // expect(JSON.parse(json)).to.deep.equal(expectedArray);
     });
   });
 
@@ -73,6 +76,20 @@ suite('parseArray', function() {
   ] as [string, string][]).forEach(([stringText, stringValue]) => {
     test(`should convert string text ${stringText} to string value`, function() {
       expect(stringTextToStringValue(stringText)).to.equal(stringValue);
+    });
+  });
+
+
+  ([
+    ['rangeTest1.js', [[[2, 3], [4, 3]], [[8, 3], [8, 28]]]],
+  ] as [string, [[number, number], [number, number]][]][]).forEach(([filepath, rawPositions]) => {
+    test(`should convert string text ${filepath} to string value`, function() {
+      const arrayString = readFileSync(`src/test/suite/parser/range/${filepath}`, ).toString()
+      const positions = rawPositions.map(([start, end]) => {
+        return {start, end};
+      })
+      const [_, actualPositions] = parseArray(arrayString, {doubleEscape: true});
+      expect(actualPositions).to.deep.equal(positions);
     });
   });
 

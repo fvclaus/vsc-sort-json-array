@@ -47,15 +47,22 @@ function sort(
         }
 
         const text = document.getText(selection);
-        const parsedArray = processAndParseArray(text, fileExtension);
+        const [parsedArray, positions] = processAndParseArray(text, fileExtension);
+        const indexSymbol = Symbol("index");
 
-        const sortedArray = await sortFn(window, workspace, parsedArray);
+        const sortedArray = await sortFn(window, workspace, parsedArray.map((el, i) => {
+          if (typeof el === 'object') {
+            return {[indexSymbol]: i, ...el}
+          } else {
+            return el;
+          }
+        }));
         if (sortedArray == null) {
           // User aborted somewhere
           return;
         }
         const workspaceEdit = new vscode.WorkspaceEdit();
-        const serializedArray = serializeArray(sortedArray, fileExtension,
+        const serializedArray = serializeArray(sortedArray, fileExtension, text, positions, indexSymbol,
                         typeof editor.options.tabSize === 'number' ? editor.options.tabSize : undefined);
         workspaceEdit.replace(editor.document.uri, selection, serializedArray);
         const success = await workspace.applyEdit(workspaceEdit);

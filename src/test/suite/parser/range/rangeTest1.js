@@ -1,0 +1,9 @@
+[
+  {
+   myEmptyObject: false
+  }, 
+  
+  
+  
+  {anotherEmptyObject: true}
+]

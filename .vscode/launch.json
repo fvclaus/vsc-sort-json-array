@@ -9,7 +9,7 @@
           "name": "Debug ANTLR4 grammar",
           "type": "antlr-debug",
           "request": "launch",
-          "input": "input.txt",
+          "input": "antlr_debug_input.txt",
           "grammar": "src/parser/JSON.g4",
           "printParseTree": true,
           "visualParseTree": true
@@ -25,7 +25,8 @@
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
-            "preLaunchTask": "npm-watch"
+            // TODO npm watch doesn't work
+            "preLaunchTask": "npm-compile"
         },
         {
             "name": "Extension Tests (vsc)",
@@ -44,7 +45,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
-            "preLaunchTask": "npm-watch"
+            "preLaunchTask": "npm-compile"
         },
         {
             "type": "node",

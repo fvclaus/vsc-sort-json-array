@@ -12,7 +12,7 @@ suite('parseArray', function() {
     ['\n{"id":1}\n{"id":2}\n', FileExtension.JSONL, [{id: 1}, {id: 2}]],
   ] as [string, FileExtension, unknown[]][]).forEach(([json, fileExtension, expectedArray]) => {
     test(`should parse valid json ${json}`, function() {
-      const array = processAndParseArray(json, fileExtension);
+      const [array, _] = processAndParseArray(json, fileExtension);
       expect(array).to.deep.equal(expectedArray);
     });
   });
