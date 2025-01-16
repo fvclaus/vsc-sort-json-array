@@ -18,7 +18,7 @@
 		},
     // "mochaExplorer.files": "out/test/suite/parser/**/*.js",
     // "mochaExplorer.require": "source-map-support/register",
-    // "mochaExplorer.watch": "out/test/suite/parser/**/*.js"
-    "mochaExplorer.files": "src/test/**/parseArray.test.ts",
+    // "mochaExplorer.watch": "out/test/suite/parser/**/*.js",
+    "mochaExplorer.files": "src/test/**/{parseArray,findRange}.test.ts",
     "mochaExplorer.require": "ts-node/register"
 }
