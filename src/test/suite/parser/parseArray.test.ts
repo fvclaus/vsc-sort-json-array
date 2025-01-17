@@ -1,8 +1,9 @@
 
 import {expect} from 'chai';
-import parseArray, {stringTextToStringValue} from '../../../parser/parseArray';
+import parseArray, {Range, stringTextToStringValue} from '../../../parser/parseArray';
 import {suite, test} from 'mocha';
 import { readFileSync } from 'node:fs';
+import { undent } from '../undent';
 
 
 suite('parseArray', function() {
@@ -39,7 +40,7 @@ suite('parseArray', function() {
     [`["\u{1f600}"]`, ["😀"]],
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
     test(`should parse ${json}`, function() {
-      const [numbers, _] = parseArray(json, {doubleEscape: true});
+      const [numbers,] = parseArray(json, {doubleEscape: true});
       expect(numbers).to.deep.equal(expectedArray);
       // expect(JSON.parse(json)).to.deep.equal(expectedArray);
     });
@@ -79,19 +80,40 @@ suite('parseArray', function() {
     });
   });
 
-
-  ([
-    ['rangeTest1.js', [[[2, 3], [4, 3]], [[8, 3], [8, 28]]]],
-  ] as [string, [[number, number], [number, number]][]][]).forEach(([filepath, rawPositions]) => {
-    test(`should convert string text ${filepath} to string value`, function() {
-      const arrayString = readFileSync(`src/test/suite/parser/range/${filepath}`, ).toString()
-      const positions = rawPositions.map(([start, end]) => {
-        return {start, end};
-      })
-      const [_, actualPositions] = parseArray(arrayString, {doubleEscape: true});
-      expect(actualPositions).to.deep.equal(positions);
-    });
+  test(`should find correct ranges for multiline object`, function() {
+    const array = undent`
+    [
+      {
+          myEmptyObject: false
+      }
+    ]
+    `;
+    const [, actualPositions] = parseArray(array, {doubleEscape: true});
+    expect(actualPositions).to.deep.equal([new Range([2, 3], [4, 3])]);
   });
+
+  test(`should find correct ranges for string`, function() {
+    const array = undent`
+    [
+     "a"
+    ]
+    `;
+    const [, actualPositions] = parseArray(array, {doubleEscape: true});
+    expect(actualPositions).to.deep.equal([new Range([2, 2], [2, 4])]);
+  });
+
+  test(`should find correct ranges for number`, function() {
+    const array = undent`
+    [
+
+  1
+    ]
+    `;
+    const [, actualPositions] = parseArray(array, {doubleEscape: true});
+    expect(actualPositions).to.deep.equal([new Range([3, 1], [3, 1])]);
+  });
+
+
 
   // TODO Test positions with dangling commas
 });

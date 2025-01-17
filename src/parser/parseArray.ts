@@ -7,10 +7,39 @@ import {JSONLexer} from './generated/JSONLexer';
 import {ATNSimulator} from 'antlr4ts/atn/ATNSimulator';
 
 
-// TODO Type leaks through whole codebase
-export type Range = {
-  start: [number, number];
-  end: [number, number];
+export class Range {
+
+  private _start: [number, number];
+  private _end: [number, number];
+
+  constructor([startLine, startColumn]: readonly [number ,number], [endLine, endColumn]: readonly [number, number]) {
+    if ([startLine, startColumn, endLine, endColumn].includes(0)) {
+      throw new Error(`Index is 1-based`);
+    }
+    if (startLine > endLine) {
+      throw new Error(`startLine ${startLine} must not be larger than endLine ${endLine}`);
+    }
+    if (startLine === endLine && startColumn > endColumn ) {
+      throw new Error(`startColumn ${startColumn} must not be larger than endColumn ${endColumn}`);
+    }
+    this._start = [startLine, startColumn];
+    this._end = [endLine, endColumn];
+    
+  }
+  
+  /**
+   * @returns 1-based index for line and column
+   */
+  public get start(): [number, number] {
+    return this._start;
+  }
+
+  /**
+   * @returns 1-based index for line and column
+   */
+  public get end(): [number, number] {
+    return this._end;
+  }
 }
 
 type Pair = [string, unknown];
@@ -45,12 +74,17 @@ class JsonVisitor {
     const positions: Range[] = [];
     for (const value of values) {
       array.push(this.visitValue(value));
-      positions.push({start: [value.start.line, value.start.charPositionInLine + 1],
-        // TODO
-        end: [value.stop!.line, value.stop!.charPositionInLine + 1 + 
-          (value.stop!.line === value.start.line &&
-            value.stop!.charPositionInLine === value.start.charPositionInLine ? (value.text.length - 1) : 0)]}
-      );
+      const startToken = value.start;
+      const stopToken = value.stop;
+      if (stopToken === undefined) {
+        throw new Error(`Unexpected zero length value: ${value.text}`)
+      }
+      const start = [startToken.line, startToken.charPositionInLine + 1] as const;
+      const isStartAndEndTokenIdentical = stopToken.line === startToken.line &&
+        stopToken.charPositionInLine === startToken.charPositionInLine;
+      const end = [stopToken.line, stopToken.charPositionInLine + 1 +
+        (isStartAndEndTokenIdentical ? (value.text.length - 1) : 0)] as const;
+      positions.push(new Range(start, end));
     }
 
     return [array, positions];
