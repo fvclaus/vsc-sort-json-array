@@ -9,10 +9,11 @@ import {searchEnclosingArray} from './searchEnclosingArray';
 import processAndParseArray from './processAndParseArray';
 import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
+import { addIndex, WithIndexArray } from './indexArray';
 
 // Return value was implemented to improve testability.
 function sort(
-    sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: unknown[]) => Promise<unknown[] | undefined>):
+    sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: WithIndexArray) => Promise<WithIndexArray | undefined>):
     () => Promise<unknown[] | undefined> {
   return async function() {
     const fail = (error: string | Error | string[]): undefined => {
@@ -48,28 +49,21 @@ function sort(
 
         const text = document.getText(selection);
         const [parsedArray, positions] = processAndParseArray(text, fileExtension);
-        const indexSymbol = Symbol("index");
+        
 
-        const sortedArray = await sortFn(window, workspace, parsedArray.map((el, i) => {
-          if (typeof el === 'object') {
-            return {[indexSymbol]: i, ...el}
-          } else {
-            return el;
-          }
-        }));
-        if (sortedArray == null) {
+        const sortedArray  = await sortFn(window, workspace, addIndex(parsedArray));
+        if (sortedArray === undefined) {
           // User aborted somewhere
           return;
         }
         const workspaceEdit = new vscode.WorkspaceEdit();
-        const serializedArray = serializeArray(sortedArray, fileExtension, text, positions, indexSymbol,
-                        typeof editor.options.tabSize === 'number' ? editor.options.tabSize : undefined);
+        const serializedArray = serializeArray(sortedArray, fileExtension, text, positions);
         workspaceEdit.replace(editor.document.uri, selection, serializedArray);
         const success = await workspace.applyEdit(workspaceEdit);
         if (success) {
           // Restore cursor position
           editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
-          window.showInformationMessage('Sucessfully sorted array!');
+          window.showInformationMessage('Successfully sorted array!');
           return sortedArray;
         } else {
           return fail('Could not apply workspace edit');

@@ -2,7 +2,6 @@
 import {expect} from 'chai';
 import parseArray, {Range, stringTextToStringValue} from '../../../parser/parseArray';
 import {suite, test} from 'mocha';
-import { readFileSync } from 'node:fs';
 import { undent } from '../undent';
 
 
@@ -12,8 +11,7 @@ suite('parseArray', function() {
     ['[{ }]', [{}]],
     ['[]', []],
     ['[ \t\n\r]', []],
-    ['[""]', ['']],
-    ['["\\\\ \\b \\f \\n \\r \\t"]', ['\\ \b \f \n \r \t']],
+    ['[""]', [String('')]],
     ['[null, undefined]', [null, undefined]],
     ['[1, 2, 3]', [1, 2, 3]],
     ['[1.5, \'foo\', 2, -3.5]', [1.5, 'foo', 2, -3.5]],
@@ -40,8 +38,15 @@ suite('parseArray', function() {
     [`["\u{1f600}"]`, ["😀"]],
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
     test(`should parse ${json}`, function() {
-      const [numbers,] = parseArray(json, {doubleEscape: true});
-      expect(numbers).to.deep.equal(expectedArray);
+      const [actualArray,] = parseArray(json, {doubleEscape: true});
+      const convertedArray = actualArray.map(el => {
+        if (el instanceof String) {
+          // Can't use === on String() objects
+          return el.valueOf();
+        }
+        return el;
+      })
+      expect(convertedArray).to.deep.equal(expectedArray);
       // expect(JSON.parse(json)).to.deep.equal(expectedArray);
     });
   });

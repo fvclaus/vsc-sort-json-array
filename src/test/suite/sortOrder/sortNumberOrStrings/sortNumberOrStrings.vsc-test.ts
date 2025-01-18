@@ -27,6 +27,10 @@ suite('Sort number or strings', function() {
     })
   });
 
+  test('should preserve escaped control characters', async function() {
+    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending' ,`["\\\\ \\b \\f \\n \\r \\t"]`, `["\\\\ \\b \\f \\n \\r \\t"]`);
+  });
+
   test('should sort numbers', async function() {
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', [100, 1, 99], [1, 99, 100]);
   });

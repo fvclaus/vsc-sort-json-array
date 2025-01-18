@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import {GenericObject} from './sortObjects/GenericObject';
 import {genericSortFn} from './sortNumberOrStrings/genericSortFn';
 import {stringSortFn} from './sortNumberOrStrings/stringSortFn';
+import { WithIndexArray } from '../indexArray';
 
 
 type CollationLocale = string[];
@@ -40,7 +41,7 @@ export interface SortConfiguration {
   collator: Intl.Collator
 }
 
-async function sortArray(window: typeof vscode.window, array: unknown[], sortOrder: SortOrder): Promise<unknown[] | undefined> {
+async function sortArray(window: typeof vscode.window, array: WithIndexArray, sortOrder: SortOrder): Promise<WithIndexArray | undefined> {
   const arrayType = determineArrayType(array);
   const extensionConfiguration = getExtensionConfiguration();
   const sortConfiguration: SortConfiguration = {
@@ -51,20 +52,22 @@ async function sortArray(window: typeof vscode.window, array: unknown[], sortOrd
   };
   switch (arrayType) {
     case ArrayType.object:
-      return sortObjects(window, array as GenericObject[], sortConfiguration);
+      return sortObjects(window, array as GenericObject[], sortConfiguration) as Promise<WithIndexArray>;
     case ArrayType.number:
       return array.sort(genericSortFn(sortConfiguration));
     case ArrayType.string:
-      return (array as string[]).sort(stringSortFn(sortConfiguration));
+      // TODO Fix typing here
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
+      return (array as String[]).sort(stringSortFn(sortConfiguration)) as WithIndexArray;
     default:
       throw new Error(`This array is not yet supported.`);
   }
 }
 
-export function sortAscending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: unknown[]): Promise<unknown[] | undefined> {
+export function sortAscending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: WithIndexArray): Promise<WithIndexArray | undefined> {
   return sortArray(window, array, SortOrder.ascending);
 }
 
-export function sortDescending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: unknown[]): Promise<unknown[] | undefined> {
+export function sortDescending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: WithIndexArray): Promise<WithIndexArray | undefined> {
   return sortArray(window, array, SortOrder.descending);
 }
