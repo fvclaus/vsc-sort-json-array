@@ -5,6 +5,7 @@ import {openNewJsonDocument} from './textEditorUtils';
 import nextTick from './nextTick';
 
 export async function triggerSortCommandExpectSuccess(
+    // TODO type string
     command: string,
     array: unknown[] | string,
     expectedArray: unknown[] | string,

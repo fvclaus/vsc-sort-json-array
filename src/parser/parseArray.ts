@@ -44,15 +44,44 @@ export class Range {
 
 type Pair = [string, unknown];
 
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type SupportedArrayValueType = (object | String | Number | boolean |  null | undefined)
+
 class JsonVisitor {
   constructor(private config: ParserConfig) {
 
   }
-  visitJson(ctx: JsonContext): [unknown[], Range[]] {
+  visitJson(ctx: JsonContext): [SupportedArrayValueType[], Range[]] {
     const arrContext = ctx.arr();
-    return this.visitArr(arrContext);
+    const array: SupportedArrayValueType[] = []
+    const valueContexts = arrContext.value();
+    const positions: Range[] = [];
+    for (const valueContext of valueContexts) {
+      const value = this.visitValue(valueContext);
+      if (typeof value === 'string') {
+        // Convert root value strings to Strings so that a [index] property can be attached
+        array.push(new String(value));
+      } else if (typeof value === 'number') {
+        array.push(new Number(value));
+      } else {
+        array.push(value);
+      }
+      const startToken = valueContext.start;
+      const stopToken = valueContext.stop;
+      if (stopToken === undefined) {
+        throw new Error(`Unexpected zero length value: ${valueContext.text}`)
+      }
+      const start = [startToken.line, startToken.charPositionInLine + 1] as const;
+      const isStartAndEndTokenIdentical = stopToken.line === startToken.line &&
+        stopToken.charPositionInLine === startToken.charPositionInLine;
+      const end = [stopToken.line, stopToken.charPositionInLine + 1 +
+        (isStartAndEndTokenIdentical ? (valueContext.text.length - 1) : 0)] as const;
+      positions.push(new Range(start, end));
+    }
+
+    return [array, positions];
   }
-  visitObj(ctx: ObjContext): unknown {
+  visitObj(ctx: ObjContext): object {
     return ctx.pair()
         .map((pair) => this.visitPair(pair))
         .reduce((obj, pair) => {
@@ -67,29 +96,16 @@ class JsonVisitor {
     // TODO String handling
     return [this.evalTerminalNode(ctx.children[0] as TerminalNode).toString(), this.visitValue(ctx.value())];
   }
-  visitArr(ctx: ArrContext): [unknown[], Range[]] {
+  visitArr(ctx: ArrContext): unknown[] {
     const values = ctx.value();
 
     const array:unknown[] = []
-    const positions: Range[] = [];
     for (const value of values) {
       array.push(this.visitValue(value));
-      const startToken = value.start;
-      const stopToken = value.stop;
-      if (stopToken === undefined) {
-        throw new Error(`Unexpected zero length value: ${value.text}`)
-      }
-      const start = [startToken.line, startToken.charPositionInLine + 1] as const;
-      const isStartAndEndTokenIdentical = stopToken.line === startToken.line &&
-        stopToken.charPositionInLine === startToken.charPositionInLine;
-      const end = [stopToken.line, stopToken.charPositionInLine + 1 +
-        (isStartAndEndTokenIdentical ? (value.text.length - 1) : 0)] as const;
-      positions.push(new Range(start, end));
     }
-
-    return [array, positions];
+    return array;
   }
-  visitValue(ctx: ValueContext): unknown {
+  visitValue(ctx: ValueContext): object | string | number | null | undefined | boolean {
     if (ctx.children == null || ctx.children.length !== 1) {
       throw new Error('Expecting exactly one child');
     }
@@ -114,7 +130,6 @@ class JsonVisitor {
           return undefined;
       }
     } else if (child instanceof ObjContext) {
-      child.start
       return this.visitObj(child);
     } else if (child instanceof ArrContext) {
       return this.visitArr(child);
@@ -136,85 +151,14 @@ class JsonVisitor {
     }
   }
 
-  // TODO We only need String for strings in top level array
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  makeString(ctx: TerminalNode): String {
+  makeString(ctx: TerminalNode): string {
     // Remove quotes.
     const stringText = ctx.text.slice(1, ctx.toString().length - 1);
-    // This is about 10x slower than eval() when converting unicode characters.
-    // It is about 2x slower when converting ASCII.
-    // I have to decided to keep it, because it aligns better with the grammar.
-    // return stringTextToStringValue(stringText);
-    return new String(stringText);
+    return stringText;
   }
 }
 
-const ESCAPE_SEQUENCE_TO_VALUE: {[key in string]: string} = {
-  '0': '\0',
-  '"': '"',
-  "'": "'",
-  "\\": "\\",
-  'r': '\r',
-  'n': '\n',
-  'v': '\v',
-  't': '\t',
-  'b': '\b',
-  'f': '\f',
-};
 
-export enum STRING_TEXT_MODE {
-  TEXT,
-  ESCAPE,
-  UNICODE
-}
-
-function stringTextToStringValue(stringText: string) : string {
-  let mode : STRING_TEXT_MODE = STRING_TEXT_MODE.TEXT;
-  let stringValue = '';
-  for (let i = 0; i < stringText.length; i++) {
-    const currentChar = stringText[i];
-    switch (mode) {
-      case STRING_TEXT_MODE.TEXT: {
-        if (currentChar == '\\') {
-          mode = STRING_TEXT_MODE.ESCAPE;
-        } else {
-          stringValue += currentChar;
-        }
-        break;
-      }
-      case STRING_TEXT_MODE.ESCAPE: {
-        if (currentChar == 'u') {
-          mode = STRING_TEXT_MODE.UNICODE;
-        } else {
-          const escapeSequence = ESCAPE_SEQUENCE_TO_VALUE[currentChar];
-          if (!escapeSequence) {
-            throw new Error(`Unexpected escape sequence \\${currentChar} `)
-          }
-          stringValue += ESCAPE_SEQUENCE_TO_VALUE[currentChar];
-          mode = STRING_TEXT_MODE.TEXT;
-        }
-        break;
-      }
-      case STRING_TEXT_MODE.UNICODE: {
-        const hex = parseInt(stringText.substring(i, i + 4), 16);
-        i += 3;
-        stringValue += String.fromCodePoint(hex);
-        mode = STRING_TEXT_MODE.TEXT;
-        break;
-      }
-      default: {
-        throw new Error(`Unknown mode ${mode}`);
-      }
-    }
-  }
-  if (mode == STRING_TEXT_MODE.ESCAPE || mode == STRING_TEXT_MODE.UNICODE) {
-    throw new Error(`Dangling backslash.`);
-  }
-  return stringValue;
-}
-
-
-export {stringTextToStringValue};
 
 export type ParserConfig =  {
   doubleEscape: boolean
@@ -222,7 +166,7 @@ export type ParserConfig =  {
 
 
 // Generate antlr classes with npm run antrl4
-export default function parseArray(text: string, config: ParserConfig): [unknown[], Range[]] {
+export default function parseArray(text: string, config: ParserConfig): [SupportedArrayValueType[], Range[]] {
   const inputStream = CharStreams.fromString(text);
   const lexer = new JSONLexer(inputStream);
   lexer.removeErrorListeners();

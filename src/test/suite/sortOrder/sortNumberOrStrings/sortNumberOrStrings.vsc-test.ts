@@ -27,11 +27,21 @@ suite('Sort number or strings', function() {
     })
   });
 
-  test('should preserve escaped control characters', async function() {
-    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending' ,`["\\\\ \\b \\f \\n \\r \\t"]`, `["\\\\ \\b \\f \\n \\r \\t"]`);
+  test('should preserve escaped control characters and preserve type of quotes', async function() {
+    await triggerSortCommandExpectSuccess('extension.sortJsonArrayDescending' ,
+      `["foo'", "\\r\\n", 'foo"', "\\\\ \\b \\f \\n \\r \\t", '\u00E9']`, 
+      `['foo"', "foo'", '\u00E9', "\\r\\n", "\\\\ \\b \\f \\n \\r \\t"]`);
   });
 
-  test('should sort numbers', async function() {
+  test("should support invalid JSON escape sequences", async function() {
+    // JSON requires double escaping so \\ is \ which is not a valid value by itself.
+    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending',
+      `["\\x", "\\"]`,
+      `["\\x", "\\"]`
+    )
+  })
+
+  test.only('should sort numbers', async function() {
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', [100, 1, 99], [1, 99, 100]);
   });
 

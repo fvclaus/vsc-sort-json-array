@@ -12,10 +12,10 @@ function determineType(item: unknown | undefined): ArrayType | undefined {
 
   if (item instanceof String || itemType === 'string') {
     return ArrayType.string;
+  } else if (item instanceof Number || itemType === 'number') {
+    return ArrayType.number;
   } else if (itemType === 'object') {
     return ArrayType.object;
-  } else if (itemType === 'number') {
-    return ArrayType.number;
   } else {
     return undefined; 
   }

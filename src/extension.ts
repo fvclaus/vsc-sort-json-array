@@ -11,6 +11,26 @@ import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
 import { addIndex, WithIndexArray } from './indexArray';
 
+
+function determineIndent(editor: vscode.TextEditor, selection: vscode.Range): {indentLevel: number, newIndent: string } {
+  const options = editor.options;
+  
+  const startingLine = editor.document.lineAt(selection.start.line);
+  const match = /^(\s)*/.exec(startingLine.text);
+  let indentLevel = 0;
+  if (match !== null) {
+    const tabIdent = match[0].replace(/[^\t][^\t]/g, "\t");
+    indentLevel = tabIdent.length;
+  }
+
+  const indentType = options.insertSpaces === false? '\t' : ' ';
+  if (indentType === '\t') {
+    return {indentLevel, newIndent: indentType};
+  } else {
+    return {indentLevel, newIndent: indentType.repeat(typeof options.tabSize == 'number'? options.tabSize : 2)};
+  }
+}
+
 // Return value was implemented to improve testability.
 function sort(
     sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: WithIndexArray) => Promise<WithIndexArray | undefined>):
@@ -57,7 +77,8 @@ function sort(
           return;
         }
         const workspaceEdit = new vscode.WorkspaceEdit();
-        const serializedArray = serializeArray(sortedArray, fileExtension, text, positions);
+        const serializedArray = serializeArray(sortedArray, fileExtension, text, positions, 
+            determineIndent(editor, selection));
         workspaceEdit.replace(editor.document.uri, selection, serializedArray);
         const success = await workspace.applyEdit(workspaceEdit);
         if (success) {

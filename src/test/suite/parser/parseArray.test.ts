@@ -1,6 +1,6 @@
 
 import {expect} from 'chai';
-import parseArray, {Range, stringTextToStringValue} from '../../../parser/parseArray';
+import parseArray, {Range} from '../../../parser/parseArray';
 import {suite, test} from 'mocha';
 import { undent } from '../undent';
 
@@ -19,7 +19,6 @@ suite('parseArray', function() {
     ['["foo", "bar"]', ['foo', 'bar']],
     ['[{"foo": 1}]', [{"foo": 1}]],
     ['[{ "foo" : 1}]', [{foo: 1}]],
-    [`["foo'", 'foo"', "\\r\\n", '\u00E9']`, ['foo\'', 'foo"', '\r\n', 'é']],
     // TODO This doesn't work. At least not in JSON
     // String handling in JS and JSON is different. JSON needs double escapes, JS doesn't
     // [`["\r", "\\r", "\\\r", "\\\\r"]`, ["\r", "\\r", "\\\r", "\\\\r"]],
@@ -52,8 +51,6 @@ suite('parseArray', function() {
   });
 
   ([
-    ['["\\x"]'],
-    ['["\\"]'],
     ['[-]'],
     ['[01]'],
     ['[-1.]'],
@@ -71,17 +68,6 @@ suite('parseArray', function() {
   ] as [string][]).forEach(([json]) => {
     test(`should not parse ${json}`, function() {
       expect(() => parseArray(json, {doubleEscape: true})).to.throw();
-    });
-  });
-
-  ([
-    ['nothingSpecial', 'nothingSpecial'],
-    ['\\b\\f\\\\\n\\r\\t\'', '\b\f\\\n\r\t\''],
-    ['a\u0300: a with grave accent', 'à: a with grave accent'],
-    ['\\uD83D\\uDE00', '😀'],
-  ] as [string, string][]).forEach(([stringText, stringValue]) => {
-    test(`should convert string text ${stringText} to string value`, function() {
-      expect(stringTextToStringValue(stringText)).to.equal(stringValue);
     });
   });
 

@@ -1,5 +1,5 @@
 import {FileExtension} from './fileExtension';
-import {default as parseJsonArray, ParserConfig, Range} from './parser/parseArray';
+import {default as parseJsonArray, ParserConfig, Range, SupportedArrayValueType} from './parser/parseArray';
 
 function applyPreFilter(array: string, fileExtension: FileExtension): string {
   switch (fileExtension) {
@@ -22,7 +22,7 @@ const fileExtensionToParserConfig: {[Key in FileExtension]: ParserConfig} =  {
   [FileExtension.OTHER]: {doubleEscape: false}
 }
 
-export default function processAndParseArray(array: string, fileExtension: FileExtension) : [unknown[], Range[]] {
+export default function processAndParseArray(array: string, fileExtension: FileExtension) : [SupportedArrayValueType[], Range[]] {
   try {
     return parseJsonArray(applyPreFilter(array, fileExtension), fileExtensionToParserConfig[fileExtension]);
   } catch (e) {

@@ -29,4 +29,8 @@ export class RangeFinder {
         }
         return text.join("\n");
     }
+
+    get numberOfLines(): number {
+      return this.lines.length;
+    }
 }

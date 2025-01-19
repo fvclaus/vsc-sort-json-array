@@ -29,7 +29,6 @@ CLOSING_CURLIES: '}';
 OPENING_CURLIES: '{';
 
 pair
- // TODO Should support NUMBER as well
    : (IDENTIFIER | STRING) COLON value
    ;
 

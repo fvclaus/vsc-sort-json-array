@@ -1,12 +1,16 @@
+import { SupportedArrayValueType } from "./parser/parseArray";
+
 export const indexSymbol = Symbol("index");
 
 
-export type WithIndex = (object | string) & {[indexSymbol]: number};
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type WithIndex = (object | String) & {[indexSymbol]: number};
 
 
-export type WithIndexArray = (WithIndex | number | null | undefined | boolean)[];
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type WithIndexArray = (WithIndex | Exclude<SupportedArrayValueType, object | String | Number>)[];
 
-export function addIndex (array: unknown[]): WithIndexArray {
+export function addIndex (array: SupportedArrayValueType[]): WithIndexArray {
 
   return array.map((el, i) => {
     if (el !== null && typeof el === 'object') {
