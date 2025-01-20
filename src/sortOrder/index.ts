@@ -9,11 +9,11 @@ import { WithIndexArray } from '../indexArray';
 
 
 type CollationLocale = string[];
-type CollactionCaseFirst = 'upper' | 'lower' | 'false'
+type CollationCaseFirst = 'upper' | 'lower' | 'false'
 export interface ExtensionConfiguration {
   collation: {
     ignorePunctuation: boolean,
-    caseFirst: CollactionCaseFirst
+    caseFirst: CollationCaseFirst
     numeric: boolean,
     locales: CollationLocale
   }
@@ -29,7 +29,7 @@ function getExtensionConfiguration() : ExtensionConfiguration {
   return {
     collation: {
       ignorePunctuation: config.get('ignorePunctuation') as boolean,
-      caseFirst: config.get('caseFirst') as CollactionCaseFirst,
+      caseFirst: config.get('caseFirst') as CollationCaseFirst,
       numeric: config.get('numeric') as boolean,
       locales: config.get('locales') as CollationLocale,
     },

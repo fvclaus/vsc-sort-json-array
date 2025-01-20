@@ -31,9 +31,9 @@ async function pickUntilSortIsDeterministic(
   if (selectedItem != null) {
     const selectedProperty = selectedItem.label;
     selectedProperties.push(selectedProperty);
-    const sortIsDeterminstic = sortObjectArray(arrayToSort, selectedProperties, sortConfiguration);
+    const sortIsDeterministic = sortObjectArray(arrayToSort, selectedProperties, sortConfiguration);
     // The sort is deterministic or the array cannot be sorted in a determinable way.
-    if (sortIsDeterminstic || selectedProperties.length === quickPickItems.length) {
+    if (sortIsDeterministic || selectedProperties.length === quickPickItems.length) {
       return arrayToSort;
     } else {
       return await pickUntilSortIsDeterministic(window, selectedProperties, quickPickItems, arrayToSort, sortConfiguration);

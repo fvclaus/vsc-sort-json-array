@@ -1,19 +1,21 @@
 import processAndParseArray from '../../processAndParseArray';
 import chai = require('chai');
 import {FileExtension} from '../../fileExtension';
+import { convertToLiteralValues } from '../../parser/parseArray';
+import {suite, test} from 'mocha';
 
 const expect = chai.expect;
 
-// TODO Rename. 2 files are named parseArray.
-suite('parseArray', function() {
+suite('processAndParseArray', function() {
   ([
     ['[1, 2, 3]', FileExtension.JSON, [1, 2, 3]],
     ['[{"id":1}, {"id":2}]', FileExtension.JSON, [{id: 1}, {id: 2}]],
     ['\n{"id":1}\n{"id":2}\n', FileExtension.JSONL, [{id: 1}, {id: 2}]],
   ] as [string, FileExtension, unknown[]][]).forEach(([json, fileExtension, expectedArray]) => {
     test(`should parse valid json ${json}`, function() {
-      const [array, _] = processAndParseArray(json, fileExtension);
-      expect(array).to.deep.equal(expectedArray);
+      const [array,] = processAndParseArray(json, fileExtension);
+      const convertedArray = convertToLiteralValues(array);
+      expect(convertedArray).to.deep.equal(expectedArray);
     });
   });
 

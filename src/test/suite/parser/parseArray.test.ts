@@ -1,4 +1,3 @@
-
 import {expect} from 'chai';
 import parseArray, {convertToLiteralValues, Range} from '../../../parser/parseArray';
 import {suite, test} from 'mocha';
@@ -31,13 +30,12 @@ suite('parseArray', function() {
     ['[{\'foo\': 2}]', [{'foo': 2}]],
     ['[\'\u00e9\']', ['é']],
     ['[1e10, 1e-10, 1E10, 1E-10, -1e-10]', [1e10, 1e-10, 1e10, 1e-10, -1e-10]],
-    ['["F:\\\\Apps\\\\a"]', ['F:\\Apps\\a']],
     ['[{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]', 
       [{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]],
     [`["\u{1f600}"]`, ["😀"]],
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
     test(`should parse ${json}`, function() {
-      const [actualArray,] = parseArray(json, {doubleEscape: true});
+      const [actualArray,] = parseArray(json);
       const convertedArray = convertToLiteralValues(actualArray);
       expect(convertedArray).to.deep.equal(expectedArray);
       // expect(JSON.parse(json)).to.deep.equal(expectedArray);
@@ -61,7 +59,7 @@ suite('parseArray', function() {
     ['[[]'],
   ] as [string][]).forEach(([json]) => {
     test(`should not parse ${json}`, function() {
-      expect(() => parseArray(json, {doubleEscape: true})).to.throw();
+      expect(() => parseArray(json)).to.throw();
     });
   });
 
@@ -73,7 +71,7 @@ suite('parseArray', function() {
       }
     ]
     `;
-    const [, actualPositions] = parseArray(array, {doubleEscape: true});
+    const [, actualPositions] = parseArray(array);
     expect(actualPositions).to.deep.equal([new Range([2, 3], [4, 3])]);
   });
 
@@ -83,7 +81,7 @@ suite('parseArray', function() {
      "a"
     ]
     `;
-    const [, actualPositions] = parseArray(array, {doubleEscape: true});
+    const [, actualPositions] = parseArray(array);
     expect(actualPositions).to.deep.equal([new Range([2, 2], [2, 4])]);
   });
 
@@ -94,7 +92,7 @@ suite('parseArray', function() {
   1
     ]
     `;
-    const [, actualPositions] = parseArray(array, {doubleEscape: true});
+    const [, actualPositions] = parseArray(array);
     expect(actualPositions).to.deep.equal([new Range([3, 1], [3, 1])]);
   });
 

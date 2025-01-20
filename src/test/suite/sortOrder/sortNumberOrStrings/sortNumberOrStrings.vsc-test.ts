@@ -1,4 +1,4 @@
-import {triggerSortCommandExpectSuccess} from '../../triggerSortCommandExpectSucccess';
+import {triggerSortCommandExpectSuccess} from '../../triggerSortCommandExpectSuccess';
 
 import * as vscode from 'vscode';
 
@@ -29,8 +29,8 @@ suite('Sort number or strings', function() {
 
   test('should preserve escaped control characters and preserve type of quotes', async function() {
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayDescending' ,
-      `["foo'", "\\r\\n", 'foo"', "\\\\ \\b \\f \\n \\r \\t", '\u00E9']`, 
-      `['foo"', "foo'", '\u00E9', "\\r\\n", "\\\\ \\b \\f \\n \\r \\t"]`);
+      `["foo'", "\\r\\n", 'foo"', "\\\\ \\b \\f \\n \\r \\t", '\u00E9', 'F:\\\\Apps\\\\a', 'F:\\Apps\\a']`, 
+      `['foo"', "foo'", 'F:\\Apps\\a', 'F:\\\\Apps\\\\a', '\u00E9', "\\r\\n", "\\\\ \\b \\f \\n \\r \\t"]`);
   });
 
   test("should support invalid JSON escape sequences", async function() {

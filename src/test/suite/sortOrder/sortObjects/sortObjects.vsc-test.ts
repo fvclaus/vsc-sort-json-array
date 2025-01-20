@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import {ALL, JIMMY, JOHN_PAUL, JOHN, ROBERT} from './lz';
 
-import {triggerSortCommandExpectSuccess} from '../../triggerSortCommandExpectSucccess';
+import {triggerSortCommandExpectSuccess} from '../../triggerSortCommandExpectSuccess';
 
 import {afterEach} from 'mocha';
 

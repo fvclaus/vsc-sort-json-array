@@ -59,9 +59,7 @@ export function convertToLiteralValues(array: SupportedArrayValueType[]): (Exclu
 }
 
 class JsonVisitor {
-  constructor(private config: ParserConfig) {
 
-  }
   visitJson(ctx: JsonContext): [SupportedArrayValueType[], Range[]] {
     const arrContext = ctx.arr();
     const array: SupportedArrayValueType[] = []
@@ -171,13 +169,8 @@ class JsonVisitor {
 
 
 
-export type ParserConfig =  {
-  doubleEscape: boolean
-}
-
-
-// Generate antlr classes with npm run antrl4
-export default function parseArray(text: string, config: ParserConfig): [SupportedArrayValueType[], Range[]] {
+// Generate antlr classes with npm run antlr4
+export default function parseArray(text: string): [SupportedArrayValueType[], Range[]] {
   const inputStream = CharStreams.fromString(text);
   const lexer = new JSONLexer(inputStream);
   lexer.removeErrorListeners();
@@ -195,6 +188,6 @@ export default function parseArray(text: string, config: ParserConfig): [Support
   if (errors.length > 0) {
     throw errors[0];
   }
-  const visitor = new JsonVisitor(config);
+  const visitor = new JsonVisitor();
   return visitor.visitJson(jsonContext);
 }
