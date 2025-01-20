@@ -19,7 +19,6 @@ function determineSerializationFormat(numberOfLines: number): SerializationForma
   }
 }
   
-// TODO Too many parameters
 export default function serializeArray(array: WithIndexArray, fileExtension: FileExtension, text: string,
   positions: Range[], {indentLevel, newIndent}: {indentLevel: number, newIndent: string}): string {
     const rangeFinder = new RangeFinder(text);

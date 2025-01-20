@@ -29,7 +29,6 @@ export async function triggerSortCommandExpectSuccess(
   await nextTick();
   if (typeof expectedArray == 'string')  {
     expect(editor.document.getText()).to.deep.equal(expectedArray);
-    // TODO What about result comparison?
   } else {
     const actualArray = JSON.parse(editor.document.getText());
     expect(actualArray).to.deep.equal(expectedArray);

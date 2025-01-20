@@ -56,8 +56,7 @@ async function sortArray(window: typeof vscode.window, array: WithIndexArray, so
     case ArrayType.number:
       return array.sort(genericSortFn(sortConfiguration));
     case ArrayType.string:
-      // TODO Fix typing here
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
+      // eslint-disable-next-line @typescript-eslint/ban-types
       return (array as String[]).sort(stringSortFn(sortConfiguration)) as WithIndexArray;
     default:
       throw new Error(`This array is not yet supported.`);

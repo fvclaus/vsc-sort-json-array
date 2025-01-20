@@ -18,9 +18,6 @@ suite('parseArray', function() {
     ['["foo", "bar"]', ['foo', 'bar']],
     ['[{"foo": 1}]', [{"foo": 1}]],
     ['[{ "foo" : 1}]', [{foo: 1}]],
-    // TODO This doesn't work. At least not in JSON
-    // String handling in JS and JSON is different. JSON needs double escapes, JS doesn't
-    // [`["\r", "\\r", "\\\r", "\\\\r"]`, ["\r", "\\r", "\\\r", "\\\\r"]],
     ['[{"foo": [{"bar1": 1}, {"bar2": 2}]}]', [{foo: [{bar1: 1}, {bar2: 2}]}]],
     ['[true,                 false, null]', [true, false, null]],
     ['[{"foo": 1,}]', [{foo: 1}]],
@@ -29,6 +26,7 @@ suite('parseArray', function() {
     ['[]', []],
     ['[{\'foo\': 2}]', [{'foo': 2}]],
     ['[\'\u00e9\']', ['é']],
+    [`["myDanglingComma", ]`, [ "myDanglingComma" ]],
     ['[1e10, 1e-10, 1E10, 1E-10, -1e-10]', [1e10, 1e-10, 1e10, 1e-10, -1e-10]],
     ['[{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]', 
       [{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]],
@@ -38,7 +36,6 @@ suite('parseArray', function() {
       const [actualArray,] = parseArray(json);
       const convertedArray = convertToLiteralValues(actualArray);
       expect(convertedArray).to.deep.equal(expectedArray);
-      // expect(JSON.parse(json)).to.deep.equal(expectedArray);
     });
   });
 
@@ -96,7 +93,4 @@ suite('parseArray', function() {
     expect(actualPositions).to.deep.equal([new Range([3, 1], [3, 1])]);
   });
 
-
-
-  // TODO Test positions with dangling commas
 });
