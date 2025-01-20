@@ -47,6 +47,17 @@ type Pair = [string, unknown];
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type SupportedArrayValueType = (object | String | Number | boolean |  null | undefined)
 
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function convertToLiteralValues(array: SupportedArrayValueType[]): (Exclude<SupportedArrayValueType, String | Number> | (string | number))[]{
+  return array.map(el => {
+    if (el instanceof String || el instanceof Number) {
+      // Can't use === on String() objects
+      return el.valueOf();
+    }
+    return el;
+  })
+}
+
 class JsonVisitor {
   constructor(private config: ParserConfig) {
 

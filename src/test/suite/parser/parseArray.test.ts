@@ -1,6 +1,6 @@
 
 import {expect} from 'chai';
-import parseArray, {Range} from '../../../parser/parseArray';
+import parseArray, {convertToLiteralValues, Range} from '../../../parser/parseArray';
 import {suite, test} from 'mocha';
 import { undent } from '../undent';
 
@@ -38,13 +38,7 @@ suite('parseArray', function() {
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
     test(`should parse ${json}`, function() {
       const [actualArray,] = parseArray(json, {doubleEscape: true});
-      const convertedArray = actualArray.map(el => {
-        if (el instanceof String) {
-          // Can't use === on String() objects
-          return el.valueOf();
-        }
-        return el;
-      })
+      const convertedArray = convertToLiteralValues(actualArray);
       expect(convertedArray).to.deep.equal(expectedArray);
       // expect(JSON.parse(json)).to.deep.equal(expectedArray);
     });

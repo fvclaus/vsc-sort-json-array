@@ -10,6 +10,7 @@ import processAndParseArray from './processAndParseArray';
 import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
 import { addIndex, WithIndexArray } from './indexArray';
+import { convertToLiteralValues } from './parser/parseArray';
 
 
 function determineIndent(editor: vscode.TextEditor, selection: vscode.Range): {indentLevel: number, newIndent: string } {
@@ -85,7 +86,7 @@ function sort(
           // Restore cursor position
           editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
           window.showInformationMessage('Successfully sorted array!');
-          return sortedArray;
+          return convertToLiteralValues(sortedArray);
         } else {
           return fail('Could not apply workspace edit');
         }

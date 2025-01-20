@@ -37,11 +37,11 @@ suite('Sort number or strings', function() {
     // JSON requires double escaping so \\ is \ which is not a valid value by itself.
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending',
       `["\\x", "\\"]`,
-      `["\\x", "\\"]`
+      `["\\", "\\x"]`
     )
   })
 
-  test.only('should sort numbers', async function() {
+  test('should sort numbers', async function() {
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', [100, 1, 99], [1, 99, 100]);
   });
 

@@ -49,6 +49,37 @@ export default function serializeArray(array: WithIndexArray, fileExtension: Fil
 
       switch (serializationFormat) {
         case SerializationFormat.MORE_THAN_THREE_LINES: {
+          /**
+           * Ideally we should support this:
+           * const array = [{
+                one: "two"
+            }, {
+                one: "two"
+            }, {
+                one: "two"
+            }]
+          and 
+          const array = [
+            {
+              one: "two",
+            },
+            {
+              one: "two",
+            },
+            {
+              one: "two",
+            },
+          ];
+          and
+          const array = [
+            { one: "two" },
+            { one: "two" },
+            { one: "two" }
+          ]
+          because these are the most common ones
+           * 
+           */
+          // Remove the whitespace logic from rangeFinder and add indent based on editor configuration
           return "[\n" + serializedArray.join(",\n") + "\n]";
         }
         case SerializationFormat.SAME_LINE: {
