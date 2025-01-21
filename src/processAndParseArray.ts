@@ -1,5 +1,5 @@
 import {FileExtension} from './fileExtension';
-import {default as parseJsonArray, Range, SupportedArrayValueType} from './parser/parseArray';
+import {default as parseJsonArray, ArrayItem} from './parser/parseArray';
 
 function preprocess(arrayAsText: string, fileExtension: FileExtension): string {
   switch (fileExtension) {
@@ -19,26 +19,10 @@ function preprocess(arrayAsText: string, fileExtension: FileExtension): string {
   }
 }
 
-function postprocess(parsedArray: SupportedArrayValueType[], positions: Range[], fileExtension: FileExtension): [SupportedArrayValueType[], Range[]] {
-
-  switch(fileExtension) {
-    case FileExtension.JSONL : {
-      return [parsedArray, positions.map(position => {
-        const {start: [startLine, startColumn], end: [endLine, endColumn]} = {start: position.start, end: position.end};
-        return new Range([startLine - 1, startColumn], [endLine - 1, endColumn]);
-      })]
-    }
-    default: {
-      return [parsedArray, positions];
-    }
-  }
-
-}
-
-export default function processAndParseArray(arrayAsText: string, fileExtension: FileExtension) : [SupportedArrayValueType[], Range[]] {
+export default function processAndParseArray(arrayAsText: string, fileExtension: FileExtension) : ArrayItem[] {
   try {
-    const [parsedArray, positions] = parseJsonArray(preprocess(arrayAsText, fileExtension));
-    return postprocess(parsedArray, positions, fileExtension);
+    const parsedArray = parseJsonArray(preprocess(arrayAsText, fileExtension));
+    return parsedArray;
   } catch (e) {
     throw new Error(`Cannot parse selection as JSON array. Reason: ${(e as Error).message}`);
   }

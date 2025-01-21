@@ -19,7 +19,7 @@
     // "mochaExplorer.files": "out/test/suite/parser/**/*.js",
     // "mochaExplorer.require": "source-map-support/register",
     // "mochaExplorer.watch": "out/test/suite/parser/**/*.js",
-    "mochaExplorer.files": "src/test/**/{parseArray,findRange,undent,processAndParseArray,serializeArray}.test.ts",
+    "mochaExplorer.files": "src/test/**/{parseArray,undent,processAndParseArray,serializeArray}.test.ts",
     "mochaExplorer.require": "ts-node/register",
     "cSpell.words": [
       "antlr",

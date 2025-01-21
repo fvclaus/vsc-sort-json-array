@@ -88,7 +88,7 @@ suite('Find enclosing array', function() {
       ], '"id": 1', undefined, undefined, FileExtension.JSONL,
     ],
   ] as [unknown[], string, vscode.Position?, vscode.Position?, FileExtension?][])
-      .forEach(([array, textAtPosition, expectedStart, expectedEnd, fileExtension = FileExtension.JSON]) => {
+      .forEach(([array, textAtPosition, expectedStart, expectedEnd, fileExtension = FileExtension.OTHER]) => {
         const content = stringifyArray(array, fileExtension);
         test(`should find enclosing root array ${content}`, async function() {
           const {
@@ -109,7 +109,7 @@ suite('Find enclosing array', function() {
     const position = new vscode.Position(0, 0);
     let hasError = false;
     try {
-      await searchEnclosingArray(document, new vscode.Selection(position, position), FileExtension.JSON);
+      await searchEnclosingArray(document, new vscode.Selection(position, position), FileExtension.OTHER);
     } catch (e) {
       expect((e as Error).message).to.satisfy((msg: string) => msg.startsWith(msgPrefix));
       hasError = true;

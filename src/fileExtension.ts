@@ -1,6 +1,5 @@
 export enum FileExtension {
     JSONL,
-    JSON,
     OTHER
 }
 
@@ -13,13 +12,11 @@ export namespace FileExtension {
         switch (fileExtension) {
           case 'jsonl':
             return FileExtension.JSONL;
-          case 'json':
-            return FileExtension.JSON;
           default:
             return FileExtension.OTHER;
         }
       } else {
-        return FileExtension.JSON;
+        return FileExtension.OTHER;
       }
     }
 }

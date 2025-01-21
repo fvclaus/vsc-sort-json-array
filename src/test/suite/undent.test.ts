@@ -11,6 +11,15 @@ suite("undent", function() {
           ]
         `).to.be.equal("[\n1,\n2\n]");
     });
+
+    test("more indent", () => {
+      expect(undent`
+      [
+        1,
+        2,
+        3
+      ]`).to.be.equal("[\n  1,\n  2,\n  3\n]")
+    });
     test("no indent", () => {
         expect(undent`[
             1, 2, 3

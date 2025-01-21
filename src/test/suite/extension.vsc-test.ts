@@ -32,7 +32,7 @@ suite('Extension Test Suite', function() {
         id: 4,
       }, {
         id: 1,
-      }], FileExtension.JSON));
+      }], FileExtension.OTHER));
     const position = new vscode.Position(2, 4);
     editor.selection = new vscode.Selection(position, position);
     const sortedArray = await vscode.commands.executeCommand('extension.sortJsonArrayAscending') as {id: number}[];

@@ -9,32 +9,28 @@ import {searchEnclosingArray} from './searchEnclosingArray';
 import processAndParseArray from './processAndParseArray';
 import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
-import { addIndex, WithIndexArray } from './indexArray';
-import { convertToLiteralValues } from './parser/parseArray';
+import { ArrayItem, convertToLiteralValues } from './parser/parseArray';
 
 
-function determineIndent(editor: vscode.TextEditor, selection: vscode.Range): {indentLevel: number, newIndent: string } {
+function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vscode.Range): {indentLevel: number, newIndent: string } {
   const options = editor.options;
   
   const startingLine = editor.document.lineAt(selection.start.line);
   const match = /^(\s)*/.exec(startingLine.text);
   let indentLevel = 0;
+  const indentOrTabSize = 'indentSize' in options? (options as any).indentSize : options.tabSize;
   if (match !== null) {
-    const tabIdent = match[0].replace(/[^\t][^\t]/g, "\t");
-    indentLevel = tabIdent.length;
+    const indent = match[0].replaceAll(/\t/g, " ".repeat(indentOrTabSize));
+    indentLevel = Math.ceil(indent.length / indentOrTabSize);
   }
 
-  const indentType = options.insertSpaces === false? '\t' : ' ';
-  if (indentType === '\t') {
-    return {indentLevel, newIndent: indentType};
-  } else {
-    return {indentLevel, newIndent: indentType.repeat(typeof options.tabSize == 'number'? options.tabSize : 2)};
-  }
+  const indentType = options.insertSpaces === false? '\t' : ' '.repeat(indentOrTabSize);
+  return {indentLevel, newIndent: indentType};
 }
 
 // Return value was implemented to improve testability.
 function sort(
-    sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: WithIndexArray) => Promise<WithIndexArray | undefined>):
+    sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined>):
     () => Promise<unknown[] | undefined> {
   return async function() {
     const fail = (error: string | Error | string[]): undefined => {
@@ -69,17 +65,17 @@ function sort(
         }
 
         const text = document.getText(selection);
-        const [parsedArray, positions] = processAndParseArray(text, fileExtension);
+        const parsedArray = processAndParseArray(text, fileExtension);
         
 
-        const sortedArray  = await sortFn(window, workspace, addIndex(parsedArray));
+        const sortedArray  = await sortFn(window, workspace, parsedArray);
         if (sortedArray === undefined) {
           // User aborted somewhere
           return;
         }
         const workspaceEdit = new vscode.WorkspaceEdit();
-        const serializedArray = serializeArray(sortedArray, fileExtension, text, positions, 
-            determineIndent(editor, selection));
+        const serializedArray = serializeArray(sortedArray, fileExtension, text, 
+            calculateIndentOfStartingLine(editor, selection));
         workspaceEdit.replace(editor.document.uri, selection, serializedArray);
         const success = await workspace.applyEdit(workspaceEdit);
         if (success) {

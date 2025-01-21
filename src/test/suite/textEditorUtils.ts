@@ -38,9 +38,9 @@ export async function closeActiveEditor(): Promise<void> {
   }
 }
 
-export async function openNewJsonDocument(text: string): Promise<{document: vscode.TextDocument, editor: TextEditor}> {
+export async function openNewDocument(text: string, suffix: string): Promise<{document: vscode.TextDocument, editor: TextEditor}> {
   const tempFile = temp.openSync({
-    suffix: '.json',
+    suffix
   });
   fs.openSync(tempFile.path, 'a+');
 
@@ -53,4 +53,8 @@ export async function openNewJsonDocument(text: string): Promise<{document: vsco
     document,
     editor,
   };
+}
+
+export async function openNewJsonDocument(text: string): Promise<{document: vscode.TextDocument, editor: TextEditor}> {
+  return openNewDocument(text, '.json')
 }

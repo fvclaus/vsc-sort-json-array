@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
 import chai = require('chai');
-const expect = chai.expect;
+export const expect = chai.expect;
 import {openNewJsonDocument} from './textEditorUtils';
 import nextTick from './nextTick';
 
 export async function triggerSortCommandExpectSuccess(
-    // TODO type string
-    command: string,
+    command: 'extension.sortJsonArrayAscending' | 'extension.sortJsonArrayDescending' | 'extension.sortJsonArrayCustom',
     array: unknown[] | string,
     expectedArray: unknown[] | string,
     userInputs?: () => Promise<unknown> | undefined): Promise<void> {

@@ -5,7 +5,7 @@ import * as glob from 'glob';
 import * as fs from 'fs';
 import * as path from 'path';
 import {createNewSortModule} from './generateUniqueSortModuleName';
-import { WithIndexArray } from '../indexArray';
+import { ArrayItem } from '../parser/parseArray';
 
 
 class SortError extends Error {
@@ -14,7 +14,7 @@ class SortError extends Error {
   }
 }
 
-function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: WithIndexArray): Promise<WithIndexArray> {
+function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: ArrayItem[]): Promise<ArrayItem[]> {
   // Must wrap in Promise to receive errors. Thenable has no .catch
   return new Promise((resolve, reject) => {
     window.withProgress<void>({
@@ -62,7 +62,7 @@ function executeAction({
     outputChannel: vscode.OutputChannel,
     moduleChoice: vscode.QuickPickItem,
     extensionContext: vscode.ExtensionContext,
-     array: WithIndexArray}): Promise<WithIndexArray | undefined> {
+     array: ArrayItem[]}): Promise<ArrayItem[] | undefined> {
   // Promise is necessary to integrate with .onDidSaveTextDocument callback.
   // It is also more flexible than async
   return new Promise((resolve, reject) => {
@@ -154,7 +154,7 @@ async function pickModuleAndAction(
     extensionContext: vscode.ExtensionContext,
     outputChannel: vscode.OutputChannel,
     window: typeof vscode.window,
-    workspace: typeof vscode.workspace, array: WithIndexArray): Promise<WithIndexArray | undefined> {
+    workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
   const sortModules: vscode.QuickPickItem[] = glob.sync('*.ts', {
     cwd: extensionContext.globalStoragePath,
   })
@@ -217,7 +217,7 @@ async function pickModuleAndAction(
 }
 
 export function sortCustom(extensionContext: vscode.ExtensionContext):
- (window: typeof vscode.window, workspace: typeof vscode.workspace, array: WithIndexArray) => Promise<WithIndexArray | undefined> {
+ (window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined> {
   return (window, workspace, array) => {
     if (!fs.existsSync(extensionContext.globalStoragePath)) {
       fs.mkdirSync(extensionContext.globalStoragePath);

@@ -6,49 +6,19 @@ import {JSONParser, JsonContext, ObjContext, PairContext, ArrContext, ValueConte
 import {JSONLexer} from './generated/JSONLexer';
 import {ATNSimulator} from 'antlr4ts/atn/ATNSimulator';
 
+export type Pair = [string, unknown];
 
-export class Range {
-
-  private _start: [number, number];
-  private _end: [number, number];
-
-  constructor([startLine, startColumn]: readonly [number ,number], [endLine, endColumn]: readonly [number, number]) {
-    if ([startLine, startColumn, endLine, endColumn].includes(0)) {
-      throw new Error(`Index is 1-based`);
-    }
-    if (startLine > endLine) {
-      throw new Error(`startLine ${startLine} must not be larger than endLine ${endLine}`);
-    }
-    if (startLine === endLine && startColumn > endColumn ) {
-      throw new Error(`startColumn ${startColumn} must not be larger than endColumn ${endColumn}`);
-    }
-    this._start = [startLine, startColumn];
-    this._end = [endLine, endColumn];
-    
-  }
-  
-  /**
-   * @returns 1-based index for line and column
-   */
-  public get start(): [number, number] {
-    return this._start;
-  }
-
-  /**
-   * @returns 1-based index for line and column
-   */
-  public get end(): [number, number] {
-    return this._end;
-  }
-}
-
-type Pair = [string, unknown];
+export const indexSymbol = Symbol("index");
+export const contextSymbol = Symbol("context");
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type SupportedArrayValueType = (object | String | Number | boolean |  null | undefined)
+export type ArrayObjectItem = (object | String | Number) & {[indexSymbol]: number, [contextSymbol]: ValueContext};
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function convertToLiteralValues(array: SupportedArrayValueType[]): (Exclude<SupportedArrayValueType, String | Number> | (string | number))[]{
+export type ArrayItem = (ArrayObjectItem)
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
   return array.map(el => {
     if (el instanceof String || el instanceof Number) {
       // Can't use === on String() objects
@@ -60,35 +30,31 @@ export function convertToLiteralValues(array: SupportedArrayValueType[]): (Exclu
 
 class JsonVisitor {
 
-  visitJson(ctx: JsonContext): [SupportedArrayValueType[], Range[]] {
+  visitJson(ctx: JsonContext): ArrayItem[] {
     const arrContext = ctx.arr();
-    const array: SupportedArrayValueType[] = []
+    const array: ArrayItem[] = []
     const valueContexts = arrContext.value();
-    const positions: Range[] = [];
+    let i = 0;
     for (const valueContext of valueContexts) {
-      const value = this.visitValue(valueContext);
+      let value = this.visitValue(valueContext);
       if (typeof value === 'string') {
-        // Convert root value strings to Strings so that a [index] property can be attached
-        array.push(new String(value));
+        value = new String(value);
       } else if (typeof value === 'number') {
-        array.push(new Number(value));
+        value = new Number(value);
+      }
+
+      if (value !== null && value !== undefined && typeof value === 'object') {
+        const arrayObjectItem = value as ArrayObjectItem;
+        arrayObjectItem[indexSymbol] = i;
+        arrayObjectItem[contextSymbol] = valueContext;
+        array.push(arrayObjectItem);
       } else {
-        array.push(value);
+        throw new Error(`Encountered value  '${value}' at position ${i}, but only strings, objects and numbers are supported.`)
       }
-      const startToken = valueContext.start;
-      const stopToken = valueContext.stop;
-      if (stopToken === undefined) {
-        throw new Error(`Unexpected zero length value: ${valueContext.text}`)
-      }
-      const start = [startToken.line, startToken.charPositionInLine + 1] as const;
-      const isStartAndEndTokenIdentical = stopToken.line === startToken.line &&
-        stopToken.charPositionInLine === startToken.charPositionInLine;
-      const end = [stopToken.line, stopToken.charPositionInLine + 1 +
-        (isStartAndEndTokenIdentical ? (valueContext.text.length - 1) : 0)] as const;
-      positions.push(new Range(start, end));
+      i++;
     }
 
-    return [array, positions];
+    return array;
   }
   visitObj(ctx: ObjContext): object {
     return ctx.pair()
@@ -170,7 +136,7 @@ class JsonVisitor {
 
 
 // Generate antlr classes with npm run antlr4
-export default function parseArray(text: string): [SupportedArrayValueType[], Range[]] {
+export default function parseArray(text: string): ArrayItem[] {
   const inputStream = CharStreams.fromString(text);
   const lexer = new JSONLexer(inputStream);
   lexer.removeErrorListeners();
