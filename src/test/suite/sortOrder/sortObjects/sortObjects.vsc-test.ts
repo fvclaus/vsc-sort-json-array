@@ -30,6 +30,8 @@ suite('Sort objects', function() {
     triggerSortCommandExpectFailure(JSON.stringify([{'foo': 1}, {'bar': 2}], null, 2), `There are no properties all objects of this array have in common.`);
   });
 
+  // TODO Test with JSONL
+
   // TODO Add test with tabs
   test("should sort JS array", async function() {
     const {

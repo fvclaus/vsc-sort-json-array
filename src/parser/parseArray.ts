@@ -8,11 +8,10 @@ import {ATNSimulator} from 'antlr4ts/atn/ATNSimulator';
 
 export type Pair = [string, unknown];
 
-export const indexSymbol = Symbol("index");
 export const contextSymbol = Symbol("context");
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type ArrayObjectItem = (object | String | Number) & {[indexSymbol]: number, [contextSymbol]: ValueContext};
+export type ArrayObjectItem = (object | String | Number) & {[contextSymbol]: ValueContext};
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ArrayItem = (ArrayObjectItem)
@@ -28,7 +27,7 @@ export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, 
   })
 }
 
-class JsonVisitor {
+class ArrayParser {
 
   visitJson(ctx: JsonContext): ArrayItem[] {
     const arrContext = ctx.arr();
@@ -45,7 +44,6 @@ class JsonVisitor {
 
       if (value !== null && value !== undefined && typeof value === 'object') {
         const arrayObjectItem = value as ArrayObjectItem;
-        arrayObjectItem[indexSymbol] = i;
         arrayObjectItem[contextSymbol] = valueContext;
         array.push(arrayObjectItem);
       } else {
@@ -68,8 +66,15 @@ class JsonVisitor {
     if (ctx.children == null || ctx.children.length !== 3) {
       throw new Error('Expecting exactly three children');
     }
+
+    if (!(ctx.children[0] instanceof TerminalNode)) {
+      throw new Error(`Expected first child of pair to be a terminal node.`);
+    }
+
+    const key = this.visitObjectKey(ctx.children[0]);
+
     // TODO String handling
-    return [this.evalTerminalNode(ctx.children[0] as TerminalNode).toString(), this.visitValue(ctx.value())];
+    return [key, this.visitValue(ctx.value())];
   }
   visitArr(ctx: ArrContext): unknown[] {
     const values = ctx.value();
@@ -113,11 +118,10 @@ class JsonVisitor {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  evalTerminalNode(ctx: TerminalNode): String {
+  visitObjectKey(ctx: TerminalNode): string {
     switch (ctx.symbol.type) {
       case JSONParser.IDENTIFIER: {
-        return new String(ctx.toString());
+        return ctx.toString();
       } case JSONParser.STRING: {
         return this.makeString(ctx);
       } default: {
@@ -154,6 +158,6 @@ export default function parseArray(text: string): ArrayItem[] {
   if (errors.length > 0) {
     throw errors[0];
   }
-  const visitor = new JsonVisitor();
+  const visitor = new ArrayParser();
   return visitor.visitJson(jsonContext);
 }

@@ -8,7 +8,6 @@ function preprocess(arrayAsText: string, fileExtension: FileExtension): string {
         arrayAsText
           .split("\n")
           // Add a trailing comma to all lines including a value
-          // TODO Test
           .map(l => /^\s*[^/]/.test(l)? `${l},` : l)
           .join("\n")
         + "\n]"

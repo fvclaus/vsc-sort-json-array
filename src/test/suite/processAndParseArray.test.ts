@@ -10,7 +10,7 @@ suite('processAndParseArray', function() {
   ([
     ['[1, 2, 3]', FileExtension.OTHER, [1, 2, 3]],
     ['[{"id":1}, {"id":2}]', FileExtension.OTHER, [{id: 1}, {id: 2}]],
-    ['\n{"id":1}\n{"id":2}\n', FileExtension.JSONL, [{id: 1}, {id: 2}]],
+    ['\n{"id":1}\n   {"id":2}\n', FileExtension.JSONL, [{id: 1}, {id: 2}]],
   ] as [string, FileExtension, unknown[]][]).forEach(([json, fileExtension, expectedArray]) => {
     test(`should parse valid json ${json}`, function() {
       const array = processAndParseArray(json, fileExtension);

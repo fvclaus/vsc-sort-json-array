@@ -3,7 +3,7 @@ import { ObjContext, PairContext, ArrContext, ValueContext } from './parser/gene
 import { ArrayItem, contextSymbol } from './parser/parseArray';
 import { FileExtension } from './fileExtension';
 
-class JsonVisitor {
+class ArraySerializer {
 
   private makeIndent(indentLevel: number): string {
     return this.newIndent.repeat(indentLevel);
@@ -65,7 +65,7 @@ class JsonVisitor {
 
 export default function serializeArrayFromTree(array: ArrayItem[], fileExtension: FileExtension, text: string,
   {indentLevel, newIndent}: {indentLevel: number, newIndent: string}): string {
-  const visitor = new JsonVisitor(newIndent);
+  const visitor = new ArraySerializer(newIndent);
   if (fileExtension === FileExtension.JSONL) {
     const lines = text.split("\n");
     const serializedArrayItems = array.map(value => {
