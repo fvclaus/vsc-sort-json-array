@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import {afterEach} from 'mocha';
 import {closeActiveEditor} from '../../textEditorUtils';
 import { ExtensionConfiguration } from '../../../../sortOrder';
+import { undent } from '../../undent';
 
 async function updateConfiguration(expectedConfiguration: ExtensionConfiguration): Promise<void> {
   const actualConfiguration = vscode.workspace.getConfiguration("sortJsonArray.collation");
@@ -30,14 +31,27 @@ suite('Sort number or strings', function() {
   test('should preserve escaped control characters and preserve type of quotes', async function() {
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayDescending' ,
       `["foo'", "\\r\\n", 'foo"', "\\\\ \\b \\f \\n \\r \\t", '\u00E9', 'F:\\\\Apps\\\\a', 'F:\\Apps\\a']`, 
-      `['foo"', "foo'", 'F:\\Apps\\a', 'F:\\\\Apps\\\\a', '\u00E9', "\\r\\n", "\\\\ \\b \\f \\n \\r \\t"]`);
+      undent`
+      [
+        'foo"', 
+        "foo'", 
+        'F:\\Apps\\a', 
+        'F:\\\\Apps\\\\a', 
+        '\u00E9', 
+        "\\r\\n", 
+        "\\\\ \\b \\f \\n \\r \\t"
+      ]`);
   });
 
   test("should support invalid JSON escape sequences", async function() {
     // JSON requires double escaping so \\ is \ which is not a valid value by itself.
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending',
       `["\\x", "\\"]`,
-      `["\\", "\\x"]`
+      undent`
+      [
+        "\\", 
+        "\\x"
+      ]`
     )
   })
 
