@@ -49,6 +49,8 @@ export async function openNewDocument(text: string, suffix: string): Promise<{do
   // Mark file as dirty to bypass preview mode that would open the sort module in the current tab.
   await replaceTextInCurrentEditor(text);
   editor.selection = new vscode.Selection(ZERO_POSITION, ZERO_POSITION);
+  editor.options.tabSize = 2;
+  editor.options.insertSpaces = true;
   return {
     document,
     editor,

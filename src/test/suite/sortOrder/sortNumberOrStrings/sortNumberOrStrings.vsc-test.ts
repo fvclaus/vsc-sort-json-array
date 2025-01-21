@@ -28,17 +28,18 @@ suite('Sort number or strings', function() {
     })
   });
 
+  // TODO This is not JSON
   test('should preserve escaped control characters and preserve type of quotes', async function() {
     await triggerSortCommandExpectSuccess('extension.sortJsonArrayDescending' ,
       `["foo'", "\\r\\n", 'foo"', "\\\\ \\b \\f \\n \\r \\t", '\u00E9', 'F:\\\\Apps\\\\a', 'F:\\Apps\\a']`, 
       undent`
       [
-        'foo"', 
-        "foo'", 
-        'F:\\Apps\\a', 
-        'F:\\\\Apps\\\\a', 
-        '\u00E9', 
-        "\\r\\n", 
+        'foo"',
+        "foo'",
+        'F:\\Apps\\a',
+        'F:\\\\Apps\\\\a',
+        '\u00E9',
+        "\\r\\n",
         "\\\\ \\b \\f \\n \\r \\t"
       ]`);
   });
@@ -49,7 +50,7 @@ suite('Sort number or strings', function() {
       `["\\x", "\\"]`,
       undent`
       [
-        "\\", 
+        "\\",
         "\\x"
       ]`
     )

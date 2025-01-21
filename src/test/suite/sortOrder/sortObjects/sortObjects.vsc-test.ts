@@ -49,8 +49,6 @@ suite('Sort objects', function() {
         }
       }
       `, '.js');
-    editor.options.tabSize = 2;
-    editor.options.insertSpaces = true;
     editor.selection = new vscode.Selection(new vscode.Position(4, 9), new vscode.Position(4, 9));
     
     await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
