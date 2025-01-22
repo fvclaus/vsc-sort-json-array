@@ -3,6 +3,7 @@ import chai = require('chai');
 export const expect = chai.expect;
 import {openNewDocument, openNewJsonDocument} from './textEditorUtils';
 import nextTick from './nextTick';
+import { sleep } from './sleep';
 
 export async function triggerSortJsExpectSuccess(
   command: 'extension.sortJsonArrayAscending' | 'extension.sortJsonArrayDescending' | 'extension.sortJsonArrayCustom',
@@ -45,6 +46,7 @@ export async function triggerSortJsonExpectSuccess(
   }
   // Wait here is required to update the editor?
   await nextTick();
+  await sleep(2000);
   const actualArray = JSON.parse(editor.document.getText());
   expect(actualArray).to.deep.equal(expectedArray);
   expect(actualArray).to.deep.equal(result);
