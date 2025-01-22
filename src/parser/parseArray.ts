@@ -73,7 +73,6 @@ class ArrayParser {
 
     const key = this.visitObjectKey(ctx.children[0]);
 
-    // TODO String handling
     return [key, this.visitValue(ctx.value())];
   }
   visitArr(ctx: ArrContext): unknown[] {
@@ -97,7 +96,7 @@ class ArrayParser {
         case JSONParser.NUMBER:
           return parseFloat(child.symbol.text as string);
         case JSONParser.STRING:
-          return this.makeString(child);
+          return this.stringTextToStringValue(child);
       }
       switch (child.text) {
         case 'null':
@@ -123,14 +122,14 @@ class ArrayParser {
       case JSONParser.IDENTIFIER: {
         return ctx.toString();
       } case JSONParser.STRING: {
-        return this.makeString(ctx);
+        return this.stringTextToStringValue(ctx);
       } default: {
         throw new Error(`Unknown type ${ctx.symbol.type} for node ${ctx.toString()}`)
       }
     }
   }
 
-  makeString(ctx: TerminalNode): string {
+  stringTextToStringValue(ctx: TerminalNode): string {
     // Remove quotes.
     const stringText = ctx.text.slice(1, ctx.toString().length - 1);
     return stringText;

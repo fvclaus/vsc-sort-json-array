@@ -11,11 +11,12 @@ const ZERO_POSITION = new vscode.Position(0, 0);
 export function replaceTextInCurrentEditor(content: string): Promise<void> {
   const editor = (vscode.window.activeTextEditor as vscode.TextEditor);
   return new Promise((resolve) => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     editor.edit((edit) => {
       console.log(`Replacing in ${editor.document.fileName}`);
       const all = new vscode.Range(ZERO_POSITION, new vscode.Position(editor.document.lineCount + 1, 0));
       edit.replace(all, content);
-      nextTick().then(resolve);
+      void nextTick().then(resolve);
     });
   });
 }

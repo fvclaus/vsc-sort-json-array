@@ -82,6 +82,8 @@ function sort(
         if (success) {
           // Restore cursor position
           editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
+          // Must not await this otherwise it will hang until the user clicks it away.
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
           window.showInformationMessage('Successfully sorted array!');
           return convertToLiteralValues(sortedArray);
         } else {

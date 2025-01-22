@@ -28,7 +28,8 @@ module.exports = {
     "@typescript-eslint/explicit-function-return-type": ["warn", {"allowExpressions": true}],  
     // We disallow number, because 0 and undefined have different meanings.
     // The problem with nullableObject is that it also applies to generics. If the generic turns out to be a number, we are in trouble.
-    "@typescript-eslint/strict-boolean-expressions": ["error", {"allowString": true, "allowNumber": false, "allowNullableObject": false}]
+    "@typescript-eslint/strict-boolean-expressions": ["error", {"allowString": true, "allowNumber": false, "allowNullableObject": false}],
+    "@typescript-eslint/no-floating-promises": "error"
   },
   "overrides": [{
     "env": {

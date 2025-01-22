@@ -3,13 +3,11 @@ import {afterEach} from 'mocha';
 import * as vscode from 'vscode';
 import chai = require('chai');
 import {closeActiveEditor, openNewJsonDocument} from './textEditorUtils';
-import sinon = require('sinon');
 import {FileExtension} from '../../fileExtension';
 import stringifyArray from './stringify';
+import { triggerSortExpectFailure } from './triggerSortExpectFailure';
 const expect = chai.expect;
 
-
-const window = vscode.window;
 
 suite('Extension Test Suite', function() {
   afterEach(async () => {
@@ -17,11 +15,7 @@ suite('Extension Test Suite', function() {
   });
 
   test('Invalid json', async function() {
-    await openNewJsonDocument('[\'foo, 2, 3]');
-    const showErrorMessageSpy = sinon.spy(window, 'showErrorMessage');
-    await vscode.commands.executeCommand('editor.action.selectAll');
-    await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
-    expect(showErrorMessageSpy.lastCall.args[0]).to.satisfy((msg: string) => msg.startsWith('Cannot parse selection as JSON array.'));
+    await triggerSortExpectFailure('[\'foo, 2, 3]', /Cannot parse selection as JSON array. Reason: no viable alternative at input '\['/)
   });
 
   test('Valid json', async function() {

@@ -1,4 +1,4 @@
-import {triggerSortCommandExpectSuccess} from '../../triggerSortCommandExpectSuccess';
+import {triggerSortJsonExpectSuccess, triggerSortJsExpectSuccess} from '../../triggerSortExpectSuccess';
 
 import * as vscode from 'vscode';
 
@@ -28,10 +28,10 @@ suite('Sort number or strings', function() {
     })
   });
 
-  // TODO This is not JSON
   test('should preserve escaped control characters and preserve type of quotes', async function() {
-    await triggerSortCommandExpectSuccess('extension.sortJsonArrayDescending' ,
+    await triggerSortJsExpectSuccess('extension.sortJsonArrayDescending' ,
       `["foo'", "\\r\\n", 'foo"', "\\\\ \\b \\f \\n \\r \\t", '\u00E9', 'F:\\\\Apps\\\\a', 'F:\\Apps\\a']`, 
+      new vscode.Position(0, 3),
       undent`
       [
         'foo"',
@@ -46,8 +46,9 @@ suite('Sort number or strings', function() {
 
   test("should support invalid JSON escape sequences", async function() {
     // JSON requires double escaping so \\ is \ which is not a valid value by itself.
-    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending',
+    await triggerSortJsExpectSuccess('extension.sortJsonArrayAscending',
       `["\\x", "\\"]`,
+      new vscode.Position(0, 4),
       undent`
       [
         "\\",
@@ -57,11 +58,11 @@ suite('Sort number or strings', function() {
   })
 
   test('should sort numbers', async function() {
-    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', [100, 1, 99], [1, 99, 100]);
+    await triggerSortJsonExpectSuccess('extension.sortJsonArrayAscending', [100, 1, 99], [1, 99, 100]);
   });
 
   test('should sort strings', async function() {
-    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', ['foo', 'bar', 'car'], ['bar', 'car', 'foo']);
+    await triggerSortJsonExpectSuccess('extension.sortJsonArrayAscending', ['foo', 'bar', 'car'], ['bar', 'car', 'foo']);
   });
 
   test('should sort strings using Intl.Collator', async function() {
@@ -73,7 +74,7 @@ suite('Sort number or strings', function() {
         locales: ["da"]
       }
     })
-    await triggerSortCommandExpectSuccess('extension.sortJsonArrayAscending', [
+    await triggerSortJsonExpectSuccess('extension.sortJsonArrayAscending', [
       "'Bar'",
       "1",
       "10",
