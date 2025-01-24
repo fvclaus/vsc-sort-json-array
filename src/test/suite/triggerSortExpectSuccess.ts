@@ -12,15 +12,22 @@ export async function triggerSortJsExpectSuccess(
   code: string,
   position: vscode.Position,
   expectedCode: string,
+  userInputs?: () => Promise<unknown> | undefined
 ): Promise<void> {
   const {showErrorMessageSpy} = setupSpies();
   const {
       editor,
     } = await openNewDocument(code, '.js');
-    
+
     editor.selection = new vscode.Selection(position, position);
+    const resultPromise = vscode.commands.executeCommand(command);
+    if (userInputs != null) {
+      // Wait for quick open
+      await nextTick();
+      await userInputs();
+    }
+    await resultPromise;
     
-    await vscode.commands.executeCommand(command);
     expectZeroInvocations(showErrorMessageSpy);
     // Wait here is required to update the editor?
     await nextTick();

@@ -16,6 +16,7 @@ import {getGlobalStoragePath} from './getGlobalStoragePath';
 import {replaceTextInCurrentEditor, closeActiveEditor} from '../textEditorUtils';
 import {rm, mvDir, createSourceModulePath} from './storagePathFsUtils';
 import {sleep} from '../sleep';
+import { selectQuickOpenItem } from './selectQuickOpenItem';
 
 
 const B2 = {
@@ -59,14 +60,6 @@ async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: s
   await mvDir(tempDir, globalStoragePath);
 }
 
-
-async function selectQuickOpenItem(item: string): Promise<void> {
-  await vscode.commands.executeCommand('workbench.action.focusQuickOpen');
-  await vscode.env.clipboard.writeText(item);
-  await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-  await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
-  await nextTick();
-}
 
 suite('Sort custom', function() {
   let globalStoragePath: string;

@@ -17,6 +17,7 @@ function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vsc
   
   const startingLine = editor.document.lineAt(selection.start.line);
   const match = /^(\s)*/.exec(startingLine.text);
+  console.log(`EOL: ${editor.document.eol}`);
   let indentLevel = 0;
   // indentSize was released in 1.74: https://code.visualstudio.com/updates/v1_74#_new-indent-size-setting
   const indentOrTabSize = 'indentSize' in options? (options as any).indentSize : options.tabSize;
@@ -75,11 +76,13 @@ function sort(
           // User aborted somewhere
           return;
         }
-        const workspaceEdit = new vscode.WorkspaceEdit();
         const serializedArray = serializeArray(sortedArray, fileExtension, text, 
             calculateIndentOfStartingLine(editor, selection));
-        workspaceEdit.replace(editor.document.uri, selection, serializedArray);
-        const success = await workspace.applyEdit(workspaceEdit);
+
+        // TextEditBuilder accounts for \n and \r\n
+        const success = await editor.edit((editBuilder) => {
+          editBuilder.replace(selection, serializedArray);
+        })
         if (success) {
           // Restore cursor position
           editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
