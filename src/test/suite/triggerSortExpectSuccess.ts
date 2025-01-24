@@ -3,7 +3,9 @@ import chai = require('chai');
 export const expect = chai.expect;
 import {openNewDocument, openNewJsonDocument} from './textEditorUtils';
 import nextTick from './nextTick';
-import { sleep } from './sleep';
+import { expectZeroInvocations, setupSpies } from './setupSpies';
+
+
 
 export async function triggerSortJsExpectSuccess(
   command: 'extension.sortJsonArrayAscending' | 'extension.sortJsonArrayDescending' | 'extension.sortJsonArrayCustom',
@@ -11,6 +13,7 @@ export async function triggerSortJsExpectSuccess(
   position: vscode.Position,
   expectedCode: string,
 ): Promise<void> {
+  const {showErrorMessageSpy} = setupSpies();
   const {
       editor,
     } = await openNewDocument(code, '.js');
@@ -18,6 +21,7 @@ export async function triggerSortJsExpectSuccess(
     editor.selection = new vscode.Selection(position, position);
     
     await vscode.commands.executeCommand(command);
+    expectZeroInvocations(showErrorMessageSpy);
     // Wait here is required to update the editor?
     await nextTick();
     const editorText = editor.document.getText();
@@ -29,6 +33,7 @@ export async function triggerSortJsonExpectSuccess(
     array: unknown[],
     expectedArray: unknown[],
     userInputs?: () => Promise<unknown> | undefined): Promise<void> {
+  const {showErrorMessageSpy} = setupSpies();
   const {
     editor,
   } = await openNewJsonDocument(JSON.stringify(array, null, 2));
@@ -46,7 +51,7 @@ export async function triggerSortJsonExpectSuccess(
   }
   // Wait here is required to update the editor?
   await nextTick();
-  await sleep(2000);
+  expectZeroInvocations(showErrorMessageSpy);
   const actualArray = JSON.parse(editor.document.getText());
   expect(actualArray).to.deep.equal(expectedArray);
   expect(actualArray).to.deep.equal(result);

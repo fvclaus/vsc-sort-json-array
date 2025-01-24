@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
 
-const window = vscode.window;
+export const window = vscode.window;
 
 import chai = require('chai');
-import sinon = require('sinon');
+import { setupSpies } from './setupSpies';
 const expect = chai.expect;
-const showErrorMessageSpy = sinon.spy(window, 'showErrorMessage');
 
 
 
 export async function triggerSortExpectFailure(content: string, expectedErrorMessage: RegExp): Promise<void> {
+  const {showErrorMessageSpy} = setupSpies();
   const document = await vscode.workspace.openTextDocument({
     language: 'JSON',
     content: content,

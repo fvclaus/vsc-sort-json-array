@@ -21,7 +21,8 @@ function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vsc
   // indentSize was released in 1.74: https://code.visualstudio.com/updates/v1_74#_new-indent-size-setting
   const indentOrTabSize = 'indentSize' in options? (options as any).indentSize : options.tabSize;
   if (match !== null) {
-    const indent = match[0].replaceAll(/\t/g, " ".repeat(indentOrTabSize));
+    // .replaceAll not available in 1.44.0
+    const indent = match[0].replace(/\t/g, " ".repeat(indentOrTabSize));
     indentLevel = Math.ceil(indent.length / indentOrTabSize);
   }
 
