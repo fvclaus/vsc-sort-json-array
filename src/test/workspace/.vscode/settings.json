@@ -3,5 +3,6 @@
   "sortJsonArray.collation.caseFirst": "false",
   "sortJsonArray.collation.ignorePunctuation": false,
   "sortJsonArray.collation.numeric": false,
-  "sortJsonArray.collation.locales": []
+  "sortJsonArray.collation.locales": [],
+  "files.eol": "\n"
 }
