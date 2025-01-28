@@ -57,7 +57,6 @@ function sort(
       try {
         const editor = window.activeTextEditor as TextEditor;
         const document = editor.document;
-        console.log(`EOL: ${document.eol}`);
         const fileExtension = FileExtension.getFileExtension(document.fileName);
 
         let selection: vscode.Range = editor.selection;

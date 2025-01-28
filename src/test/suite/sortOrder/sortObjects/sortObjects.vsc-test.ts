@@ -11,6 +11,12 @@ import {closeActiveEditor, openNewDocument} from '../../textEditorUtils';
 import { undent } from '../../undent';
 import { selectQuickOpenItem } from '../../sortCustom/selectQuickOpenItem';
 
+async function changeToCRLF() {
+  await vscode.commands.executeCommand("workbench.action.showCommands");
+  await selectQuickOpenItem("Change End of Line Sequence")
+  await selectQuickOpenItem("CRLF");
+}
+
 suite('Sort objects', function() {
   afterEach(async () => {
     await closeActiveEditor();
@@ -56,11 +62,7 @@ suite('Sort objects', function() {
     await triggerSortJsExpectSuccess("extension.sortJsonArrayAscending", 
       "const array = [1,\r\n 2,\r\n 3];", new vscode.Position(0, 15),
       "const array = [\r\n  1,\r\n  2,\r\n  3\r\n];",
-      async () => {
-        await vscode.commands.executeCommand("workbench.action.showCommands");
-        await selectQuickOpenItem("Change End of Line Sequence")
-        await selectQuickOpenItem("CRLF");
-      }
+      changeToCRLF
       )
   });
 
@@ -71,11 +73,7 @@ suite('Sort objects', function() {
       position: new vscode.Position(0, 3),
       expectedCode: `{id: 1}\r\n{id: 3}\r\n{id: 5}`, 
       fileExtension: '.jsonl',
-      userInputs: async () => {
-        await vscode.commands.executeCommand("workbench.action.showCommands");
-        await selectQuickOpenItem("Change End of Line Sequence")
-        await selectQuickOpenItem("CRLF");
-      }
+      userInputs: changeToCRLF
     });
   })
 
