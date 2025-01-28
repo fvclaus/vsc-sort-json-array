@@ -17,7 +17,6 @@ function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vsc
   
   const startingLine = editor.document.lineAt(selection.start.line);
   const match = /^(\s)*/.exec(startingLine.text);
-  console.log(`EOL: ${editor.document.eol}`);
   let indentLevel = 0;
   // indentSize was released in 1.74: https://code.visualstudio.com/updates/v1_74#_new-indent-size-setting
   const indentOrTabSize = 'indentSize' in options? (options as any).indentSize : options.tabSize;
@@ -79,10 +78,12 @@ function sort(
         const serializedArray = serializeArray(sortedArray, fileExtension, text, 
             calculateIndentOfStartingLine(editor, selection));
 
-        // TextEditBuilder accounts for \n and \r\n
-        const success = await editor.edit((editBuilder) => {
-          editBuilder.replace(selection, serializedArray);
-        })
+        // textEditor.edit doesn't work for custom sort, because the editor is not active when the sorting is triggered.
+        const workspaceEdit = new vscode.WorkspaceEdit();
+        workspaceEdit.replace(editor.document.uri, 
+          selection, editor.document.eol === vscode.EndOfLine.CRLF? serializedArray.replace(/\n/g, "\r\n") : 
+          serializedArray);
+        const success = await workspace.applyEdit(workspaceEdit);
         if (success) {
           // Restore cursor position
           editor.selection = new vscode.Selection(cursorPosition, cursorPosition);

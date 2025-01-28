@@ -54,7 +54,7 @@ suite('Sort objects', function() {
 
   test("should sort with CRLF", async function() {
     await triggerSortJsExpectSuccess("extension.sortJsonArrayAscending", 
-      "const array = [1,\r\n 2,\r\n 3];", new vscode.Position(0, 19),
+      "const array = [1,\r\n 2,\r\n 3];", new vscode.Position(0, 15),
       "const array = [\r\n  1,\r\n  2,\r\n  3\r\n];",
       async () => {
         await vscode.commands.executeCommand("workbench.action.showCommands");
