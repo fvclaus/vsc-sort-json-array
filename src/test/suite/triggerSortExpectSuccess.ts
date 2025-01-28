@@ -6,25 +6,32 @@ import nextTick from './nextTick';
 import { expectZeroInvocations, setupSpies } from './setupSpies';
 
 
+type SortCommands = 'extension.sortJsonArrayAscending' | 'extension.sortJsonArrayDescending' | 'extension.sortJsonArrayCustom';
 
-export async function triggerSortJsExpectSuccess(
-  command: 'extension.sortJsonArrayAscending' | 'extension.sortJsonArrayDescending' | 'extension.sortJsonArrayCustom',
+
+export type Config = {
+  command: SortCommands,
   code: string,
   position: vscode.Position,
   expectedCode: string,
-  userInputs?: () => Promise<unknown> | undefined
+  fileExtension: string,
+  userInputs?: () => Promise<unknown> | undefined,
+}
+
+export async function triggerSortExpectSuccess(
+  config: Config
 ): Promise<void> {
   const {showErrorMessageSpy} = setupSpies();
   const {
       editor,
-    } = await openNewDocument(code, '.js');
+    } = await openNewDocument(config.code, config.fileExtension);
 
-    editor.selection = new vscode.Selection(position, position);
-    const resultPromise = vscode.commands.executeCommand(command);
-    if (userInputs != null) {
+    editor.selection = new vscode.Selection(config.position, config.position);
+    const resultPromise = vscode.commands.executeCommand(config.command);
+    if (config.userInputs != null) {
       // Wait for quick open
       await nextTick();
-      await userInputs();
+      await config.userInputs();
     }
     await resultPromise;
     
@@ -32,11 +39,29 @@ export async function triggerSortJsExpectSuccess(
     // Wait here is required to update the editor?
     await nextTick();
     const editorText = editor.document.getText();
-    expect(editorText).to.be.equal(expectedCode);
+    expect(editorText).to.be.equal(config.expectedCode);
+}
+
+
+export async function triggerSortJsExpectSuccess(
+  command: SortCommands,
+  code: string,
+  position: vscode.Position,
+  expectedCode: string,
+  userInputs?: () => Promise<unknown> | undefined
+): Promise<void> {
+  await triggerSortExpectSuccess({
+    code,
+    command,
+    position,
+    expectedCode,
+    userInputs,
+    fileExtension: '.js'
+  })
 }
 
 export async function triggerSortJsonExpectSuccess(
-    command: 'extension.sortJsonArrayAscending' | 'extension.sortJsonArrayDescending' | 'extension.sortJsonArrayCustom',
+    command: SortCommands,
     array: unknown[],
     expectedArray: unknown[],
     userInputs?: () => Promise<unknown> | undefined): Promise<void> {

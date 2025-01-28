@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import {ALL, JIMMY, JOHN_PAUL, JOHN, ROBERT} from './lz';
 
-import {expect, triggerSortJsonExpectSuccess, triggerSortJsExpectSuccess} from '../../triggerSortExpectSuccess';
+import {expect, triggerSortJsonExpectSuccess, triggerSortJsExpectSuccess, triggerSortExpectSuccess} from '../../triggerSortExpectSuccess';
 
 import {afterEach} from 'mocha';
 
@@ -62,6 +62,31 @@ suite('Sort objects', function() {
         await selectQuickOpenItem("CRLF");
       }
       )
+  });
+
+  test("should sort JSONL with CRLF", async function() {
+    await triggerSortExpectSuccess({
+      command: "extension.sortJsonArrayAscending", 
+      code: `{id: 5}\r\n{id: 1}\r\n{id: 3}`,
+      position: new vscode.Position(0, 3),
+      expectedCode: `{id: 1}\r\n{id: 3}\r\n{id: 5}`, 
+      fileExtension: '.jsonl',
+      userInputs: async () => {
+        await vscode.commands.executeCommand("workbench.action.showCommands");
+        await selectQuickOpenItem("Change End of Line Sequence")
+        await selectQuickOpenItem("CRLF");
+      }
+    });
+  })
+
+  test("should sort JSONL with mixed line endings", async function() {
+    await triggerSortExpectSuccess({
+      command: "extension.sortJsonArrayAscending",
+      code: `{id: 5}\r\n{id: 1}\n{id: 3}\n{id: 4}`,
+      position: new vscode.Position(0, 3),
+      expectedCode: `{id: 1}\n{id: 3}\n{id: 4}\n{id: 5}`, 
+      fileExtension: ".jsonl"
+    });
   })
 
 

@@ -6,7 +6,7 @@ function preprocess(arrayAsText: string, fileExtension: FileExtension): string {
     case FileExtension.JSONL: {
       return '[\n'+
         arrayAsText
-          .split("\n")
+          .split(/\r?\n/)
           // Add a trailing comma to all lines including a value
           .map(l => /^\s*[^/]/.test(l)? `${l},` : l)
           .join("\n")

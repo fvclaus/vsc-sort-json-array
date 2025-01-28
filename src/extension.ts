@@ -57,6 +57,7 @@ function sort(
       try {
         const editor = window.activeTextEditor as TextEditor;
         const document = editor.document;
+        console.log(`EOL: ${document.eol}`);
         const fileExtension = FileExtension.getFileExtension(document.fileName);
 
         let selection: vscode.Range = editor.selection;
@@ -67,6 +68,7 @@ function sort(
         }
 
         const text = document.getText(selection);
+        // console.log(text.replace('\n', '\\n').replace('\r', '\\r'));
         const parsedArray = processAndParseArray(text, fileExtension);
         
 
@@ -80,9 +82,11 @@ function sort(
 
         // textEditor.edit doesn't work for custom sort, because the editor is not active when the sorting is triggered.
         const workspaceEdit = new vscode.WorkspaceEdit();
-        workspaceEdit.replace(editor.document.uri, 
-          selection, editor.document.eol === vscode.EndOfLine.CRLF? serializedArray.replace(/\n/g, "\r\n") : 
-          serializedArray);
+        // const updatedText = editor.document.eol === vscode.EndOfLine.CRLF ? serializedArray.replace(/\n/g, "\r\n") :
+        //   serializedArray;
+        
+        // console.log(`EOL: ${document.eol}`, updatedText.replace(/\r/g, '\\r').replace(/\n/g, '\\n'));
+        workspaceEdit.replace(editor.document.uri, selection, serializedArray);
         const success = await workspace.applyEdit(workspaceEdit);
         if (success) {
           // Restore cursor position

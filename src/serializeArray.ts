@@ -67,7 +67,7 @@ export default function serializeArrayFromTree(array: ArrayItem[], fileExtension
   {indentLevel, newIndent}: {indentLevel: number, newIndent: string}): string {
   const visitor = new ArraySerializer(newIndent);
   if (fileExtension === FileExtension.JSONL) {
-    const lines = text.split("\n");
+    const lines = text.split(/\r?\n/);
     const serializedArrayItems = array.map(value => {
         const valueContext = value[contextSymbol];
         const startToken = valueContext.start;
@@ -75,7 +75,7 @@ export default function serializeArrayFromTree(array: ArrayItem[], fileExtension
         // therefore we need to subtract the first line and convert the 1-based index to a 0-based index
         return lines[startToken.line - 2];
       })
-      return serializedArrayItems.join("\n");
+    return serializedArrayItems.join("\n");
   } else {
     const serializedArrayItems = array.map(value => {
       const contextValue = value[contextSymbol];

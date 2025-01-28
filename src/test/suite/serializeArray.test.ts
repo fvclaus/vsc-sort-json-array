@@ -93,7 +93,6 @@ suite('serializeArray', function() {
       0
       {a: [1, 2, 3], o: {foo: "bar"}}
       `, {indentLevel: 0, newIndent: '\t'}, FileExtension.JSONL)
-
   })
 
 });
