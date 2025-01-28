@@ -11,7 +11,7 @@ import {closeActiveEditor, openNewDocument} from '../../textEditorUtils';
 import { undent } from '../../undent';
 import { selectQuickOpenItem } from '../../sortCustom/selectQuickOpenItem';
 
-async function changeToCRLF() {
+async function changeToCRLF(): Promise<void> {
   await vscode.commands.executeCommand("workbench.action.showCommands");
   await selectQuickOpenItem("Change End of Line Sequence")
   await selectQuickOpenItem("CRLF");

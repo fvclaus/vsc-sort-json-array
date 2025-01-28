@@ -10,11 +10,11 @@ export type Pair = [string, unknown];
 
 export const contextSymbol = Symbol("context");
 
+// The array needs to consist of one type to be sorted: 
+// So only object, string, numbers are supported array items. 
+// [null], [undefined] or [true, false] doesn't make any sense
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type ArrayObjectItem = (object | String | Number) & {[contextSymbol]: ValueContext};
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type ArrayItem = (ArrayObjectItem)
+export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext}
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
@@ -43,7 +43,7 @@ class ArrayParser {
       }
 
       if (value !== null && value !== undefined && typeof value === 'object') {
-        const arrayObjectItem = value as ArrayObjectItem;
+        const arrayObjectItem = value as ArrayItem;
         arrayObjectItem[contextSymbol] = valueContext;
         array.push(arrayObjectItem);
       } else {

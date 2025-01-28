@@ -17,7 +17,8 @@ class SortError extends Error {
 function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: ArrayItem[]): Promise<ArrayItem[]> {
   // Must wrap in Promise to receive errors. Thenable has no .catch
   return new Promise((resolve, reject) => {
-    void window.withProgress<void>({
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    window.withProgress<void>({
       location: vscode.ProgressLocation.Window,
       title: `Validating and applying sort module ${moduleName}`,
     }, () => { // Window does not support progress.
