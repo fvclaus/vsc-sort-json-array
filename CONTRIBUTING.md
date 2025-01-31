@@ -1,5 +1,7 @@
 ## Recording demo gifs
+- Create a new profile and switch to it
 - Use the `Light (Visual Studio)` theme
 - Set editor font size to 15px
-- Record about 1000px from the left editor border including the line numbers
-- Resize gif with `gifsicle --resize 700x sortOrderExample.gif > sortOrderExample.gif`
+- Resize the window horizontally to about 800px
+- Record the whole window with the sidebar hidden
+- Resize gif with `gifsicle --resize 800x sortOrderExample.gif > sortOrderExample.gif`

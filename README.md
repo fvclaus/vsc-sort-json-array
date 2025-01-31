@@ -1,22 +1,19 @@
-# Sort JSON array
+# Sort JSON/JS array
 
-Sorts a JSON array by common property or by custom function and replace the array in-place. The JSON array can be selected. If no selection is present, the extension will try to find an array that is enclosed by the current cursor position.
+Sorts a JSON/JS array by common property or by custom function and replace the array in-place. The array can be selected (must include `[` and `]`). If no selection is present, the extension will try to find an array that is enclosed by the current cursor position.
 
-## Supported arrays and file type combinations
+## What is supported?
 
-Definition of array types:
-- loose JSON: Valid JSON array including starting (`[`) and closing (`]`) brackets. Furthermore, the parser can handle:
-  - Single quoted properties. Unquoted properties are currently not supported
-  - Dangling commas
-- JSON lines format: Multiple lines each containing a valid JSON object. Selection of an arbitrary number of lines is supported
+This extension contains its own parser, because `JSON.parse` is too restrictive and `eval` doesn't support comments (which is an upcoming feature)
 
-The following table shows which type of array is supported in which type of file. The table is applied top to bottom and the first match on the current file type will determine the supported array.
-
-| File type    | Supported arrays | Auto-detect behaviour |
-| ------------- |:-------------:|:-------------:|
-| .jsonl      | JSON lines format | Whole file |
-| any  | loose JSON      | Array enlosed by cursor |
-
+- Arrays: 
+  - `number[]`, `string[]` or `object[]`
+  - Dangling `,` commas after the last array item
+- Objects:
+  - Object properties/key can be either unquoted, `'single'` or `"double"` quoted
+- Strings: `'single'` and `"double"` quoted
+- Numbers: Base 10 numbers with optional exponent
+- JSONL: with the same rules as above. Selection of an arbitrary number of lines is supported.
 
 ## Demo
 
