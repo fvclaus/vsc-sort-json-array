@@ -1,5 +1,6 @@
-
 /** Taken from "The Definitive ANTLR 4 Reference" by Terence Parr */
+
+// TODO Support comments
 
 // Derived from http://json.org
 grammar JSON;
@@ -10,11 +11,11 @@ json
 
 value
    : obj
-   | arr       
-   | STRING    
-   | NUMBER    
-   | 'true'      
-   | 'false'     
+   | arr
+   | STRING
+   | NUMBER
+   | 'true'
+   | 'false'
    | 'null'
    | 'undefined'
    ;
@@ -28,7 +29,7 @@ CLOSING_CURLIES: '}';
 OPENING_CURLIES: '{';
 
 pair
-   : STRING COLON value
+   : (IDENTIFIER | STRING) COLON value
    ;
 
 COLON: ':';
@@ -44,26 +45,11 @@ STRING
    ;
 
 fragment STRINGCHARS_DOUBLE
-   : ('\\' (["\\/bfnrt] | UNICODE)) |  ~ ["\\\u0000-\u001F]*
+   : ('\\"' | ~["])*
    ;
 
 fragment STRINGCHARS_SINGLE
-   : ('\\' (['\\/bfnrt] | UNICODE)) |  ~ ['\\\u0000-\u001F]*
-   ;
-
-// TODO Template
-fragment ESC
-   : '\\' (["\\/bfnrt] | UNICODE)
-   ;
-fragment UNICODE
-   : 'u' HEX HEX HEX HEX
-   ;
-fragment HEX
-   : [0-9a-fA-F]
-   ;
-// TODO Template
-fragment SAFECODEPOINT
-   : ~ ["\\\u0000-\u001F]
+  : ('\\\'' | ~['])*
    ;
 
 
@@ -76,17 +62,20 @@ fragment INT
    : '0' | [1-9] [0-9]*
    ;
 
-// no leading zeros
 
 fragment EXP
    : [Ee] [+\-]? INT
    ;
 
-// \- since - means "range" inside [...]
-
 WS
    : [ \t\n\r] + -> skip
    ;
+
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#identifiers
+IDENTIFIER
+  : [$_\p{ID_Start}][$\p{ID_Continue}]*
+;
 
 // handle characters which failed to match any other token
 ErrorCharacter : . ;

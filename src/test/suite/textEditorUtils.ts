@@ -8,16 +8,14 @@ const window = vscode.window;
 
 const ZERO_POSITION = new vscode.Position(0, 0);
 
-export function replaceTextInCurrentEditor(content: string): Promise<void> {
+export async function replaceTextInCurrentEditor(content: string): Promise<void> {
   const editor = (vscode.window.activeTextEditor as vscode.TextEditor);
-  return new Promise((resolve) => {
-    editor.edit((edit) => {
-      console.log(`Replacing in ${editor.document.fileName}`);
-      const all = new vscode.Range(ZERO_POSITION, new vscode.Position(editor.document.lineCount + 1, 0));
-      edit.replace(all, content);
-      nextTick().then(resolve);
-    });
+  await editor.edit((edit) => {
+    const all = new vscode.Range(ZERO_POSITION, new vscode.Position(editor.document.lineCount + 1, 0));
+    edit.replace(all, content);
+    console.log(`Replacing in ${editor.document.fileName}`);
   });
+  void nextTick();
 }
 
 export async function closeActiveEditor(): Promise<void> {
@@ -38,9 +36,9 @@ export async function closeActiveEditor(): Promise<void> {
   }
 }
 
-export async function openNewJsonDocument(text: string): Promise<{document: vscode.TextDocument, editor: TextEditor}> {
+export async function openNewDocument(text: string, suffix: string): Promise<{document: vscode.TextDocument, editor: TextEditor}> {
   const tempFile = temp.openSync({
-    suffix: '.json',
+    suffix
   });
   fs.openSync(tempFile.path, 'a+');
 
@@ -49,8 +47,14 @@ export async function openNewJsonDocument(text: string): Promise<{document: vsco
   // Mark file as dirty to bypass preview mode that would open the sort module in the current tab.
   await replaceTextInCurrentEditor(text);
   editor.selection = new vscode.Selection(ZERO_POSITION, ZERO_POSITION);
+  editor.options.tabSize = 2;
+  editor.options.insertSpaces = true;
   return {
     document,
     editor,
   };
+}
+
+export async function openNewJsonDocument(text: string): Promise<{document: vscode.TextDocument, editor: TextEditor}> {
+  return openNewDocument(text, '.json')
 }

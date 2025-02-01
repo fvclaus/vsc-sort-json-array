@@ -6,13 +6,34 @@ import TextEditor = vscode.TextEditor;
 import {sortCustom} from './sortCustom';
 import {sortAscending, sortDescending} from './sortOrder';
 import {searchEnclosingArray} from './searchEnclosingArray';
-import parseArray from './parseArray';
+import processAndParseArray from './processAndParseArray';
 import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
+import { ArrayItem, convertToLiteralValues } from './parser/parseArray';
+
+
+function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vscode.Range): {indentLevel: number, newIndent: string } {
+  const options = editor.options;
+  
+  const startingLine = editor.document.lineAt(selection.start.line);
+  const match = /^(\s)*/.exec(startingLine.text);
+  let indentLevel = 0;
+  // indentSize was released in 1.74: https://code.visualstudio.com/updates/v1_74#_new-indent-size-setting
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const indentOrTabSize = 'indentSize' in options? (options as any).indentSize : options.tabSize;
+  if (match !== null) {
+    // .replaceAll not available in 1.44.0
+    const indent = match[0].replace(/\t/g, " ".repeat(indentOrTabSize));
+    indentLevel = Math.ceil(indent.length / indentOrTabSize);
+  }
+
+  const indentType = options.insertSpaces === false? '\t' : ' '.repeat(indentOrTabSize);
+  return {indentLevel, newIndent: indentType};
+}
 
 // Return value was implemented to improve testability.
 function sort(
-    sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: unknown[]) => Promise<unknown[] | undefined>):
+    sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined>):
     () => Promise<unknown[] | undefined> {
   return async function() {
     const fail = (error: string | Error | string[]): undefined => {
@@ -47,23 +68,29 @@ function sort(
         }
 
         const text = document.getText(selection);
-        const parsedArray = parseArray(text, fileExtension);
+        const parsedArray = processAndParseArray(text, fileExtension);
+        
 
-        const sortedArray = await sortFn(window, workspace, parsedArray);
-        if (sortedArray == null) {
+        const sortedArray  = await sortFn(window, workspace, parsedArray);
+        if (sortedArray === undefined) {
           // User aborted somewhere
           return;
         }
+        const serializedArray = serializeArray(sortedArray, fileExtension, text, 
+            calculateIndentOfStartingLine(editor, selection));
+
+        // textEditor.edit doesn't work for custom sort, because the editor is not active when the sorting is triggered.
+        // WorkspaceEdit takes care of line endings
         const workspaceEdit = new vscode.WorkspaceEdit();
-        const serializedArray = serializeArray(sortedArray, fileExtension,
-                        typeof editor.options.tabSize === 'number' ? editor.options.tabSize : undefined);
         workspaceEdit.replace(editor.document.uri, selection, serializedArray);
         const success = await workspace.applyEdit(workspaceEdit);
         if (success) {
           // Restore cursor position
           editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
-          window.showInformationMessage('Sucessfully sorted array!');
-          return sortedArray;
+          // Must not await this otherwise it will hang until the user clicks it away.
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          window.showInformationMessage('Successfully sorted array!');
+          return convertToLiteralValues(sortedArray);
         } else {
           return fail('Could not apply workspace edit');
         }

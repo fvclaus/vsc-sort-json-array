@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import {triggerSortCommandExpectSuccess} from '../triggerSortCommandExpectSucccess';
+import {triggerSortJsonExpectSuccess} from '../triggerSortExpectSuccess';
 
 import {afterEach, after, before, beforeEach} from 'mocha';
 
@@ -16,6 +16,7 @@ import {getGlobalStoragePath} from './getGlobalStoragePath';
 import {replaceTextInCurrentEditor, closeActiveEditor} from '../textEditorUtils';
 import {rm, mvDir, createSourceModulePath} from './storagePathFsUtils';
 import {sleep} from '../sleep';
+import { selectQuickOpenItem } from './selectQuickOpenItem';
 
 
 const B2 = {
@@ -59,14 +60,6 @@ async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: s
   await mvDir(tempDir, globalStoragePath);
 }
 
-
-async function selectQuickOpenItem(item: string): Promise<void> {
-  await vscode.commands.executeCommand('workbench.action.focusQuickOpen');
-  await vscode.env.clipboard.writeText(item);
-  await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-  await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
-  await nextTick();
-}
 
 suite('Sort custom', function() {
   let globalStoragePath: string;
@@ -116,7 +109,7 @@ suite('Sort custom', function() {
 
   test('should sort using custom function', async function() {
     createTestModule();
-    await triggerSortCommandExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
+    await triggerSortJsonExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
       await selectQuickOpenItem(testModuleName);
       await selectQuickOpenItem('edit');
       const sortByDecadeAndPs = `
@@ -160,6 +153,9 @@ suite('Sort custom', function() {
     });
     await vscode.window.showTextDocument(document);
     await vscode.commands.executeCommand('editor.action.selectAll');
+    // Must not await, because this will only resolve once the user navigated 
+    // through all menus and the sort is finished.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     vscode.commands.executeCommand('extension.sortJsonArrayCustom');
     // Wait for quick open
     await nextTick();

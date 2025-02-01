@@ -6,15 +6,55 @@ import {JSONParser, JsonContext, ObjContext, PairContext, ArrContext, ValueConte
 import {JSONLexer} from './generated/JSONLexer';
 import {ATNSimulator} from 'antlr4ts/atn/ATNSimulator';
 
+export type Pair = [string, unknown];
 
-type Pair = [string, unknown];
+export const contextSymbol = Symbol("context");
 
-class JsonVisitor {
-  visitJson(ctx: JsonContext): unknown[] {
+// The array needs to consist of one type to be sorted: 
+// So only object, string, numbers are supported array items. 
+// [null], [undefined] or [true, false] doesn't make any sense
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext}
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
+  return array.map(el => {
+    if (el instanceof String || el instanceof Number) {
+      // Can't use === on String() objects
+      return el.valueOf();
+    }
+    return el;
+  })
+}
+
+class ArrayParser {
+
+  visitJson(ctx: JsonContext): ArrayItem[] {
     const arrContext = ctx.arr();
-    return this.visitArr(arrContext);
+    const array: ArrayItem[] = []
+    const valueContexts = arrContext.value();
+    let i = 0;
+    for (const valueContext of valueContexts) {
+      let value = this.visitValue(valueContext);
+      if (typeof value === 'string') {
+        value = new String(value);
+      } else if (typeof value === 'number') {
+        value = new Number(value);
+      }
+
+      if (value !== null && value !== undefined && typeof value === 'object') {
+        const arrayObjectItem = value as ArrayItem;
+        arrayObjectItem[contextSymbol] = valueContext;
+        array.push(arrayObjectItem);
+      } else {
+        throw new Error(`Encountered value  '${value}' at position ${i}, but only strings, objects and numbers are supported.`)
+      }
+      i++;
+    }
+
+    return array;
   }
-  visitObj(ctx: ObjContext): unknown {
+  visitObj(ctx: ObjContext): object {
     return ctx.pair()
         .map((pair) => this.visitPair(pair))
         .reduce((obj, pair) => {
@@ -23,41 +63,52 @@ class JsonVisitor {
         }, {} as {[key: string]: unknown});
   }
   visitPair(ctx: PairContext): Pair {
-    return [this.evalTerminalNode<string>(ctx.STRING()), this.visitValue(ctx.value())];
+    if (ctx.children == null || ctx.children.length !== 3) {
+      throw new Error('Expecting exactly three children');
+    }
+
+    if (!(ctx.children[0] instanceof TerminalNode)) {
+      throw new Error(`Expected first child of pair to be a terminal node.`);
+    }
+
+    const key = this.visitObjectKey(ctx.children[0]);
+
+    return [key, this.visitValue(ctx.value())];
   }
   visitArr(ctx: ArrContext): unknown[] {
-    return ctx.value()
-        .map((value) => this.visitValue(value));
+    const values = ctx.value();
+
+    const array:unknown[] = []
+    for (const value of values) {
+      array.push(this.visitValue(value));
+    }
+    return array;
   }
-  visitValue(ctx: ValueContext): unknown {
+  visitValue(ctx: ValueContext): object | string | number | null | undefined | boolean {
     if (ctx.children == null || ctx.children.length !== 1) {
       throw new Error('Expecting exactly one child');
     }
-    if (ctx.children != null) {
-      for (const child of ctx.children) {
-        if (child instanceof TerminalNode) {
-          switch (child.symbol.type) {
-            case JSONParser.NUMBER:
-              return parseFloat(child.symbol.text as string);
-            case JSONParser.STRING:
-              return this.makeString(child);
-          }
-          switch (child.text) {
-            case 'null':
-              return null;
-            case 'true':
-              return true;
-            case 'false':
-              return false;
-            case 'undefined':
-              return undefined;
-          }
-        }
-      }
-    }
+
     const child = ctx.getChild(0);
 
-    if (child instanceof ObjContext) {
+    if (child instanceof TerminalNode) {
+      switch (child.symbol.type) {
+        case JSONParser.NUMBER:
+          return parseFloat(child.symbol.text as string);
+        case JSONParser.STRING:
+          return this.stringTextToStringValue(child);
+      }
+      switch (child.text) {
+        case 'null':
+          return null;
+        case 'true':
+          return true;
+        case 'false':
+          return false;
+        case 'undefined':
+          return undefined;
+      }
+    } else if (child instanceof ObjContext) {
       return this.visitObj(child);
     } else if (child instanceof ArrContext) {
       return this.visitArr(child);
@@ -66,80 +117,29 @@ class JsonVisitor {
     }
   }
 
-  evalTerminalNode<T= unknown>(ctx: TerminalNode): T {
-    return eval(ctx.toString());
-  }
-
-  makeString(ctx: TerminalNode): string {
-    // Remove quotes.
-    const stringText = ctx.text.slice(1, ctx.toString().length - 1);
-    // This is about 10x slower than eval() when converting unicode characters.
-    // It is about 2x slower when converting ASCII.
-    // I have to decided to keep it, because it aligns better with the grammar.
-    return stringTextToStringValue(stringText);
-  }
-}
-
-const ESCAPE_SEQUENCE_TO_VALUE: {[key in string]: string} = {
-  'b': '\b',
-  't': '\t',
-  'n': '\n',
-  // TODO Support
-  'v': '\v',
-  'f': '\f',
-  'r': '\r',
-};
-
-export enum STRING_TEXT_MODE {
-  TEXT,
-  ESCAPE,
-  UNICODE
-}
-
-function stringTextToStringValue(stringText: string) : string {
-  let mode : STRING_TEXT_MODE = STRING_TEXT_MODE.TEXT;
-  let stringValue = '';
-  for (let i = 0; i < stringText.length; i++) {
-    const currentChar = stringText[i];
-    switch (mode) {
-      case STRING_TEXT_MODE.TEXT: {
-        if (currentChar == '\\') {
-          mode = STRING_TEXT_MODE.ESCAPE;
-        } else {
-          stringValue += currentChar;
-        }
-        break;
-      }
-      case STRING_TEXT_MODE.ESCAPE: {
-        if (currentChar == 'u') {
-          mode = STRING_TEXT_MODE.UNICODE;
-        } else {
-          stringValue += ESCAPE_SEQUENCE_TO_VALUE[currentChar] || currentChar;
-          mode = STRING_TEXT_MODE.TEXT;
-        }
-        break;
-      }
-      case STRING_TEXT_MODE.UNICODE: {
-        const hex = parseInt(stringText.substr(i, 4), 16);
-        i += 3;
-        stringValue += String.fromCodePoint(hex);
-        mode = STRING_TEXT_MODE.TEXT;
-        break;
-      }
-      default: {
-        throw new Error(`Unknown mode ${mode}`);
+  visitObjectKey(ctx: TerminalNode): string {
+    switch (ctx.symbol.type) {
+      case JSONParser.IDENTIFIER: {
+        return ctx.toString();
+      } case JSONParser.STRING: {
+        return this.stringTextToStringValue(ctx);
+      } default: {
+        throw new Error(`Unknown type ${ctx.symbol.type} for node ${ctx.toString()}`)
       }
     }
   }
-  return stringValue;
+
+  stringTextToStringValue(ctx: TerminalNode): string {
+    // Remove quotes.
+    const stringText = ctx.text.slice(1, ctx.toString().length - 1);
+    return stringText;
+  }
 }
 
 
-export {stringTextToStringValue};
 
-
-// Generate antlr classes with npm run antrl4
-export default function parseArray(text: string): unknown[] {
+// Generate antlr classes with npm run antlr4
+export default function parseArray(text: string): ArrayItem[] {
   const inputStream = CharStreams.fromString(text);
   const lexer = new JSONLexer(inputStream);
   lexer.removeErrorListeners();
@@ -157,6 +157,6 @@ export default function parseArray(text: string): unknown[] {
   if (errors.length > 0) {
     throw errors[0];
   }
-  const visitor = new JsonVisitor();
+  const visitor = new ArrayParser();
   return visitor.visitJson(jsonContext);
 }

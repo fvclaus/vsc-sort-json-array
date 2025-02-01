@@ -10,7 +10,7 @@ const SORT_CONFIG_ASCENDING: SortConfiguration = {order: SortOrder.ascending, co
 const SORT_ORDER_DESCENDING: SortConfiguration = {order: SortOrder.descending, collator: new Intl.Collator()};
 
 suite('Sort object array', function() {
-  test('should return undeterminstic sort order', function() {
+  test('should return nondeterministic sort order', function() {
     expect(sortObjectArray(ALL, ['name'], SORT_CONFIG_ASCENDING)).to.be.false;
   });
 

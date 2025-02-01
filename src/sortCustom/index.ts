@@ -5,6 +5,7 @@ import * as glob from 'glob';
 import * as fs from 'fs';
 import * as path from 'path';
 import {createNewSortModule} from './generateUniqueSortModuleName';
+import { ArrayItem } from '../parser/parseArray';
 
 
 class SortError extends Error {
@@ -13,9 +14,10 @@ class SortError extends Error {
   }
 }
 
-function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: unknown[]): Promise<unknown[]> {
+function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: ArrayItem[]): Promise<ArrayItem[]> {
   // Must wrap in Promise to receive errors. Thenable has no .catch
   return new Promise((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     window.withProgress<void>({
       location: vscode.ProgressLocation.Window,
       title: `Validating and applying sort module ${moduleName}`,
@@ -61,13 +63,14 @@ function executeAction({
     outputChannel: vscode.OutputChannel,
     moduleChoice: vscode.QuickPickItem,
     extensionContext: vscode.ExtensionContext,
-     array: unknown[]}): Promise<unknown[] | undefined> {
+     array: ArrayItem[]}): Promise<ArrayItem[] | undefined> {
   // Promise is necessary to integrate with .onDidSaveTextDocument callback.
   // It is also more flexible than async
   return new Promise((resolve, reject) => {
     switch (actionChoice) {
       case 'edit': {
         fs.openSync(modulePath, 'a+');
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         workspace.openTextDocument(modulePath)
             .then((document) => window.showTextDocument(document))
             .then(() => {
@@ -79,6 +82,7 @@ function executeAction({
                         outputChannel.appendLine('Sort preview:');
                         outputChannel.appendLine(JSON.stringify(sortedArray, null, 2));
                         outputChannel.show(true);
+                        // eslint-disable-next-line @typescript-eslint/no-floating-promises
                         window.showInformationMessage(`Module ${moduleName} is valid`);
                       })
                       .catch((error: SortError) => error.errors.forEach(window.showErrorMessage));
@@ -103,6 +107,7 @@ function executeAction({
             .catch(reject);
         break;
       case 'rename': {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         window.showInputBox({
           prompt: 'New sort module name including .ts',
           value: moduleChoice.label,
@@ -116,8 +121,10 @@ function executeAction({
           if (newModuleName != null) {
             try {
               fs.renameSync(modulePath, path.join(extensionContext.globalStoragePath, newModuleName));
+              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               window.showInformationMessage(`Renamed module ${moduleName} to ${newModuleName}.`);
             } catch (e) {
+              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               window.showErrorMessage(`Cannot rename module ${moduleName}: ${e}`);
             }
             pickModuleAndAction(extensionContext, outputChannel, window, workspace, array)
@@ -136,8 +143,10 @@ function executeAction({
           } catch (e) {
             // Ignore errors
           }
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
           window.showInformationMessage(`Deleted module ${moduleChoice.label}.`);
         } catch (e) {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
           window.showErrorMessage(`Cannot delete module ${moduleChoice.label}: ${e}`);
         }
         pickModuleAndAction(extensionContext, outputChannel, window, workspace, array)
@@ -153,7 +162,7 @@ async function pickModuleAndAction(
     extensionContext: vscode.ExtensionContext,
     outputChannel: vscode.OutputChannel,
     window: typeof vscode.window,
-    workspace: typeof vscode.workspace, array: unknown[]): Promise<unknown[] | undefined> {
+    workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
   const sortModules: vscode.QuickPickItem[] = glob.sync('*.ts', {
     cwd: extensionContext.globalStoragePath,
   })
@@ -216,7 +225,7 @@ async function pickModuleAndAction(
 }
 
 export function sortCustom(extensionContext: vscode.ExtensionContext):
- (window: typeof vscode.window, workspace: typeof vscode.workspace, array: unknown[]) => Promise<unknown[] | undefined> {
+ (window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined> {
   return (window, workspace, array) => {
     if (!fs.existsSync(extensionContext.globalStoragePath)) {
       fs.mkdirSync(extensionContext.globalStoragePath);

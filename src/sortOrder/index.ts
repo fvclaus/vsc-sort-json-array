@@ -5,14 +5,15 @@ import * as vscode from 'vscode';
 import {GenericObject} from './sortObjects/GenericObject';
 import {genericSortFn} from './sortNumberOrStrings/genericSortFn';
 import {stringSortFn} from './sortNumberOrStrings/stringSortFn';
+import { ArrayItem } from '../parser/parseArray';
 
 
 type CollationLocale = string[];
-type CollactionCaseFirst = 'upper' | 'lower' | 'false'
+type CollationCaseFirst = 'upper' | 'lower' | 'false'
 export interface ExtensionConfiguration {
   collation: {
     ignorePunctuation: boolean,
-    caseFirst: CollactionCaseFirst
+    caseFirst: CollationCaseFirst
     numeric: boolean,
     locales: CollationLocale
   }
@@ -28,7 +29,7 @@ function getExtensionConfiguration() : ExtensionConfiguration {
   return {
     collation: {
       ignorePunctuation: config.get('ignorePunctuation') as boolean,
-      caseFirst: config.get('caseFirst') as CollactionCaseFirst,
+      caseFirst: config.get('caseFirst') as CollationCaseFirst,
       numeric: config.get('numeric') as boolean,
       locales: config.get('locales') as CollationLocale,
     },
@@ -40,7 +41,7 @@ export interface SortConfiguration {
   collator: Intl.Collator
 }
 
-async function sortArray(window: typeof vscode.window, array: unknown[], sortOrder: SortOrder): Promise<unknown[] | undefined> {
+async function sortArray(window: typeof vscode.window, array: ArrayItem[], sortOrder: SortOrder): Promise<ArrayItem[] | undefined> {
   const arrayType = determineArrayType(array);
   const extensionConfiguration = getExtensionConfiguration();
   const sortConfiguration: SortConfiguration = {
@@ -51,20 +52,21 @@ async function sortArray(window: typeof vscode.window, array: unknown[], sortOrd
   };
   switch (arrayType) {
     case ArrayType.object:
-      return sortObjects(window, array as GenericObject[], sortConfiguration);
+      return sortObjects(window, array as GenericObject[], sortConfiguration) as Promise<ArrayItem[]>;
     case ArrayType.number:
       return array.sort(genericSortFn(sortConfiguration));
     case ArrayType.string:
-      return (array as string[]).sort(stringSortFn(sortConfiguration));
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      return (array as String[]).sort(stringSortFn(sortConfiguration)) as ArrayItem[];
     default:
-      throw new Error(`This array is not yet supported.`);
+      throw new Error(`This extension can only support arrays that contain only objects, only numbers or only strings.`);
   }
 }
 
-export function sortAscending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: unknown[]): Promise<unknown[] | undefined> {
+export function sortAscending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
   return sortArray(window, array, SortOrder.ascending);
 }
 
-export function sortDescending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: unknown[]): Promise<unknown[] | undefined> {
+export function sortDescending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
   return sortArray(window, array, SortOrder.descending);
 }

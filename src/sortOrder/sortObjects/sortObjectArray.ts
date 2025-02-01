@@ -14,7 +14,7 @@ function sortByProperty(a: GenericObject, b: GenericObject, property: string, so
 }
 
 export function sortObjectArray(arrayToSort: GenericObject[], selectedProperties: string[], sortConfiguration: SortConfiguration): boolean {
-  let sortIsDeterminstic = true;
+  let sortIsDeterministic = true;
   arrayToSort.sort((a, b) => {
     for (const selectedProperty of selectedProperties) {
       const order = sortByProperty(a, b, selectedProperty, sortConfiguration);
@@ -22,8 +22,8 @@ export function sortObjectArray(arrayToSort: GenericObject[], selectedProperties
         return order;
       }
     }
-    sortIsDeterminstic = false;
+    sortIsDeterministic = false;
     return 0;
   });
-  return sortIsDeterminstic;
+  return sortIsDeterministic;
 }

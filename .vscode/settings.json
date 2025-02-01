@@ -7,5 +7,24 @@
         "out": true // set this to false to include "out" folder in search results
     },
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.tsc.autoDetect": "off"
+    "typescript.tsc.autoDetect": "off",
+    "eslint.codeActionsOnSave.mode": "all",
+		
+		"[typescript]": {
+      "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+			"editor.codeActionsOnSave": [
+				"source.fixAll.eslint"
+			],
+		},
+    // "mochaExplorer.files": "out/test/suite/parser/**/*.js",
+    // "mochaExplorer.require": "source-map-support/register",
+    // "mochaExplorer.watch": "out/test/suite/parser/**/*.js",
+    "mochaExplorer.files": "src/test/**/{parseArray,undent,processAndParseArray,serializeArray}.test.ts",
+    "mochaExplorer.require": "ts-node/register",
+    "cSpell.words": [
+      "antlr",
+      "CURLIES",
+      "STRINGCHARS",
+      "undent"
+    ]
 }
