@@ -1,6 +1,6 @@
 <a name="4.1.0"></a>
 ## 4.1.0
-* Improves quickpick text #27
+* Improves text for property selection #27
 
 
 | Before | After |
