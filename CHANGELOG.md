@@ -1,4 +1,16 @@
-<a name="4.0.0">
+<a name="4.1.0"></a>
+## 4.1.0
+* Improves quickpick text #27
+
+
+| Before | After |
+| --- | --- | 
+| ![quickpick first selection before](doc/sort_quickpick01_4.0.0.png)| ![quickpick first selection after](doc/sort_quickpick01_4.1.0.png) |
+| ![quickpick second selection before](doc/sort_quickpick02_4.0.0.png)| ![quickpick second selection after](doc/sort_quickpick02_4.1.0.png) |
+
+
+
+<a name="4.0.0"></a>
 ## 4.0.0
 * Supports unquoted object properties #7
 * Updates dependencies to fix audit issues

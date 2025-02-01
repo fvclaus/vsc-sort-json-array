@@ -13,12 +13,30 @@ async function pickPropertiesIfNecessary(window: typeof Window, selectedProperti
   const remainingQuickPickItems = quickPickItems.filter((item) => selectedProperties.indexOf(item.label) === -1);
   // Don't show picker if only one item is remaining.
   if (remainingQuickPickItems.length > 1) {
-    return window.showQuickPick(remainingQuickPickItems, {
-      canPickMany: false,
-      placeHolder: selectedProperties.length === 0 ?
-        'Pick property from list to define sort order.' :
-         'Sorting cannot produce determinable result. Please pick another property.',
+    const quickPick = window.createQuickPick();
+    quickPick.title = selectedProperties.length === 0 ? 'Pick property from list to define sort order' :
+      `Pick an additional property to produce a deterministic sort`;
+
+    if (selectedProperties.length > 0) {
+      quickPick.placeholder = "There are array items with the same value for " +
+        selectedProperties.map(p => `.${p}`).join(',');
+    }
+    quickPick.items = remainingQuickPickItems;
+    quickPick.canSelectMany = false;
+    quickPick.show();
+
+    return new Promise<vscode.QuickPickItem | undefined>((resolve) => {
+      quickPick.onDidAccept(() => {
+        const selectedItem = quickPick.selectedItems[0];
+        quickPick.hide();
+        resolve(selectedItem);
+      });
+      quickPick.onDidHide(() => {
+        resolve(undefined);
+      });
     });
+  
+    
   } else {
     return remainingQuickPickItems[0];
   }
