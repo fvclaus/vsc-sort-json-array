@@ -1,7 +1,21 @@
 # Sort JSON/JS array
 ![test status badge](https://github.com/fvclaus/vsc-sort-json-array/actions/workflows/ci.yml/badge.svg?branch=master)
+<a href="https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array">
+    <img alt="VS Code Marketplace Installs" src="https://img.shields.io/visual-studio-marketplace/i/fvclaus.sort-json-array"></a>
 
 Sorts a JSON/JS array by common property or by custom function and replace the array in-place. The array can be selected (must include `[` and `]`). If no selection is present, the extension will try to find an array that is enclosed by the current cursor position.
+
+## Installation
+
+Install through VS Code extensions. Search for `sort js array`
+
+[Visual Studio Code Market Place: Sort JSON/JS array](https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array)
+
+Can also be installed in VS Code: Launch VS Code Quick Open (Ctrl+P), paste the following command, and press enter.
+
+```
+ext install fvclaus.sort-json-array
+```
 
 ## What is supported?
 
