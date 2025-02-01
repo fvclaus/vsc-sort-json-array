@@ -1,8 +1,8 @@
 {
   "name": "sort-json-array",
-  "displayName": "Sort JSON array",
-  "description": "Sorts any type of json array by value, object property or custom function",
-  "version": "3.1.0",
+  "displayName": "Sort JSON/JS array",
+  "description": "Sorts JSON/JS arrays by value, object property or custom function",
+  "version": "4.0.0",
   "publisher": "fvclaus",
   "license": "BSD-3-Clause",
   "engines": {
@@ -96,7 +96,8 @@
     "test:unit": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.test.js'",
     "test:benchmark": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.benchmark-test.js'",
     "lint": "eslint \"src/**/*.ts\"",
-    "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4"
+    "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4",
+    "vsce:package": "npx vsce package"
   },
   "dependencies": {
     "antlr4ts": "^0.5.0-alpha.4",
