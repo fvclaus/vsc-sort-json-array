@@ -11,11 +11,11 @@ export async function showQuickPick<T extends vscode.QuickPickItem>(extensionCon
       quickPick.onDidAccept(async () => {
         const selectedItem = quickPick.selectedItems[0];
         quickPick.hide();
-        await extensionContext.workspaceState.update(QUICK_PICK_STATE_NAME, true);
+        await extensionContext.workspaceState.update(QUICK_PICK_STATE_NAME, false);
         resolve(selectedItem);
       });
       quickPick.onDidHide(async () => {
-        await extensionContext.workspaceState.update(QUICK_PICK_STATE_NAME, true);
+        await extensionContext.workspaceState.update(QUICK_PICK_STATE_NAME, false);
         resolve(undefined);
       });
     });
