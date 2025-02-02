@@ -4,12 +4,12 @@ export const window = vscode.window;
 
 import chai = require('chai');
 import { setupSpies } from './setupSpies';
+import { waitForActiveExtension } from './waitForActiveExtension';
 const expect = chai.expect;
-
-
 
 export async function triggerSortExpectFailure(content: string, expectedErrorMessage: RegExp): Promise<void> {
   const {showErrorMessageSpy} = setupSpies();
+  await waitForActiveExtension();
   const document = await vscode.workspace.openTextDocument({
     language: 'JSON',
     content: content,

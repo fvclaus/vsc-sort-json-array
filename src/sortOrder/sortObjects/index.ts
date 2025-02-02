@@ -7,8 +7,10 @@ import QuickPickItem = vscode.QuickPickItem;
 import {findCommonProperties} from './findCommonProperties';
 import {GenericObject} from './GenericObject';
 import {SortConfiguration} from '..';
+import {showQuickPick} from '../../showQuickPick';
 
-async function pickPropertiesIfNecessary(window: typeof Window, selectedProperties: string[], quickPickItems: QuickPickItem[]):
+async function pickPropertiesIfNecessary(extensionContext: vscode.ExtensionContext, window: typeof Window, 
+  selectedProperties: string[], quickPickItems: QuickPickItem[]):
  Promise<vscode.QuickPickItem | undefined> {
   const remainingQuickPickItems = quickPickItems.filter((item) => selectedProperties.indexOf(item.label) === -1);
   // Don't show picker if only one item is remaining.
@@ -23,28 +25,16 @@ async function pickPropertiesIfNecessary(window: typeof Window, selectedProperti
     }
     quickPick.items = remainingQuickPickItems;
     quickPick.canSelectMany = false;
-    quickPick.show();
-
-    return new Promise<vscode.QuickPickItem | undefined>((resolve) => {
-      quickPick.onDidAccept(() => {
-        const selectedItem = quickPick.selectedItems[0];
-        quickPick.hide();
-        resolve(selectedItem);
-      });
-      quickPick.onDidHide(() => {
-        resolve(undefined);
-      });
-    });
-  
-    
+    return showQuickPick(extensionContext, quickPick);
   } else {
     return remainingQuickPickItems[0];
   }
 }
 async function pickUntilSortIsDeterministic(
-    window: typeof Window, selectedProperties: string[], quickPickItems: QuickPickItem[], arrayToSort: GenericObject[], sortConfiguration: SortConfiguration):
+    extensionContext: vscode.ExtensionContext, window: typeof Window, selectedProperties: string[], 
+    quickPickItems: QuickPickItem[], arrayToSort: GenericObject[], sortConfiguration: SortConfiguration):
      Promise<GenericObject[] | undefined> {
-  const selectedItem = await pickPropertiesIfNecessary(window, selectedProperties, quickPickItems);
+  const selectedItem = await pickPropertiesIfNecessary(extensionContext, window, selectedProperties, quickPickItems);
   // undefined if user uses ESC
   if (selectedItem != null) {
     const selectedProperty = selectedItem.label;
@@ -54,11 +44,12 @@ async function pickUntilSortIsDeterministic(
     if (sortIsDeterministic || selectedProperties.length === quickPickItems.length) {
       return arrayToSort;
     } else {
-      return await pickUntilSortIsDeterministic(window, selectedProperties, quickPickItems, arrayToSort, sortConfiguration);
+      return await pickUntilSortIsDeterministic(extensionContext, window, selectedProperties, quickPickItems, arrayToSort, sortConfiguration);
     }
   }
 }
-export async function sortObjects(window: typeof Window, array: GenericObject[], sortConfiguration: SortConfiguration): Promise<GenericObject[] | undefined> {
+export async function sortObjects(extensionContext: vscode.ExtensionContext, window: typeof Window, 
+  array: GenericObject[], sortConfiguration: SortConfiguration): Promise<GenericObject[] | undefined> {
   const commonProperties = findCommonProperties(array);
   const quickPickItems = Array.from(commonProperties)
       .map((property) => ({
@@ -69,6 +60,6 @@ export async function sortObjects(window: typeof Window, array: GenericObject[],
   if (quickPickItems.length === 0) {
     throw new Error(`There are no properties all objects of this array have in common.`);
   } else {
-    return await pickUntilSortIsDeterministic(window, [], quickPickItems, array.slice(0), sortConfiguration);
+    return await pickUntilSortIsDeterministic(extensionContext, window, [], quickPickItems, array.slice(0), sortConfiguration);
   }
 }

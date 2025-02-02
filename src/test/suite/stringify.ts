@@ -1,9 +1,5 @@
 import {FileExtension} from '../../fileExtension';
 
-function stringify(a: unknown): string {
-  return JSON.stringify(a, null, 2);
-}
-
 export default function stringifyArray(array: unknown[], fileExtension: FileExtension): string {
   switch (fileExtension) {
     case FileExtension.JSONL:
@@ -11,6 +7,6 @@ export default function stringifyArray(array: unknown[], fileExtension: FileExte
           .map((a) => JSON.stringify(a))
           .join('\n');
     default:
-      return stringify(array);
+      return JSON.stringify(array, null, 2);
   }
 }

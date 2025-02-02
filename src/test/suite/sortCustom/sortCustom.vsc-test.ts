@@ -17,6 +17,8 @@ import {replaceTextInCurrentEditor, closeActiveEditor} from '../textEditorUtils'
 import {rm, mvDir, createSourceModulePath} from './storagePathFsUtils';
 import {sleep} from '../sleep';
 import { selectQuickOpenItem } from './selectQuickOpenItem';
+import { waitForActiveExtension } from '../waitForActiveExtension';
+import { waitForQuickPick } from '../waitForQuickPick';
 
 
 const B2 = {
@@ -134,7 +136,7 @@ suite('Sort custom', function() {
                     return decadeDifference;
                 }
             }`;
-      // Wait for text editor to become availble through vscode.window.activeTextEditor
+      // Wait for text editor to become available through vscode.window.activeTextEditor
       await nextTick();
       // Wait for new sort module to become open
       await replaceTextInCurrentEditor(sortByDecadeAndPs);
@@ -146,6 +148,7 @@ suite('Sort custom', function() {
   });
 
   async function setupCommandTest(): Promise<void> {
+    const extension = await waitForActiveExtension();
     createTestModule();
     const document = await vscode.workspace.openTextDocument({
       language: 'JSON',
@@ -157,8 +160,7 @@ suite('Sort custom', function() {
     // through all menus and the sort is finished.
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     vscode.commands.executeCommand('extension.sortJsonArrayCustom');
-    // Wait for quick open
-    await nextTick();
+    await waitForQuickPick(extension);
   }
 
   test('should rename module', async function() {

@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {createNewSortModule} from './generateUniqueSortModuleName';
 import { ArrayItem } from '../parser/parseArray';
+import { showQuickPick } from '../showQuickPick';
 
 
 class SortError extends Error {
@@ -187,9 +188,10 @@ async function pickModuleAndAction(
   let moduleChoice: vscode.QuickPickItem | undefined;
   if (sortModules.length > 0) {
     // TODO Extract to constant.
-    moduleChoice = await window.showQuickPick([...sortModules, {label: 'New sort module'}], {
-      placeHolder: 'Pick a sort module',
-    });
+    const quickPick = window.createQuickPick();
+    quickPick.placeholder = 'Pick a sort module';
+    quickPick.items = [...sortModules, {label: 'New sort module'}];
+    moduleChoice = await showQuickPick(extensionContext, quickPick);
   } else {
     moduleChoice = {label: 'New sort module'};
   }
@@ -198,21 +200,22 @@ async function pickModuleAndAction(
     return;
   }
   let moduleName: string = moduleChoice.label;
-  let actionChoice: string | undefined;
+  let actionChoice: vscode.QuickPickItem | undefined;
   if (moduleName === 'New sort module') {
     moduleName = createNewSortModule(extensionContext.globalStoragePath);
-    actionChoice = 'edit';
+    actionChoice = {label: 'edit'};
   } else {
-    actionChoice = await window.showQuickPick(['apply', 'edit', 'rename', 'delete'], {
-      placeHolder: 'Pick an action',
-    });
+    const quickPick = window.createQuickPick();
+    quickPick.placeholder = 'Pick an action';
+    quickPick.items = ['apply', 'edit', 'rename', 'delete'].map(a => ({label: a}));
+    actionChoice = await showQuickPick(extensionContext, quickPick);
   }
   if (actionChoice == null) {
     return;
   }
   const modulePath = path.join(extensionContext.globalStoragePath, moduleName);
   return executeAction({
-    actionChoice,
+    actionChoice: actionChoice.label,
     moduleName,
     modulePath,
     window,
@@ -224,13 +227,11 @@ async function pickModuleAndAction(
   });
 }
 
-export function sortCustom(extensionContext: vscode.ExtensionContext):
- (window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined> {
-  return (window, workspace, array) => {
-    if (!fs.existsSync(extensionContext.globalStoragePath)) {
-      fs.mkdirSync(extensionContext.globalStoragePath);
-    }
-    const outputChannel = window.createOutputChannel('Sort preview');
-    return pickModuleAndAction(extensionContext, outputChannel, window, workspace, array);
-  };
+export function sortCustom(extensionContext: vscode.ExtensionContext,
+  window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
+  if (!fs.existsSync(extensionContext.globalStoragePath)) {
+    fs.mkdirSync(extensionContext.globalStoragePath);
+  }
+  const outputChannel = window.createOutputChannel('Sort preview');
+  return pickModuleAndAction(extensionContext, outputChannel, window, workspace, array);
 }
