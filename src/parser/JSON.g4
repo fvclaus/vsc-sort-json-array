@@ -68,7 +68,13 @@ fragment EXP
    ;
 
 WS
-   : [ \t\n\r] + -> skip
+   // \p{Zs}: All kinds of spaces that take up space, but no tabs and line feeds and no zero space
+   // U+FEFF: Zero Width No-Break Space 
+   // U+000B: Vertical tab
+   // U+2028: Line separator
+   // U+2029: Paragraph separator
+   // U+0085: Next line
+   : [ \n\r\t\f\u000B\u2028\u2029\uFEFF\u0085\p{Zs}] + -> skip
    ;
 
 
