@@ -43,6 +43,10 @@ export async function triggerSortExpectSuccess(
 }
 
 
+/**
+ * 
+ * @deprecated Use {@code triggerSortExpectSuccess} instead
+ */
 export async function triggerSortJsExpectSuccess(
   command: SortCommands,
   code: string,
