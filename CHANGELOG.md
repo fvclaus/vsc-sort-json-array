@@ -2,12 +2,12 @@
 ## 4.1.0
 * Improves text for property selection #27
 
-
 | Before | After |
 | --- | --- | 
 | ![quickpick first selection before](doc/sort_quickpick01_4.0.0.png)| ![quickpick first selection after](doc/sort_quickpick01_4.1.0.png) |
 | ![quickpick second selection before](doc/sort_quickpick02_4.0.0.png)| ![quickpick second selection after](doc/sort_quickpick02_4.1.0.png) |
 
+* Adds support for all whitespace and formatting characters #14
 
 
 <a name="4.0.0"></a>
