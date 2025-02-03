@@ -6,13 +6,11 @@ import nextTick from './nextTick';
 import { expectZeroInvocations, setupSpies } from './setupSpies';
 import { waitForActiveExtension } from './waitForActiveExtension';
 import { waitForQuickPick } from './waitForQuickPick';
-
-
-type SortCommands = 'extension.sortJsonArrayAscending' | 'extension.sortJsonArrayDescending' | 'extension.sortJsonArrayCustom';
+import { SortCommand } from './SortCommands';
 
 
 export type Config = {
-  command: SortCommands,
+  command: SortCommand,
   code: string,
   position: vscode.Position,
   expectedCode: string,
@@ -65,7 +63,7 @@ export async function triggerSortExpectSuccess(
  * @deprecated Use {@code triggerSortExpectSuccess} instead
  */
 export async function triggerSortJsExpectSuccess(
-  command: SortCommands,
+  command: SortCommand,
   code: string,
   position: vscode.Position,
   expectedCode: string,
@@ -82,7 +80,7 @@ export async function triggerSortJsExpectSuccess(
 }
 
 export async function triggerSortJsonExpectSuccess(
-    command: SortCommands,
+    command: SortCommand,
     array: unknown[],
     expectedArray: unknown[],
     userInputs?: () => Promise<unknown> | undefined): Promise<void> {

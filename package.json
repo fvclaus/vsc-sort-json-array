@@ -36,15 +36,18 @@
     "commands": [
       {
         "command": "extension.sortJsonArrayAscending",
-        "title": "Sort JSON array ascending"
+        "title": "Sort JSON/JS array ascending",
+        "enablement": "editorLangId == json || editorLangId == jsonc || editorLangId == jsonl || editorLangId == typescript || editorLangId == typescriptreact || editorLangId == javascript || editorLangId == javascriptreact || editorLangId == dart || editorLangId == coffeescript"
       },
       {
         "command": "extension.sortJsonArrayDescending",
-        "title": "Sort JSON array descending"
+        "title": "Sort JSON/JS array descending",
+        "enablement": "editorLangId == json || editorLangId == jsonc || editorLangId == jsonl || editorLangId == typescript || editorLangId == typescriptreact || editorLangId == javascript || editorLangId == javascriptreact || editorLangId == dart || editorLangId == coffeescript"
       },
       {
         "command": "extension.sortJsonArrayCustom",
-        "title": "Sort JSON array custom"
+        "title": "Sort JSON/JS array custom",
+        "enablement": "editorLangId == json || editorLangId == jsonc || editorLangId == jsonl || editorLangId == typescript || editorLangId == typescriptreact || editorLangId == javascript || editorLangId == javascriptreact || editorLangId == dart || editorLangId == coffeescript"
       }
     ],
     "configuration": {
