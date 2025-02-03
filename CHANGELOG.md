@@ -8,6 +8,7 @@
 | ![quickpick second selection before](doc/sort_quickpick02_4.0.0.png)| ![quickpick second selection after](doc/sort_quickpick02_4.1.0.png) |
 
 * Adds support for all whitespace and formatting characters #14
+* Show sort commands in command palette only for the Javascript programming language family #4
 
 
 <a name="4.0.0"></a>
