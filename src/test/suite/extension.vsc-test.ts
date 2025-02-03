@@ -1,12 +1,8 @@
 import {afterEach} from 'mocha';
 
-import * as vscode from 'vscode';
-import chai = require('chai');
-import {closeActiveEditor, openNewJsonDocument} from './textEditorUtils';
-import {FileExtension} from '../../fileExtension';
-import stringifyArray from './stringify';
+import {closeActiveEditor} from './textEditorUtils';
 import { triggerSortExpectFailure } from './triggerSortExpectFailure';
-const expect = chai.expect;
+import { triggerSortJsonExpectSuccess } from './triggerSortExpectSuccess';
 
 
 suite('Extension Test Suite', function() {
@@ -19,17 +15,17 @@ suite('Extension Test Suite', function() {
   });
 
   test('Valid json', async function() {
-    const {editor} = await openNewJsonDocument(stringifyArray([
-      {
-        id: 3,
-      }, {
-        id: 4,
-      }, {
-        id: 1,
-      }], FileExtension.OTHER));
-    const position = new vscode.Position(2, 4);
-    editor.selection = new vscode.Selection(position, position);
-    const sortedArray = await vscode.commands.executeCommand('extension.sortJsonArrayAscending') as {id: number}[];
-    expect(sortedArray.map((el) => el.id)).to.deep.equal([1, 3, 4]);
+    await triggerSortJsonExpectSuccess(
+      'extension.sortJsonArrayAscending',
+      [
+        {
+          id: 3,
+        }, {
+          id: 4,
+        }, {
+          id: 1,
+        }
+      ], 
+      [{id: 1}, {id: 3}, {id: 4}]);
   });
 });

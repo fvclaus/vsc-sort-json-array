@@ -3,12 +3,13 @@ import {openNewJsonDocument, closeActiveEditor} from '../textEditorUtils';
 import * as path from 'path';
 import * as fs from 'fs';
 import {ExtensionApi} from '../../../extension';
+import { waitForActiveExtension } from '../waitForActiveExtension';
 
 
 export async function getExtensionApi(): Promise<ExtensionApi> {
   const packageJson : {[key: string]: unknown} = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../package.json')).toString());
   const extensionId = `${packageJson.publisher}.${packageJson.name}`;
-  // Activate extension
+  const extension = await waitForActiveExtension();
   try {
     // Open empty document. Otherwise we dependent on the current editor content of the previous test.
     // If the cursor position is inside and object array a Quickpick may appear and hang forever.
@@ -19,7 +20,6 @@ export async function getExtensionApi(): Promise<ExtensionApi> {
     console.log(`Error activating extension: ${e}`);
   }
   await closeActiveEditor();
-  const extension = vscode.extensions.getExtension(extensionId);
   if (extension != null) {
     // If no command of this extension was executed before, .getExtension will return undefined.
     return extension.exports;

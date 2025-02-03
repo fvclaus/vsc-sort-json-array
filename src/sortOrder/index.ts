@@ -41,7 +41,8 @@ export interface SortConfiguration {
   collator: Intl.Collator
 }
 
-async function sortArray(window: typeof vscode.window, array: ArrayItem[], sortOrder: SortOrder): Promise<ArrayItem[] | undefined> {
+async function sortArray(extensionContext: vscode.ExtensionContext, window: typeof vscode.window, 
+  array: ArrayItem[], sortOrder: SortOrder): Promise<ArrayItem[] | undefined> {
   const arrayType = determineArrayType(array);
   const extensionConfiguration = getExtensionConfiguration();
   const sortConfiguration: SortConfiguration = {
@@ -52,7 +53,7 @@ async function sortArray(window: typeof vscode.window, array: ArrayItem[], sortO
   };
   switch (arrayType) {
     case ArrayType.object:
-      return sortObjects(window, array as GenericObject[], sortConfiguration) as Promise<ArrayItem[]>;
+      return sortObjects(extensionContext, window, array as GenericObject[], sortConfiguration) as Promise<ArrayItem[]>;
     case ArrayType.number:
       return array.sort(genericSortFn(sortConfiguration));
     case ArrayType.string:
@@ -63,10 +64,12 @@ async function sortArray(window: typeof vscode.window, array: ArrayItem[], sortO
   }
 }
 
-export function sortAscending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
-  return sortArray(window, array, SortOrder.ascending);
+export function sortAscending(extensionContext: vscode.ExtensionContext, window: typeof vscode.window, 
+  workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
+  return sortArray(extensionContext, window, array, SortOrder.ascending);
 }
 
-export function sortDescending(window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
-  return sortArray(window, array, SortOrder.descending);
+export function sortDescending(extensionContext: vscode.ExtensionContext, window: typeof vscode.window, 
+  workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
+  return sortArray(extensionContext, window, array, SortOrder.descending);
 }

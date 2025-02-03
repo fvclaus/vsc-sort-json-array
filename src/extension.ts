@@ -10,6 +10,7 @@ import processAndParseArray from './processAndParseArray';
 import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
 import { ArrayItem, convertToLiteralValues } from './parser/parseArray';
+import { isQuickPickOpen } from './showQuickPick';
 
 
 function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vscode.Range): {indentLevel: number, newIndent: string } {
@@ -33,7 +34,9 @@ function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vsc
 
 // Return value was implemented to improve testability.
 function sort(
-    sortFn: (window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined>):
+  extensionContext: vscode.ExtensionContext,
+  sortFn: (extensionContext: vscode.ExtensionContext, window: typeof vscode.window, 
+      workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined>):
     () => Promise<unknown[] | undefined> {
   return async function() {
     const fail = (error: string | Error | string[]): undefined => {
@@ -71,7 +74,7 @@ function sort(
         const parsedArray = processAndParseArray(text, fileExtension);
         
 
-        const sortedArray  = await sortFn(window, workspace, parsedArray);
+        const sortedArray  = await sortFn(extensionContext, window, workspace, parsedArray);
         if (sortedArray === undefined) {
           // User aborted somewhere
           return;
@@ -103,6 +106,7 @@ function sort(
 
 export interface ExtensionApi {
     getGlobalStoragePath: () => string;
+    isQuickPickOpen: () => boolean;
 }
 
 // this method is called when your extension is activated
@@ -111,9 +115,9 @@ export function activate(context: vscode.ExtensionContext): ExtensionApi {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
-  const ascendingSort = vscode.commands.registerCommand('extension.sortJsonArrayAscending', sort(sortAscending));
-  const descendingSort = vscode.commands.registerCommand('extension.sortJsonArrayDescending', sort(sortDescending));
-  const customSort = vscode.commands.registerCommand('extension.sortJsonArrayCustom', sort(sortCustom(context)));
+  const ascendingSort = vscode.commands.registerCommand('extension.sortJsonArrayAscending', sort(context, sortAscending));
+  const descendingSort = vscode.commands.registerCommand('extension.sortJsonArrayDescending', sort(context, sortDescending));
+  const customSort = vscode.commands.registerCommand('extension.sortJsonArrayCustom', sort(context, sortCustom));
 
   context.subscriptions.push(ascendingSort);
   context.subscriptions.push(descendingSort);
@@ -123,5 +127,9 @@ export function activate(context: vscode.ExtensionContext): ExtensionApi {
     getGlobalStoragePath() {
       return context.globalStoragePath;
     },
+    // This exists only to make the tests more reliable
+    isQuickPickOpen() {
+      return isQuickPickOpen(context);
+    }
   };
 }
