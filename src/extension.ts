@@ -9,7 +9,7 @@ import {searchEnclosingArray} from './searchEnclosingArray';
 import processAndParseArray from './processAndParseArray';
 import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
-import { ArrayItem, convertToLiteralValues } from './parser/parseArray';
+import { ArrayItems, convertToLiteralValues } from './parser/parseArray';
 import { isQuickPickOpen } from './showQuickPick';
 
 
@@ -35,8 +35,8 @@ function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vsc
 // Return value was implemented to improve testability.
 function sort(
   extensionContext: vscode.ExtensionContext,
-  sortFn: (extensionContext: vscode.ExtensionContext, window: typeof vscode.window, 
-      workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined>):
+  sortFn: (extensionContext: vscode.ExtensionContext, window: typeof vscode.window,
+      workspace: typeof vscode.workspace, array: ArrayItems) => Promise<ArrayItems | undefined>):
     () => Promise<unknown[] | undefined> {
   return async function() {
     const fail = (error: string | Error | string[]): undefined => {
@@ -71,16 +71,20 @@ function sort(
         }
 
         const text = document.getText(selection);
-        const parsedArray = processAndParseArray(text, fileExtension);
+        const parsedResult = processAndParseArray(text, fileExtension);
         
+        const sortedItems  = await sortFn(extensionContext, window, workspace, parsedResult.items);
 
-        const sortedArray  = await sortFn(extensionContext, window, workspace, parsedArray);
-        if (sortedArray === undefined) {
+        if (sortedItems === undefined) {
           // User aborted somewhere
           return;
         }
-        const serializedArray = serializeArray(sortedArray, fileExtension, text, 
-            calculateIndentOfStartingLine(editor, selection));
+        const serializedArray = serializeArray(
+            { items: sortedItems, allCommentTokens: parsedResult.allCommentTokens },
+            fileExtension,
+            text,
+            calculateIndentOfStartingLine(editor, selection)
+        );
 
         // textEditor.edit doesn't work for custom sort, because the editor is not active when the sorting is triggered.
         // WorkspaceEdit takes care of line endings
@@ -93,7 +97,8 @@ function sort(
           // Must not await this otherwise it will hang until the user clicks it away.
           // eslint-disable-next-line @typescript-eslint/no-floating-promises
           window.showInformationMessage('Successfully sorted array!');
-          return convertToLiteralValues(sortedArray);
+          // Return the sorted items as literal values
+          return convertToLiteralValues(sortedItems); // Pass sortedItems to convertToLiteralValues
         } else {
           return fail('Could not apply workspace edit');
         }

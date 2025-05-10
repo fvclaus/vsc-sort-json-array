@@ -1,6 +1,7 @@
 import {expect} from 'chai';
-import parseArray, {convertToLiteralValues} from '../../../parser/parseArray';
+import parseArray, {CommentInfo, convertToLiteralValues} from '../../../parser/parseArray';
 import {suite, test} from 'mocha';
+import { undent } from '../undent';
 
 
 suite('parseArray', function() {
@@ -29,8 +30,8 @@ suite('parseArray', function() {
     [`["\u{1f600}"]`, ["😀"]],
   ] as [string, unknown[]][]).forEach(([json, expectedArray]) => {
     test(`should parse ${json}`, function() {
-      const actualArray = parseArray(json);
-      const convertedArray = convertToLiteralValues(actualArray);
+      const parseResult = parseArray(json);
+      const convertedArray = convertToLiteralValues(parseResult.items);
       expect(convertedArray).to.deep.equal(expectedArray);
     });
   });
@@ -64,8 +65,8 @@ suite('parseArray', function() {
     ZeroWidthNoBreakSpace: "\uFEFF"
   }).forEach(([name, character]) => {
     test(`should parse ${name}`, function() {
-      const actualArray = parseArray(`[${character}]`);
-      const convertedArray = convertToLiteralValues(actualArray);
+      const parseResult = parseArray(`[${character}]`);
+      const convertedArray = convertToLiteralValues(parseResult.items);
       expect(convertedArray).to.deep.equal([]);
     })
   });
@@ -92,5 +93,87 @@ suite('parseArray', function() {
       expect(() => parseArray(json)).to.throw();
     });
   });
+
+    test('should collect inline comments from array elements', function() {
+      const json = '[\n  "a", // comment1\n  "b" // comment2\n]';
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(2);
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '// comment1', line: 1, column: 7 },
+        { text: '// comment2', line: 2, column: 6 }  
+      ];
+      expect(result.allCommentTokens).to.deep.members(expectedComments);
+    });
+
+    test('should collect inline comments from object properties (comments are collected globally)', function() {
+      const json = '[\n  { "a": 1, // commentA\n    "b": 2 // commentB\n  }\n]';
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(1);
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '// commentA', line: 1, column: 12 }, 
+        { text: '// commentB', line: 2, column: 11 }  
+      ];
+      expect(result.allCommentTokens).to.deep.members(expectedComments);
+    });
+
+    test('should collect comments on lines before array elements', function() {
+      const json = '[\n  // comment1\n  "a",\n  // comment2\n  "b"\n]';
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(2);
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '// comment1', line: 1, column: 2 }, 
+        { text: '// comment2', line: 3, column: 2 }  
+      ];
+      expect(result.allCommentTokens).to.deep.members(expectedComments);
+    });
+
+    test('should collect comments on lines before object properties (comments are collected globally)', function() {
+      const json = '[\n  {\n    // commentA\n    "a": 1,\n    // commentB\n    "b": 2\n  }\n]';
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(1);
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '// commentA', line: 2, column: 4 }, 
+        { text: '// commentB', line: 4, column: 4 }  
+      ];
+      expect(result.allCommentTokens).to.deep.members(expectedComments);
+    });
+
+    test('should collect comments after the last array element (within the array brackets)', function() {
+      const json = '[\n  "a",\n  "b"\n  // comment after last 1\n  // comment after last 2\n]';
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(2);
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '// comment after last 1', line: 3, column: 2 }, 
+        { text: '// comment after last 2', line: 4, column: 2 }  
+      ];
+      expect(result.allCommentTokens).to.deep.members(expectedComments);
+    });
+
+    test('should handle a mix of comment types and collect them all', function() {
+      const json = undent`
+      [
+        // before1
+        "a", // inline1
+        // before2
+        "b", // inline2
+        // after last1
+        // after last2
+      ]`;
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(2);
+      expect(result.allCommentTokens.length).to.equal(6);
+
+      // Check properties of each comment
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '// before1', line: 1, column: 2 }, 
+        { text: '// inline1', line: 2, column: 7 }, 
+        { text: '// before2', line: 3, column: 2 }, 
+        { text: '// inline2', line: 4, column: 7 }, 
+        { text: '// after last1', line: 5, column: 2 }, 
+        { text: '// after last2', line: 6, column: 2 }  
+      ];
+
+      expect(result.allCommentTokens).to.deep.members(expectedComments);
+    });
 
 });

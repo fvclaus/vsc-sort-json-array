@@ -83,5 +83,8 @@ IDENTIFIER
   : [$_\p{ID_Start}][$\p{ID_Continue}]*
 ;
 
+// Single-line comments
+LINE_COMMENT : '//' ~[\r\n]* -> channel(HIDDEN);
+
 // handle characters which failed to match any other token
 ErrorCharacter : . ;

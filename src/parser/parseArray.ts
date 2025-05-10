@@ -9,12 +9,19 @@ import {ATNSimulator} from 'antlr4ts/atn/ATNSimulator';
 export type Pair = [string, unknown];
 
 export const contextSymbol = Symbol("context");
+export interface CommentInfo {
+  text: string;
+  line: number;
+  column: number;
+}
 
 // The array needs to consist of one type to be sorted: 
 // So only object, string, numbers are supported array items. 
 // [null], [undefined] or [true, false] doesn't make any sense
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext}
+
+export type ArrayItems = ArrayItem[] & {[contextSymbol]: ArrContext};
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
@@ -29,9 +36,10 @@ export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, 
 
 class ArrayParser {
 
-  visitJson(ctx: JsonContext): ArrayItem[] {
+  visitJson(ctx: JsonContext): ArrayItems {
     const arrContext = ctx.arr();
-    const array: ArrayItem[] = []
+    // TODO Fix typing
+    const array: ArrayItems = [] as any as  ArrayItems;
     const valueContexts = arrContext.value();
     let i = 0;
     for (const valueContext of valueContexts) {
@@ -136,10 +144,13 @@ class ArrayParser {
   }
 }
 
-
+export interface ParseResult {
+  items: ArrayItems;
+  allCommentTokens: CommentInfo[]; // All LINE_COMMENT tokens from hidden channel *within the parsed array text*
+}
 
 // Generate antlr classes with npm run antlr4
-export default function parseArray(text: string): ArrayItem[] {
+export default function parseArray(text: string): ParseResult {
   const inputStream = CharStreams.fromString(text);
   const lexer = new JSONLexer(inputStream);
   lexer.removeErrorListeners();
@@ -157,6 +168,17 @@ export default function parseArray(text: string): ArrayItem[] {
   if (errors.length > 0) {
     throw errors[0];
   }
+
+  const allCommentTokens: CommentInfo[] = tokenStream.getTokens().filter(token =>
+    token.channel === Token.HIDDEN_CHANNEL && token.type === JSONLexer.LINE_COMMENT
+  ).map(token => ({
+    text: typeof token.text !== 'undefined' ? token.text : "",
+    line: token.line - 1,
+    column: token.charPositionInLine
+  }));
+
   const visitor = new ArrayParser();
-  return visitor.visitJson(jsonContext);
+  const items = visitor.visitJson(jsonContext);
+
+  return { items, allCommentTokens };
 }
