@@ -9,6 +9,7 @@ import {ATNSimulator} from 'antlr4ts/atn/ATNSimulator';
 export type Pair = [string, unknown];
 
 export const contextSymbol = Symbol("context");
+export const predecessorLineStopSymbol = Symbol("predecessorLineStop");
 export interface CommentInfo {
   text: string;
   line: number;
@@ -19,7 +20,7 @@ export interface CommentInfo {
 // So only object, string, numbers are supported array items. 
 // [null], [undefined] or [true, false] doesn't make any sense
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext}
+export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext & { [predecessorLineStopSymbol]: number}}
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
@@ -49,7 +50,9 @@ class ArrayParser {
 
       if (value !== null && value !== undefined && typeof value === 'object') {
         const arrayObjectItem = value as ArrayItem;
-        arrayObjectItem[contextSymbol] = valueContext;
+        const enhancedValueContext = Object.assign(valueContext, 
+            {[predecessorLineStopSymbol]: i === 0? arrContext.start.line : valueContexts[i - 1].stop!.line});
+        arrayObjectItem[contextSymbol] = enhancedValueContext;
         array.push(arrayObjectItem);
       } else {
         throw new Error(`Encountered value  '${value}' at position ${i}, but only strings, objects and numbers are supported.`)

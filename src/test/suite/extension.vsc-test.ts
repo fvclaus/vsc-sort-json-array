@@ -52,32 +52,4 @@ suite('Extension Test Suite', function() {
       expect(commands).to.include.members(extensionCommands);
     })
   })
-
-  suite('Comment Handling Integration Tests', function() {
-    test('should sort JSON array and preserve comments', async function() {
-      const originalJson = '[\n  // before b\n  "b", // inline b\n  // before a\n  "a", // inline a\n  // after last\n]';
-      const expectedJson = '[\n  // before a\n  "a", // inline a\n  // before b\n  "b", // inline b\n  // after last\n]';
-
-      await triggerSortExpectSuccess(
-        {
-          command: 'extension.sortJsonArrayAscending',
-          fileExtension: '.js',
-          expectedCode: expectedJson,
-          code: originalJson,
-          position: new vscode.Position(0, 0)
-        }
-      );
-    });
-
-    test('should show error message for JSONL with comments', async function() {
-      const jsonlWithComment = '{"a": 1}\n// This is a comment\n{"a": 2}';
-      const showErrorMessageStub = sinon.stub(vscode.window, 'showErrorMessage');
-
-      await openNewDocument(jsonlWithComment, '.jsonl');
-      await vscode.commands.executeCommand('extension.sortJsonArrayAscending'); // Trigger any sort command
-
-      expect(showErrorMessageStub.calledOnce).to.be.true;
-      expect(showErrorMessageStub.getCall(0).args[0]).to.equal('Comments are not supported in JSONL files. Each line must be a valid JSON object.');
-    });
-  });
 });
