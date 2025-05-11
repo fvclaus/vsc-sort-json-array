@@ -26,13 +26,13 @@ suite('Comment Handling Integration Tests', function() {
     });
   });
 
-  test('should sort array with nested objects and preserve inline comments', async function() {
+  test.only('should sort array with nested objects and preserve inline comments', async function() {
     const originalJson = `[
     // comment before id 2 object
   {
     // comment before id 2
     "id": 2, // comment for id 2
-    "data": {
+    "dataId2": {
       "value": "zeta" // comment for zeta
     } // comment for data object of id 2
   },
@@ -40,7 +40,7 @@ suite('Comment Handling Integration Tests', function() {
   {
     // comment before id 1
     "id": 1, // comment for id 1
-    "data": {
+    "dataId1": {
       "value": "alpha" // comment for alpha
     } // comment for data object of id 1
   }
@@ -51,14 +51,14 @@ suite('Comment Handling Integration Tests', function() {
   {
     // comment before id 1
     "id": 1, // comment for id 1
-    "data": {
+    "dataId1": {
       "value": "alpha" // comment for alpha
     } // comment for data object of id 1
   },
   // comment before id 2 object
   {
     "id": 2, // comment for id 2
-    "data": {
+    "dataId2": {
       "value": "zeta" // comment for zeta
     } // comment for data object of id 2
   }

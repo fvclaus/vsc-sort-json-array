@@ -43,7 +43,7 @@ There are two primary methods for sorting, implemented in [`../../src/sortOrder/
 The extension also a custom serialization process ([`../../src/serializeArray.ts`](../../src/serializeArray.ts)) that preserves the type of quotes used for properties. It doesn't preserve whitespace from the input, because it the use of whitespace in array often heavily depends on the position in the array and doesn't make sense after sorting anymore. The current serializer formats similar to how `JSON.stringify(whatever, null, 2)` aligning indentation settings of the editor.
 
 
-The project includes a comprehensive test suite ([`../../src/test/suite/`](../../src/test/suite/)) to ensure the reliability of its features. This includes unit tests for core logic like parsing ([`../../src/test/suite/processAndParseArray.test.ts`](../../src/test/suite/processAndParseArray.test.ts)) and integration tests for the VS Code extension commands ([`../../src/test/suite/extension.vsc-test.ts`](../../src/test/suite/extension.vsc-test.ts)).
+The project includes a comprehensive test suite ([`../../src/test/suite/`](../../src/test/suite/)) to ensure the reliability of its features. This includes unit tests for core logic like parsing ([`../../src/test/suite/processAndParseArray.test.ts`](../../src/test/suite/processAndParseArray.test.ts)) and integration tests for the VS Code extension commands ([`../../src/test/suite/extension.vsc-test.ts`](../../src/test/suite/extension.vsc-test.ts)). When generating test cases you MUST make sure that objects in object array have at least one property in common that can be used for sorting.
 
 ## Current Work
 

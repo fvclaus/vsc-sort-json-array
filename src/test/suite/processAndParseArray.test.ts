@@ -17,7 +17,7 @@ suite('processAndParseArray', function() {
       const result = processAndParseArray(json, fileExtension);
       const convertedArray = convertToLiteralValues(result.items);
       expect(convertedArray).to.deep.equal(expectedArray);
-      expect(result.allCommentTokens).to.be.an('array'); // Ensure allCommentTokens exists
+      expect(result.comments).to.be.an('array'); // Ensure allCommentTokens exists
     });
   });
 

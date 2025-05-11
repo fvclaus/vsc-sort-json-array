@@ -21,8 +21,6 @@ export interface CommentInfo {
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext}
 
-export type ArrayItems = ArrayItem[] & {[contextSymbol]: ArrContext};
-
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
   return array.map(el => {
@@ -36,10 +34,9 @@ export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, 
 
 class ArrayParser {
 
-  visitJson(ctx: JsonContext): ArrayItems {
+  visitJson(ctx: JsonContext): ArrayItem[] {
     const arrContext = ctx.arr();
-    // TODO Fix typing
-    const array: ArrayItems = [] as any as  ArrayItems;
+    const array: ArrayItem[] = [];
     const valueContexts = arrContext.value();
     let i = 0;
     for (const valueContext of valueContexts) {
@@ -145,8 +142,9 @@ class ArrayParser {
 }
 
 export interface ParseResult {
-  items: ArrayItems;
-  allCommentTokens: CommentInfo[]; // All LINE_COMMENT tokens from hidden channel *within the parsed array text*
+  items: ArrayItem[];
+  arrayContext: ArrContext;
+  comments: CommentInfo[]; // All LINE_COMMENT tokens from hidden channel *within the parsed array text*
 }
 
 // Generate antlr classes with npm run antlr4
@@ -169,16 +167,23 @@ export default function parseArray(text: string): ParseResult {
     throw errors[0];
   }
 
-  const allCommentTokens: CommentInfo[] = tokenStream.getTokens().filter(token =>
+  const comments: CommentInfo[] = tokenStream.getTokens().filter(token =>
     token.channel === Token.HIDDEN_CHANNEL && token.type === JSONLexer.LINE_COMMENT
   ).map(token => ({
     text: typeof token.text !== 'undefined' ? token.text : "",
-    line: token.line - 1,
+    line: token.line,
     column: token.charPositionInLine
-  }));
+  }))
+  .sort((a, b) => {
+    if (a.line === b.line) {
+      throw new Error(`Found two comments on the same line: ${a.text} and ${b.text} on line ${a.line}`);
+    }
+    return a.line - b.line
+  });
+
 
   const visitor = new ArrayParser();
   const items = visitor.visitJson(jsonContext);
 
-  return { items, allCommentTokens };
+  return { items, comments, arrayContext: jsonContext.arr() };
 }

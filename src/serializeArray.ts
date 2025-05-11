@@ -17,32 +17,39 @@ class ArraySerializer {
     this.remainingComments = comments;
   }
 
-  visitObj(ctx: ObjContext, indentLevel: number): string {
-    const buffer = [];
-    buffer.push("{\n");
-
-    buffer.push(this.getComments(ctx, "before"));
-    buffer.push(`${this.makeIndent(indentLevel)}{\n`);
+  private visitObj(ctx: ObjContext, indentLevel: number): string {
+    const buffer: string[] = [];
+    buffer.push("{");
+    buffer.push(this.addInlineComment(ctx.start.line));
     const pairs = ctx.pair();
-    pairs.forEach((pair, index) => {
-      this.visitPair(pair, indentLevel + 1);
-      if (index < pairs.length - 1) {
-        buffer.push(",")
-      }
+    this.visitChildren(pairs, buffer, indentLevel);
 
-      buffer.push(` ${this.getComments(pair, 'inline')}`);
-    });
-
-    // TODO What about empty Objects;
-    buffer.push("\n");
-
-    buffer.push(...this.getComments(ctx, 'end').map(c => `${this.makeIndent(indentLevel)}${c}`));
+    buffer.push(this.getComments(ctx, "end", indentLevel));
 
     buffer.push(`${this.makeIndent(indentLevel)}}`)
 
     return buffer.join("");
   }
-  visitPair(ctx: PairContext, indentLevel: number): string {
+
+  private visitChildren(children: ParserRuleContext[], buffer: string[], indentLevel: number): void {
+    children.forEach((child, index) => {
+      buffer.push(this.getComments(child, "before", indentLevel));
+
+      if (child instanceof PairContext) {
+        buffer.push(this.visitPair(child, indentLevel + 1));
+      } else if (child instanceof ValueContext) {
+        buffer.push(this.visitValue(child, true, indentLevel + 1));
+      }
+
+      if (index < children.length - 1) {
+        buffer.push(",");
+      }
+
+      buffer.push(this.addInlineComment(child.stop!.line));
+    });
+  }
+
+  private visitPair(ctx: PairContext, indentLevel: number): string {
     if (ctx.children == null || ctx.children.length !== 3) {
       throw new Error('Expecting exactly three children');
     }
@@ -53,36 +60,27 @@ class ArraySerializer {
 
     const key = ctx.children[0].text;
 
-    return `${this.getComments(ctx, 'before')}${this.makeIndent(indentLevel)}${key}: ` + 
+    return `${this.makeIndent(indentLevel)}${key}: ` + 
       this.visitValue(ctx.value(), false, indentLevel);
   }
 
-  visitArr(ctx: ArrContext, indentLevel: number): string {
+  private visitArr(ctx: ArrContext, indentLevel: number, children?: ValueContext[]): string {
     const buffer = [];
-    buffer.push(`${this.makeIndent(indentLevel)}[\n`);
+    buffer.push(`[`);
+    buffer.push(this.addInlineComment(ctx.start.line));
 
-    const values = ctx.value();
+    const values = children === undefined? ctx.value() : children;
 
-    values.forEach((value, index) => {
-      this.visitValue(value, true, indentLevel + 1);
+    this.visitChildren(values, buffer, indentLevel);
 
-      if (index < values.length - 1) {
-        buffer.push(",")
-      }
-
-      buffer.push(` ${this.getComments(value, 'inline')}`);
-    });
-
-    // TODO What about empty Objects;
-    buffer.push("\n");
-
-    buffer.push(...this.getComments(ctx, 'end').map(c => `${this.makeIndent(indentLevel)}${c}`));
+    buffer.push(this.getComments(ctx, 'end', indentLevel));
 
     buffer.push(`${this.makeIndent(indentLevel)}]`);
+
     return buffer.join("");
   }
 
-  visitValue(ctx: ValueContext, topLevelValue: boolean, indentLevel: number): string {
+  private visitValue(ctx: ValueContext, topLevelValue: boolean, indentLevel: number): string {
     if (ctx.children == null || ctx.children.length !== 1) {
       throw new Error('Expecting exactly one child');
     }
@@ -105,22 +103,60 @@ class ArraySerializer {
     return indent + text;
   }
 
+  public serializeArray(parseResult: ParseResult, indentLevel: number): string {
+    const serializedArray =  this.visitArr(parseResult.arrayContext, indentLevel, parseResult.items.map(i => i[contextSymbol]));
+    if (this.remainingComments.length > 0) {
+      throw new Error(`I don't know where to put the following comments: ${this.remainingComments.join(",")}. Aborting`);
+    }
+    return serializedArray;
+  }
+
+  private addInlineComment(line: number): string {
+    const comments =  this.consumeComments(c => c.line === line);
+    if (comments.length > 1) {
+      throw new Error(`Found two inline comments in line ${line}`);
+    }
+
+    return comments.length > 0 ? ` ${comments[0].text}\n` : "\n";
+  }
+
+  private getBeforeComments(ctx: ParserRuleContext, prevCtx: ParserRuleContext, indentLevel: number): string {
+    const start = ctx.start.line;
+    const prevEnd = prevCtx.stop!.line;
+    const comments =  this.consumeComments((c) => (c.line < start && c.line > prevEnd)).map( c => `${c.text}`).map(c => this.makeIndent(indentLevel + 1) + c);
+    if (comments.length > 0) {
+      return comments.join("\n") + "\n";
+    } else {
+      return "";
+    }
+  }
+
+  // TODO Only collect until previous element
   private getComments(
     ctx: ParserRuleContext,
-    type: 'before' | 'inline' | 'end'
-  ): string[] {
-    const comments = [];
+    type: 'before' | 'end',
+    indentLevel: number
+  ): string {
+    const start = ctx.start.line;
+    // TODO
+    const end = ctx.stop!.line;
+    const comments =  this.consumeComments((c) => (type === 'before' && c.line < start) || 
+    (type === 'end' && c.line < end)).map( c => `${c.text}`).map(c => this.makeIndent(indentLevel + 1) + c);
+    if (comments.length > 0) {
+      return comments.join("\n") + "\n";
+    } else {
+      return "";
+    }
+  }
 
+  private consumeComments(predicate: (c: CommentInfo) => boolean): CommentInfo[] {
+    const comments: CommentInfo[] = [];
+    // Comments should be read in order, if one is skipped this is likely a bug
+    // to make it easier to notice, we implement a .takeUntil() here
     for (let i = 0; i < this.remainingComments.length; i++) {
       const comment = this.remainingComments[i];
-      const line = comment.line;
-      const start = ctx.start!.line;
-      const end = ctx.stop!.line;
-      if (
-        (type === 'before' && line === start - 2) || 
-        (type === 'inline' &&  line === start - 1) || 
-        (type === 'end' && line < (end - 1))) {
-        comments.push(`//${comment.text}\n`);
+      if (predicate(comment)) {
+        comments.push(comment);
       } else {
         break;
       }
@@ -135,7 +171,7 @@ class ArraySerializer {
 export default function serializeArrayFromTree(parseResult: ParseResult, fileExtension: FileExtension, text: string,
   {indentLevel, newIndent}: {indentLevel: number, newIndent: string}): string {
   
-  const { items, allCommentTokens } = parseResult;
+  const { items, comments: allCommentTokens } = parseResult;
 
   if (fileExtension === FileExtension.JSONL) {
     const lines = text.split(/\r?\n/);
@@ -147,7 +183,6 @@ export default function serializeArrayFromTree(parseResult: ParseResult, fileExt
     return serializedArrayItems.join("\n");
   } else {
     const serializer = new ArraySerializer(newIndent, allCommentTokens);
-    const contextValue = items[contextSymbol];
-    return serializer.visitArr(contextValue, indentLevel + 1);
+    return serializer.serializeArray(parseResult, indentLevel);
   }
 }

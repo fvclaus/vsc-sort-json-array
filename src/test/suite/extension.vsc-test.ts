@@ -70,7 +70,7 @@ suite('Extension Test Suite', function() {
     });
 
     test('should show error message for JSONL with comments', async function() {
-      const jsonlWithComment = '{"a": 1}\n// This is a comment\n{"b": 2}';
+      const jsonlWithComment = '{"a": 1}\n// This is a comment\n{"a": 2}';
       const showErrorMessageStub = sinon.stub(vscode.window, 'showErrorMessage');
 
       await openNewDocument(jsonlWithComment, '.jsonl');

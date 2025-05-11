@@ -23,7 +23,7 @@ export default function processAndParseArray(arrayAsText: string, fileExtension:
     const parsedArray = parseJsonArray(preprocess(arrayAsText, fileExtension));
 
     if (fileExtension === FileExtension.JSONL) {
-      if (parsedArray.allCommentTokens.length > 0) {
+      if (parsedArray.comments.length > 0) {
         throw new Error("Comments are not supported in JSONL files. Each line must be a valid JSON object.");
       }
     }

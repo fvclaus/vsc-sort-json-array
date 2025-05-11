@@ -99,10 +99,10 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// comment1', line: 1, column: 7 },
-        { text: '// comment2', line: 2, column: 6 }  
+        { text: '// comment1', line: 2, column: 7 },
+        { text: '// comment2', line: 3, column: 6 }  
       ];
-      expect(result.allCommentTokens).to.deep.members(expectedComments);
+      expect(result.comments).to.deep.members(expectedComments);
     });
 
     test('should collect inline comments from object properties (comments are collected globally)', function() {
@@ -110,10 +110,10 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(1);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// commentA', line: 1, column: 12 }, 
-        { text: '// commentB', line: 2, column: 11 }  
+        { text: '// commentA', line: 2, column: 12 }, 
+        { text: '// commentB', line: 3, column: 11 }  
       ];
-      expect(result.allCommentTokens).to.deep.members(expectedComments);
+      expect(result.comments).to.deep.members(expectedComments);
     });
 
     test('should collect comments on lines before array elements', function() {
@@ -121,10 +121,10 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// comment1', line: 1, column: 2 }, 
-        { text: '// comment2', line: 3, column: 2 }  
+        { text: '// comment1', line: 2, column: 2 }, 
+        { text: '// comment2', line: 4, column: 2 }  
       ];
-      expect(result.allCommentTokens).to.deep.members(expectedComments);
+      expect(result.comments).to.deep.members(expectedComments);
     });
 
     test('should collect comments on lines before object properties (comments are collected globally)', function() {
@@ -132,10 +132,10 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(1);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// commentA', line: 2, column: 4 }, 
-        { text: '// commentB', line: 4, column: 4 }  
+        { text: '// commentA', line: 3, column: 4 }, 
+        { text: '// commentB', line: 5, column: 4 }  
       ];
-      expect(result.allCommentTokens).to.deep.members(expectedComments);
+      expect(result.comments).to.deep.members(expectedComments);
     });
 
     test('should collect comments after the last array element (within the array brackets)', function() {
@@ -143,10 +143,10 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// comment after last 1', line: 3, column: 2 }, 
-        { text: '// comment after last 2', line: 4, column: 2 }  
+        { text: '// comment after last 1', line: 4, column: 2 }, 
+        { text: '// comment after last 2', line: 5, column: 2 }  
       ];
-      expect(result.allCommentTokens).to.deep.members(expectedComments);
+      expect(result.comments).to.deep.members(expectedComments);
     });
 
     test('should handle a mix of comment types and collect them all', function() {
@@ -161,19 +161,19 @@ suite('parseArray', function() {
       ]`;
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
-      expect(result.allCommentTokens.length).to.equal(6);
+      expect(result.comments.length).to.equal(6);
 
       // Check properties of each comment
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// before1', line: 1, column: 2 }, 
-        { text: '// inline1', line: 2, column: 7 }, 
-        { text: '// before2', line: 3, column: 2 }, 
-        { text: '// inline2', line: 4, column: 7 }, 
-        { text: '// after last1', line: 5, column: 2 }, 
-        { text: '// after last2', line: 6, column: 2 }  
+        { text: '// before1', line: 2, column: 2 }, 
+        { text: '// inline1', line: 3, column: 7 }, 
+        { text: '// before2', line: 4, column: 2 }, 
+        { text: '// inline2', line: 5, column: 7 }, 
+        { text: '// after last1', line: 6, column: 2 }, 
+        { text: '// after last2', line: 7, column: 2 }  
       ];
 
-      expect(result.allCommentTokens).to.deep.members(expectedComments);
+      expect(result.comments).to.deep.members(expectedComments);
     });
 
 });

@@ -5,7 +5,7 @@ import * as glob from 'glob';
 import * as fs from 'fs';
 import * as path from 'path';
 import {createNewSortModule} from './generateUniqueSortModuleName';
-import { ArrayItems } from '../parser/parseArray';
+import { ArrayItem } from '../parser/parseArray';
 import { showQuickPick } from '../showQuickPick';
 
 
@@ -15,7 +15,7 @@ class SortError extends Error {
   }
 }
 
-function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: ArrayItems): Promise<ArrayItems> {
+function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: ArrayItem[]): Promise<ArrayItem[]> {
   // Must wrap in Promise to receive errors. Thenable has no .catch
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -31,7 +31,7 @@ function trySortModule(window: typeof vscode.window, path: string, moduleName: s
       const errors = validateSortModule(path);
       if (errors.length === 0) {
         const sortFn = loadSortFn(path);
-        const arrayCopy = array.slice() as ArrayItems;
+        const arrayCopy = array.slice() as ArrayItem[];
         try {
           arrayCopy.sort(sortFn);
           resolve(arrayCopy);
@@ -64,7 +64,7 @@ function executeAction({
     outputChannel: vscode.OutputChannel,
     moduleChoice: vscode.QuickPickItem,
     extensionContext: vscode.ExtensionContext,
-     array: ArrayItems}): Promise<ArrayItems | undefined> {
+     array: ArrayItem[]}): Promise<ArrayItem[] | undefined> {
   // Promise is necessary to integrate with .onDidSaveTextDocument callback.
   // It is also more flexible than async
   return new Promise((resolve, reject) => {
@@ -163,7 +163,7 @@ async function pickModuleAndAction(
     extensionContext: vscode.ExtensionContext,
     outputChannel: vscode.OutputChannel,
     window: typeof vscode.window,
-    workspace: typeof vscode.workspace, array: ArrayItems): Promise<ArrayItems | undefined> {
+    workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
   const sortModules: vscode.QuickPickItem[] = glob.sync('*.ts', {
     cwd: extensionContext.globalStoragePath,
   })
@@ -228,7 +228,7 @@ async function pickModuleAndAction(
 }
 
 export function sortCustom(extensionContext: vscode.ExtensionContext,
-  window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItems): Promise<ArrayItems | undefined> {
+  window: typeof vscode.window, workspace: typeof vscode.workspace, array: ArrayItem[]): Promise<ArrayItem[] | undefined> {
   if (!fs.existsSync(extensionContext.globalStoragePath)) {
     fs.mkdirSync(extensionContext.globalStoragePath);
   }

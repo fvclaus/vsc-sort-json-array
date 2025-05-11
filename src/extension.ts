@@ -9,7 +9,7 @@ import {searchEnclosingArray} from './searchEnclosingArray';
 import processAndParseArray from './processAndParseArray';
 import serializeArray from './serializeArray';
 import {FileExtension} from './fileExtension';
-import { ArrayItems, convertToLiteralValues } from './parser/parseArray';
+import { ArrayItem, convertToLiteralValues } from './parser/parseArray';
 import { isQuickPickOpen } from './showQuickPick';
 
 
@@ -36,10 +36,11 @@ function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vsc
 function sort(
   extensionContext: vscode.ExtensionContext,
   sortFn: (extensionContext: vscode.ExtensionContext, window: typeof vscode.window,
-      workspace: typeof vscode.workspace, array: ArrayItems) => Promise<ArrayItems | undefined>):
+      workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined>):
     () => Promise<unknown[] | undefined> {
   return async function() {
     const fail = (error: string | Error | string[]): undefined => {
+      console.error(error);
       let errors: string[];
       if (typeof error === 'string') {
         errors = [error];
@@ -80,7 +81,7 @@ function sort(
           return;
         }
         const serializedArray = serializeArray(
-            { items: sortedItems, allCommentTokens: parsedResult.allCommentTokens },
+            { items: sortedItems, comments: parsedResult.comments, arrayContext: parsedResult.arrayContext },
             fileExtension,
             text,
             calculateIndentOfStartingLine(editor, selection)
