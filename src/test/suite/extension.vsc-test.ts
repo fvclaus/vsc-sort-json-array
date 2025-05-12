@@ -4,16 +4,15 @@ import * as vscode from "vscode";
 
 import {closeActiveEditor, openNewDocument} from './textEditorUtils';
 import { triggerSortExpectFailure } from './triggerSortExpectFailure';
-import { triggerSortExpectSuccess, triggerSortJsonExpectSuccess } from './triggerSortExpectSuccess';
+import { triggerSortJsonExpectSuccess } from './triggerSortExpectSuccess';
 import { expect } from 'chai';
 import { SortCommand } from './SortCommands';
 import { waitForActiveExtension } from './waitForActiveExtension';
-import * as sinon from 'sinon';
+
 
 suite('Extension Test Suite', function() {
   afterEach(async () => {
     await closeActiveEditor();
-    sinon.restore(); // Restore any stubs/spies after each test
   });
 
   test('Invalid json', async function() {
@@ -31,7 +30,7 @@ suite('Extension Test Suite', function() {
         }, {
           id: 1,
         }
-      ],
+      ], 
       [{id: 1}, {id: 3}, {id: 4}]);
   });
 

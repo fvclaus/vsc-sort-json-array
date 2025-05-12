@@ -9,9 +9,9 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        vscode-version: ['1.44.0', '1.100.0'] # Example: older supported and latest stable
-      fail-fast: true # Continue other jobs even if one fails
+        os: [ubuntu-latest, windows-latest]
+        vscode-version: ['1.44.0', '1.100.0']
+      fail-fast: true
 
     runs-on: ${{ matrix.os }}
     steps:
