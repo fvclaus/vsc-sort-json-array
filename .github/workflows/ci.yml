@@ -32,12 +32,16 @@ jobs:
       - run: npm run test:benchmark
         if: matrix.os == 'ubuntu-latest' # Run only once
 
-      - name: Setup Xvfb for Linux
+      - name: Run VS Code Extension Tests
         if: runner.os == 'Linux'
         run: |
           export DISPLAY=':99.0'
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          npm run test:vsc
+        env:
+          VSCODE_VERSION: ${{ matrix.vscode-version }}
       - name: Run VS Code Extension Tests
+        if: runner.os != 'Linux'
         run: npm run test:vsc
         env:
           VSCODE_VERSION: ${{ matrix.vscode-version }}
