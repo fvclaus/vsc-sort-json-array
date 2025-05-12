@@ -27,7 +27,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest' # Run only once
 
       - run: npm run test:unit
-        if: if: matrix.os == 'ubuntu-latest' # Run only once
+        if: matrix.os == 'ubuntu-latest' # Run only once
 
       - run: npm run test:benchmark
         if: matrix.os == 'ubuntu-latest' # Run only once
