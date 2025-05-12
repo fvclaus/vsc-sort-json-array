@@ -7,7 +7,7 @@
   "license": "BSD-3-Clause",
   "engines": {
     "vscode": "^1.44.0",
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "bugs": {
     "url": "https://github.com/fvclaus/vsc-sort-json-array/issues",
@@ -58,7 +58,7 @@
             "type": "string"
           },
           "description": "Which locale to use for sorting. The sort order for characters such as ö is different in some languages (for example Swedish and German). Leave empty to use system default",
-          "default": [],
+          "default": [ ],
           "order": 1
         },
         "sortJsonArray.collation.caseFirst": {

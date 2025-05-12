@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ObjContext, PairContext, ArrContext, ValueContext } from './parser/generated/JSONParser';
 import { CommentInfo, contextSymbol, ParseResult, predecessorLineStopSymbol } from './parser/parseArray';
 import { FileExtension } from './fileExtension';
@@ -17,17 +18,25 @@ class ArraySerializer {
     this.remainingComments = comments;
   }
 
-  private visitObj(ctx: ObjContext, indentLevel: number): string {
+  private visitObjectOrArray(ctx: ObjContext | ArrContext, indentLevel: number, children?: ValueContext[] | PairContext[]): string {
     const buffer: string[] = [];
-    buffer.push("{");
+    const [openingBrackets, closingBrackets] = ctx instanceof ObjContext? ['{', '}'] : ['[', ']'];
+
+    buffer.push(openingBrackets);
     buffer.push(this.addInlineComment(ctx.start.line));
-    const pairs = ctx.pair();
-    this.visitChildren(pairs, buffer, indentLevel,);
+    buffer.push("\n");
 
-    buffer.push(this.getComments(ctx, 
-      pairs.length > 0? pairs[pairs.length - 1].stop!.line : ctx.start.line, indentLevel));
+    if (children === undefined) {
+      children = ctx instanceof ObjContext? ctx.pair() : ctx.value();
+    }
+    this.visitChildren(children, buffer, indentLevel);
 
-    buffer.push(`${this.makeIndent(indentLevel)}}`)
+    // Array or object might be empty
+    const previousChildOrStartLine = children.length > 0 ? children[children.length - 1].stop!.line : ctx.start.line;
+    const commentsAtEnd = this.getLineCommentsBetween(previousChildOrStartLine,
+      ctx.stop!.line, indentLevel);
+    buffer.push(commentsAtEnd);
+    buffer.push(this.makeIndent(indentLevel) + closingBrackets);
 
     return buffer.join("");
   }
@@ -36,10 +45,10 @@ class ArraySerializer {
   private visitChildren(children: ParserRuleContext[], buffer: string[], indentLevel: number): void {
     children.forEach((child, index) => {
 
-      const getPredecessorLineStop = () => {
-        if (predecessorLineStopSymbol in (child as any)) {
+      const getPredecessorLineStop = (): number => {
+        if (child instanceof ValueContext && predecessorLineStopSymbol in child) {
           // Top Level item. May have changed order. Retrieve the the predecessor before sorting
-          return (child as any)[predecessorLineStopSymbol];
+          return (child as any)[predecessorLineStopSymbol] as number;
         } else if (index === 0) {
           // First child, use start token of parent
           return child.parent!.start.line
@@ -49,7 +58,7 @@ class ArraySerializer {
         }
       }
 
-      buffer.push(this.getBeforeComments(child, getPredecessorLineStop(), indentLevel));
+      buffer.push(this.getLineCommentsBetween(getPredecessorLineStop(), child.start.line, indentLevel));
 
       if (child instanceof PairContext) {
         buffer.push(this.visitPair(child, indentLevel + 1));
@@ -62,6 +71,7 @@ class ArraySerializer {
       }
 
       buffer.push(this.addInlineComment(child.stop!.line));
+      buffer.push("\n");
     });
   }
 
@@ -80,23 +90,6 @@ class ArraySerializer {
       this.visitValue(ctx.value(), false, indentLevel);
   }
 
-  private visitArr(ctx: ArrContext, indentLevel: number, children?: ValueContext[]): string {
-    const buffer = [];
-    buffer.push(`[`);
-    buffer.push(this.addInlineComment(ctx.start.line));
-
-    const values = children === undefined? ctx.value() : children;
-
-    this.visitChildren(values, buffer, indentLevel);
-
-    buffer.push(this.getComments(ctx, 
-      values.length > 0 ? values[values.length - 1].stop!.line : ctx.start.line, indentLevel));
-
-    buffer.push(`${this.makeIndent(indentLevel)}]`);
-
-    return buffer.join("");
-  }
-
   private visitValue(ctx: ValueContext, topLevelValue: boolean, indentLevel: number): string {
     if (ctx.children == null || ctx.children.length !== 1) {
       throw new Error('Expecting exactly one child');
@@ -109,10 +102,8 @@ class ArraySerializer {
     let text : string | null = null;
     if (child instanceof TerminalNode) {
       text = child.symbol.text as string;
-    } else if (child instanceof ObjContext) {
-      text = this.visitObj(child, indentLevel);
-    } else if (child instanceof ArrContext) {
-      text = this.visitArr(child, indentLevel);
+    } else if (child instanceof ObjContext || child instanceof ArrContext) {
+      text = this.visitObjectOrArray(child, indentLevel);
     } else {
       throw new Error(`Unknown token type ${child.constructor.name}`);
     }
@@ -121,7 +112,7 @@ class ArraySerializer {
   }
 
   public serializeArray(parseResult: ParseResult, indentLevel: number): string {
-    const serializedArray =  this.visitArr(parseResult.arrayContext, indentLevel, parseResult.items.map(i => i[contextSymbol]));
+    const serializedArray =  this.visitObjectOrArray(parseResult.arrayContext, indentLevel, parseResult.items.map(i => i[contextSymbol]));
     if (this.remainingComments.length > 0) {
       throw new Error(`I don't know where to put the following comments: ${this.remainingComments.map(c => c.text).join(",")}. Aborting`);
     }
@@ -134,27 +125,15 @@ class ArraySerializer {
       throw new Error(`Found two inline comments in line ${line}`);
     }
 
-    return comments.length > 0 ? ` ${comments[0].text}\n` : "\n";
+    return comments.length > 0 ? ` ${comments[0].text}` : "";
   }
 
-  private getBeforeComments(ctx: ParserRuleContext, predecessorLineStop: number, indentLevel: number): string {
-    const start = ctx.start.line;
-    const comments =  this.consumeComments((c) => (c.line < start && c.line > predecessorLineStop))
-      .map( c => `${c.text}`).map(c => this.makeIndent(indentLevel + 1) + c);
-    if (comments.length > 0) {
-      return comments.join("\n") + "\n";
-    } else {
-      return "";
-    }
-  }
-
-  private getComments(
-    ctx: ParserRuleContext,
-    lastChildLineStop: number,
+  private getLineCommentsBetween(
+    start: number,
+    end: number,
     indentLevel: number
   ): string {
-    const end = ctx.stop!.line;
-    const comments =  this.consumeComments((c) => (c.line < end && c.line > lastChildLineStop))
+    const comments =  this.consumeComments((c) => (c.line > start && c.line < end))
       .map( c => `${c.text}`).map(c => this.makeIndent(indentLevel + 1) + c);
     if (comments.length > 0) {
       return comments.join("\n") + "\n";

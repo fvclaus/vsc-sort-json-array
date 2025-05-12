@@ -48,7 +48,13 @@ suite('Comment Handling Integration Tests', function() {
   { // comment start of id 2
     // comment before id 2
     "id": 2, // comment for id 2
-    // comment between id 2 and dataId2
+    // comment between id 2 and array2
+    "array2": [ // comment start of array2
+    1, // inline comment array2 1
+    2, // inline comment array2 2
+    3 // inline comment array2 3
+    ], // comment end of array 2
+    // comment between array2 and dataId2
     "dataId2": { // comment start of dataId2
       "value": "zeta" // comment for zeta
     } // comment end of dataId2
@@ -79,7 +85,13 @@ suite('Comment Handling Integration Tests', function() {
   { // comment start of id 2
     // comment before id 2
     "id": 2, // comment for id 2
-    // comment between id 2 and dataId2
+    // comment between id 2 and array2
+    "array2": [ // comment start of array2
+      1, // inline comment array2 1
+      2, // inline comment array2 2
+      3 // inline comment array2 3
+    ], // comment end of array 2
+    // comment between array2 and dataId2
     "dataId2": { // comment start of dataId2
       "value": "zeta" // comment for zeta
     } // comment end of dataId2

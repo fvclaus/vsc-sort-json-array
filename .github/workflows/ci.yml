@@ -5,64 +5,39 @@ on:
       - master
   pull_request:
 
-
-
 jobs:
-  lint-and-unit-tests:
-    runs-on: ubuntu-latest
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        vscode-version: ['1.44.0', '1.100.0'] # Example: older supported and latest stable
+      fail-fast: true # Continue other jobs even if one fails
+
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.20.4'
+          node-version: 22.x
       - run: npm install
+
       - run: npm run lint
+        if: matrix.os == 'ubuntu-latest' # Run only once
+
       - run: npm run test:unit
+        if: if: matrix.os == 'ubuntu-latest' # Run only once
+
       - run: npm run test:benchmark
+        if: matrix.os == 'ubuntu-latest' # Run only once
 
-  extension-test-windows:
-    # Run on windows because it provides a graphics server
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '18.20.4'
-      - run: npm install
-      - name: Run lowest supported version
-        run: npm run test:vsc
-        env:
-          VSCODE_VERSION: "1.44.0"
-      - name: Run newish version
-        run: npm run test:vsc
-        env:
-          VSCODE_VERSION: "1.96.2"
-
-  extension-test-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '18.20.4'
-      - run: npm install
-      - name: Run lowest supported version
-        env:
-          VSCODE_VERSION: "1.44.0"
+      - name: Setup Xvfb for Linux
+        if: runner.os == 'Linux'
         run: |
           export DISPLAY=':99.0'
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          npm run test:vsc
-      - name: Run newish version
+      - name: Run VS Code Extension Tests
+        run: npm run test:vsc
         env:
-          VSCODE_VERSION: "1.96.2"
-        run: |
-          export DISPLAY=':99.0'
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          npm run test:vsc
+          VSCODE_VERSION: ${{ matrix.vscode-version }}
