@@ -113,6 +113,6 @@ suite('Comment Handling Integration Tests', function() {
     await openNewDocument(jsonlWithComment, '.jsonl');
     await vscode.commands.executeCommand('extension.sortJsonArrayAscending'); // Trigger any sort command
 
-    expectErrorMessage(/Comments are not supported in JSONL files/);
+    await expectErrorMessage(/Comments are not supported in JSONL files/);
   });
 });

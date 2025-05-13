@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import {afterEach} from 'mocha';
 import {closeActiveEditor} from '../../textEditorUtils';
-import { ExtensionConfiguration } from '../../../../sortOrder';
+import { ExtensionConfiguration } from '../../../../extensionConfiguration';
 import { undent } from '../../undent';
 
 async function updateConfiguration(expectedConfiguration: ExtensionConfiguration): Promise<void> {

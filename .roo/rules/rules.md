@@ -52,7 +52,7 @@ Support most common syntax element encountered in arrays where sorting makes sen
 Find a way to remove the Typescript dependency from the bundle and maybe load it on demand or just strip the types instead of actually compiling to JS
 
 ## Rules
-- You MUST ignore ESLint errors in your output, I can format it myself later
+- You MUST ignore ESLint errors, I can format it myself later
 - You MUST make sure that new features have a sufficient test coverage
 - You MUST not use comments in your code, write readable code instead
 - You MUST not use comments to tell me what you did or what you are going to do

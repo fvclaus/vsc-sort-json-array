@@ -160,9 +160,6 @@ suite('Sort custom', function() {
       }
 
       await waitForActiveEditorChange(testModuleName, 5000);
-      // TODO Focus editor? It currently doesn't have focus
-      // vscode.window.showTextDocument()
-      // Wait for new sort module to become open
       await replaceTextInCurrentEditor(sortByDecadeAndPs);
       await vscode.commands.executeCommand('workbench.action.files.save');
       await vscode.commands.executeCommand('workbench.action.closeActiveEditor');

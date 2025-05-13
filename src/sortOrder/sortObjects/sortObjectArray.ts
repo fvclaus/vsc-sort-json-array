@@ -1,6 +1,6 @@
 import {genericSortFn} from '../sortNumberOrStrings/genericSortFn';
 import {GenericObject} from './GenericObject';
-import {SortConfiguration} from '..';
+import {SortConfiguration} from '../../extensionConfiguration';
 import {stringSortFn} from '../sortNumberOrStrings/stringSortFn';
 
 

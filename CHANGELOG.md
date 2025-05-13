@@ -15,6 +15,11 @@ All the following are supported now:
 ]
 ```
 
+* Adds an 'Open GitHub Issue' button to all error messages #41
+
+![Error with Open GitHub Issue button](doc/open_github_issue_5.0.0.png)
+![New GitHub Issue](doc/github_issue_5.0.0.png)
+
 
 
 <a name="4.1.0"></a>
