@@ -57,8 +57,11 @@ export async function sortObjects(extensionContext: vscode.ExtensionContext, win
       } as QuickPickItem));
     // Ensure consistent sorting.
   quickPickItems.sort();
+  if (process.env.FVCLAUS_SORT_JSON_ARRAY_DEBUG === 'true') {
+    console.log(`Sorting ${JSON.stringify(array, null, 2)}`);
+  }
   if (quickPickItems.length === 0) {
-    throw new Error(`There are no properties all objects of this array have in common.`);
+    throw new Error(`There are no properties all objects kof this array have in common.`);
   } else {
     return await pickUntilSortIsDeterministic(extensionContext, window, [], quickPickItems, array.slice(0), sortConfiguration);
   }

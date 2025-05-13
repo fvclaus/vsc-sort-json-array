@@ -95,7 +95,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "rimraf out/ && tsc -p ./ --outDir out/",
     "watch": "rimraf out/ && tsc --watch --outDir out/",
-    "test:vsc": "npm run compile && node ./out/test/runTest.js",
+    "test:vsc": "npm run compile && FVCLAUS_SORT_JSON_ARRAY_DEBUG=true node ./out/test/runTest.js",
     "test:unit": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.test.js'",
     "test:benchmark": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.benchmark-test.js'",
     "lint": "eslint \"src/**/*.ts\"",
