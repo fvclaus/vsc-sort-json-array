@@ -5,13 +5,12 @@ import * as vscode from "vscode";
 import {closeActiveEditor, openNewDocument} from './textEditorUtils';
 import { triggerSortExpectSuccess } from './triggerSortExpectSuccess';
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 import { undent } from './undent';
+import { expectErrorMessage, setupSpies } from './setupSpies';
 
 suite('Comment Handling Integration Tests', function() {
   afterEach(async () => {
     await closeActiveEditor();
-    sinon.restore(); // Restore any stubs/spies after each test
   });
 
   test('should sort string array and preserve comments', async function() {
@@ -109,12 +108,11 @@ suite('Comment Handling Integration Tests', function() {
 
   test('should show error message for JSONL with comments', async function() {
     const jsonlWithComment = '{"a": 1}\n// This is a comment\n{"b": 2}';
-    const showErrorMessageStub = sinon.stub(vscode.window, 'showErrorMessage');
+    setupSpies();
 
     await openNewDocument(jsonlWithComment, '.jsonl');
     await vscode.commands.executeCommand('extension.sortJsonArrayAscending'); // Trigger any sort command
 
-    expect(showErrorMessageStub.calledOnce).to.be.true;
-    expect(showErrorMessageStub.getCall(0).args[0]).to.include('Comments are not supported in JSONL files.');
+    expectErrorMessage(/Comments are not supported in JSONL files/);
   });
 });

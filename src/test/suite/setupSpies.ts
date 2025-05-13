@@ -11,6 +11,12 @@ export function setupSpies(): {showErrorMessageSpy: typeof showErrorMessageSpy} 
   }
 }
 
+export function expectErrorMessage(msg: RegExp): void {
+  expect(showErrorMessageSpy.called, 'Expected vscode.window.showErrorMessage to be called').to.be.true;
+  expect(showErrorMessageSpy.lastCall.args[0]).to.satisfy((actualErrorMessage: string) => msg.test(actualErrorMessage));
+}
+
+
 export function expectZeroInvocations(spy: sinon.SinonSpy): void {
   expect(spy.callCount).to.be.equal(0, spy.printf(`Expected %n to be called 0 times, but was called %c times: %C`));
 }
