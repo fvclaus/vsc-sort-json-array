@@ -13,10 +13,7 @@ import { selectQuickOpenItems } from '../../sortCustom/selectQuickOpenItem';
 
 async function changeToCRLF(): Promise<void> {
   await vscode.commands.executeCommand("workbench.action.showCommands");
-  await selectQuickOpenItems({
-    targetExtension: false,
-    items: ["Change End of Line Sequence", "CRLF"]
-  });
+  await selectQuickOpenItems("Change End of Line Sequence", "CRLF");
 }
 
 suite('Sort objects', function() {
@@ -183,10 +180,7 @@ suite('Sort objects', function() {
       command: 'extension.sortJsonArrayAscending',
       position: new vscode.Position(1, 0),
       async userInputs() {
-        await selectQuickOpenItems({
-          targetExtension: true,
-          items: ["label"]
-        })
+        await selectQuickOpenItems("label");
       },
       expectedCode: undent`
         const LINKS = [

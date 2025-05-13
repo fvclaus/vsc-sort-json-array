@@ -112,10 +112,7 @@ suite('Sort custom', function() {
   test('should sort using custom function', async function() {
     createTestModule();
     await triggerSortJsonExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
-      await selectQuickOpenItems({
-        targetExtension: true,
-        items: [testModuleName, 'edit']
-      });
+      await selectQuickOpenItems(testModuleName, 'edit');
       const sortByDecadeAndPs = `
             interface CarSpec {
                 model: string;
@@ -192,10 +189,7 @@ suite('Sort custom', function() {
 
   test('should rename module', async function() {
     await setupCommandTest();
-    await selectQuickOpenItems({
-      targetExtension: true,
-      items: [testModuleName, 'rename', 'sort.cars.ts']
-    });
+    await selectQuickOpenItems(testModuleName, 'rename', 'sort.cars.ts');
     expect(fs.existsSync(testModulePath)).to.be.false;
     expect(fs.existsSync(path.join(globalStoragePath, 'sort.cars.ts'))).to.be.true;
   });
@@ -203,10 +197,8 @@ suite('Sort custom', function() {
   test('should delete module', async function() {
     await setupCommandTest();
 
-    await selectQuickOpenItems({
-      targetExtension: true,
-      items: [testModuleName, 'delete']
-    });
+    await selectQuickOpenItems(testModuleName, 'delete');
+    
     await nextTick();
     expect(fs.existsSync(testModulePath)).to.be.false;
   });
