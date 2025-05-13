@@ -16,7 +16,7 @@ import {getGlobalStoragePath} from './getGlobalStoragePath';
 import {replaceTextInCurrentEditor, closeActiveEditor} from '../textEditorUtils';
 import {rm, mvDir, createSourceModulePath} from './storagePathFsUtils';
 import {sleep} from '../sleep';
-import { selectQuickOpenItem } from './selectQuickOpenItem';
+import { selectQuickOpenItems } from './selectQuickOpenItem';
 import { waitForActiveExtension } from '../waitForActiveExtension';
 import { waitForQuickPick } from '../waitForQuickPick';
 
@@ -112,8 +112,7 @@ suite('Sort custom', function() {
   test('should sort using custom function', async function() {
     createTestModule();
     await triggerSortJsonExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
-      await selectQuickOpenItem(testModuleName);
-      await selectQuickOpenItem('edit');
+      await selectQuickOpenItems(testModuleName, 'edit');
       const sortByDecadeAndPs = `
             interface CarSpec {
                 model: string;
@@ -136,8 +135,33 @@ suite('Sort custom', function() {
                     return decadeDifference;
                 }
             }`;
-      // Wait for text editor to become available through vscode.window.activeTextEditor
-      await nextTick();
+      await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+      async function waitForActiveEditorChange(fileName: string, timeout: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+          const disposable = vscode.window.onDidChangeActiveTextEditor(editor => {
+            if (editor !== undefined && editor.document.uri.fsPath.endsWith(fileName)) {
+              disposable.dispose();
+              resolve();
+            }
+          });
+
+          const timer = setTimeout(() => {
+            disposable.dispose();
+            reject(new Error(`Timeout waiting for active editor to change to ${fileName}`));
+          }, timeout);
+
+          // Check immediately if the active editor is already the one we want
+          if (vscode.window.activeTextEditor !== undefined && vscode.window.activeTextEditor.document.uri.fsPath.endsWith(fileName)) {
+            clearTimeout(timer);
+            disposable.dispose();
+            resolve();
+          }
+        });
+      }
+
+      await waitForActiveEditorChange(testModuleName, 5000);
+      // TODO Focus editor? It currently doesn't have focus
+      // vscode.window.showTextDocument()
       // Wait for new sort module to become open
       await replaceTextInCurrentEditor(sortByDecadeAndPs);
       await vscode.commands.executeCommand('workbench.action.files.save');
@@ -165,18 +189,16 @@ suite('Sort custom', function() {
 
   test('should rename module', async function() {
     await setupCommandTest();
-    await selectQuickOpenItem(testModuleName);
-    await selectQuickOpenItem('rename');
-    // Rename module
-    await selectQuickOpenItem('sort.cars.ts');
+    await selectQuickOpenItems(testModuleName, 'rename', 'sort.cars.ts');
     expect(fs.existsSync(testModulePath)).to.be.false;
     expect(fs.existsSync(path.join(globalStoragePath, 'sort.cars.ts'))).to.be.true;
   });
 
   test('should delete module', async function() {
     await setupCommandTest();
-    await selectQuickOpenItem(testModuleName);
-    await selectQuickOpenItem('delete');
+
+    await selectQuickOpenItems(testModuleName, 'delete');
+    
     await nextTick();
     expect(fs.existsSync(testModulePath)).to.be.false;
   });

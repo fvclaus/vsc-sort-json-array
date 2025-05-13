@@ -31,7 +31,7 @@ function trySortModule(window: typeof vscode.window, path: string, moduleName: s
       const errors = validateSortModule(path);
       if (errors.length === 0) {
         const sortFn = loadSortFn(path);
-        const arrayCopy = array.slice();
+        const arrayCopy = array.slice() as ArrayItem[];
         try {
           arrayCopy.sort(sortFn);
           resolve(arrayCopy);

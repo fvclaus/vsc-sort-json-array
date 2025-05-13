@@ -20,7 +20,9 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                // Await interference with other plugins
+                "--profile-temp",
             ],
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
@@ -38,9 +40,11 @@
                 "VSCODE_VERSION": "1.63.0"
             },
             "args": [
-              "${workspaceFolder}/src/test/workspace",
-              "--extensionDevelopmentPath=${workspaceFolder}",
-              "--extensionTestsPath=${workspaceFolder}/out/test/suite"
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/out/test/suite",
+                // Await interference with other plugins
+                "--profile-temp",
+                "${workspaceFolder}/src/test/workspace",
             ],
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"

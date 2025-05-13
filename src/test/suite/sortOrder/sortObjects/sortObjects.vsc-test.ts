@@ -9,12 +9,11 @@ import {triggerSortExpectFailure} from '../../triggerSortExpectFailure';
 import nextTick from '../../nextTick';
 import {closeActiveEditor} from '../../textEditorUtils';
 import { undent } from '../../undent';
-import { selectQuickOpenItem } from '../../sortCustom/selectQuickOpenItem';
+import { selectQuickOpenItems } from '../../sortCustom/selectQuickOpenItem';
 
 async function changeToCRLF(): Promise<void> {
   await vscode.commands.executeCommand("workbench.action.showCommands");
-  await selectQuickOpenItem("Change End of Line Sequence")
-  await selectQuickOpenItem("CRLF");
+  await selectQuickOpenItems("Change End of Line Sequence", "CRLF");
 }
 
 suite('Sort objects', function() {
@@ -181,7 +180,7 @@ suite('Sort objects', function() {
       command: 'extension.sortJsonArrayAscending',
       position: new vscode.Position(1, 0),
       async userInputs() {
-        await selectQuickOpenItem("label")
+        await selectQuickOpenItems("label");
       },
       expectedCode: undent`
         const LINKS = [

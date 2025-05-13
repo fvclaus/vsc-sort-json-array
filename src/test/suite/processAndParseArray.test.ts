@@ -1,8 +1,9 @@
 import processAndParseArray from '../../processAndParseArray';
 import chai = require('chai');
 import {FileExtension} from '../../fileExtension';
-import { convertToLiteralValues } from '../../parser/parseArray';
+import { convertToLiteralValues, CommentInfo } from '../../parser/parseArray'; // Removed metadataSymbol, added CommentInfo
 import {suite, test} from 'mocha';
+import { Token } from 'antlr4ts';
 
 const expect = chai.expect;
 
@@ -13,9 +14,10 @@ suite('processAndParseArray', function() {
     ['\n{"id":1}\n   {"id":2}\n', FileExtension.JSONL, [{id: 1}, {id: 2}]],
   ] as [string, FileExtension, unknown[]][]).forEach(([json, fileExtension, expectedArray]) => {
     test(`should parse valid json ${json}`, function() {
-      const array = processAndParseArray(json, fileExtension);
-      const convertedArray = convertToLiteralValues(array);
+      const result = processAndParseArray(json, fileExtension);
+      const convertedArray = convertToLiteralValues(result.items);
       expect(convertedArray).to.deep.equal(expectedArray);
+      expect(result.comments).to.be.an('array'); // Ensure allCommentTokens exists
     });
   });
 

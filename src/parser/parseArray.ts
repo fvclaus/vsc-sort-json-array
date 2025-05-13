@@ -9,12 +9,18 @@ import {ATNSimulator} from 'antlr4ts/atn/ATNSimulator';
 export type Pair = [string, unknown];
 
 export const contextSymbol = Symbol("context");
+export const predecessorLineStopSymbol = Symbol("predecessorLineStop");
+export interface CommentInfo {
+  text: string;
+  line: number;
+  column: number;
+}
 
 // The array needs to consist of one type to be sorted: 
 // So only object, string, numbers are supported array items. 
 // [null], [undefined] or [true, false] doesn't make any sense
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext}
+export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext & { [predecessorLineStopSymbol]: number}}
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
@@ -31,7 +37,7 @@ class ArrayParser {
 
   visitJson(ctx: JsonContext): ArrayItem[] {
     const arrContext = ctx.arr();
-    const array: ArrayItem[] = []
+    const array: ArrayItem[] = [];
     const valueContexts = arrContext.value();
     let i = 0;
     for (const valueContext of valueContexts) {
@@ -44,7 +50,9 @@ class ArrayParser {
 
       if (value !== null && value !== undefined && typeof value === 'object') {
         const arrayObjectItem = value as ArrayItem;
-        arrayObjectItem[contextSymbol] = valueContext;
+        const enhancedValueContext = Object.assign(valueContext, 
+            {[predecessorLineStopSymbol]: i === 0? arrContext.start.line : valueContexts[i - 1].stop!.line});
+        arrayObjectItem[contextSymbol] = enhancedValueContext;
         array.push(arrayObjectItem);
       } else {
         throw new Error(`Encountered value  '${value}' at position ${i}, but only strings, objects and numbers are supported.`)
@@ -136,10 +144,14 @@ class ArrayParser {
   }
 }
 
-
+export interface ParseResult {
+  items: ArrayItem[];
+  arrayContext: ArrContext;
+  comments: CommentInfo[]; // All LINE_COMMENT tokens from hidden channel *within the parsed array text*
+}
 
 // Generate antlr classes with npm run antlr4
-export default function parseArray(text: string): ArrayItem[] {
+export default function parseArray(text: string): ParseResult {
   const inputStream = CharStreams.fromString(text);
   const lexer = new JSONLexer(inputStream);
   lexer.removeErrorListeners();
@@ -157,6 +169,24 @@ export default function parseArray(text: string): ArrayItem[] {
   if (errors.length > 0) {
     throw errors[0];
   }
+
+  const comments: CommentInfo[] = tokenStream.getTokens().filter(token =>
+    token.channel === Token.HIDDEN_CHANNEL && token.type === JSONLexer.LINE_COMMENT
+  ).map(token => ({
+    text: typeof token.text !== 'undefined' ? token.text : "",
+    line: token.line,
+    column: token.charPositionInLine
+  }))
+  .sort((a, b) => {
+    if (a.line === b.line) {
+      throw new Error(`Found two comments on the same line: ${a.text} and ${b.text} on line ${a.line}`);
+    }
+    return a.line - b.line
+  });
+
+
   const visitor = new ArrayParser();
-  return visitor.visitJson(jsonContext);
+  const items = visitor.visitJson(jsonContext);
+
+  return { items, comments, arrayContext: jsonContext.arr() };
 }
