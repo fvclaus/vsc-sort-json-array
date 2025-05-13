@@ -1,3 +1,7 @@
+<a name="5.0.0"></a>
+## 5.0.0
+* Adds support for inline comments #40
+
 <a name="4.1.0"></a>
 ## 4.1.0
 * Improves text for property selection #27
