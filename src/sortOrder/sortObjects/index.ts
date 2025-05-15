@@ -6,7 +6,7 @@ import Window = vscode.window;
 import QuickPickItem = vscode.QuickPickItem;
 import {findCommonProperties} from './findCommonProperties';
 import {GenericObject} from './GenericObject';
-import {SortConfiguration} from '..';
+import {SortConfiguration} from '../../extensionConfiguration';
 import {showQuickPick} from '../../showQuickPick';
 
 async function pickPropertiesIfNecessary(extensionContext: vscode.ExtensionContext, window: typeof Window, 

@@ -1,6 +1,26 @@
 <a name="5.0.0"></a>
 ## 5.0.0
-* Adds support for inline comments #40
+* Adds support for inline and single line comments #40
+
+All the following are supported now:
+```json
+[ // start of array
+    // comment before object
+    { // comment at start of object
+        // comment before property
+        "id": 2, // comment at property
+        // comment after property
+    } // comment at end of object
+    // comment at the end of array
+]
+```
+
+* Adds an 'Open GitHub Issue' button to all error messages #41
+
+![Error with Open GitHub Issue button](doc/open_github_issue_5.0.0.png)
+![New GitHub Issue](doc/github_issue_5.0.0.png)
+
+
 
 <a name="4.1.0"></a>
 ## 4.1.0

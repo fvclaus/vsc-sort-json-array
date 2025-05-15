@@ -16,5 +16,5 @@ export async function triggerSortExpectFailure(content: string, expectedErrorMes
   await vscode.commands.executeCommand('editor.action.selectAll');
   // Command does not throw otherwise user will be presented with dialog.
   await vscode.commands.executeCommand('extension.sortJsonArrayAscending');
-  expectErrorMessage(expectedErrorMessage);
+  await expectErrorMessage(expectedErrorMessage);
 }

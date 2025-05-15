@@ -1,4 +1,4 @@
-import {SortConfiguration} from '..';
+import {SortConfiguration} from '../../extensionConfiguration';
 import {SortOrder} from '../SortOrder';
 
 

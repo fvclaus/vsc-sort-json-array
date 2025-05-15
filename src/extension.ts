@@ -1,9 +1,13 @@
 'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os'; // Import os module
 import * as vscode from 'vscode';
-import TextEditor = vscode.TextEditor;
+import { window, TextEditor } from 'vscode';
 import {sortCustom} from './sortCustom';
+import { getExtensionConfiguration } from './extensionConfiguration'; // Import getExtensionConfiguration
 import {sortAscending, sortDescending} from './sortOrder';
 import {searchEnclosingArray} from './searchEnclosingArray';
 import processAndParseArray from './processAndParseArray';
@@ -33,32 +37,100 @@ function calculateIndentOfStartingLine(editor: vscode.TextEditor, selection: vsc
 }
 
 // Return value was implemented to improve testability.
+const fail = async (extensionContext: vscode.ExtensionContext, error: string | Error, arrayString?: string): Promise<undefined> => {
+  console.error(error);
+  const errorMessage = typeof error === 'string' ? error : error.message;
+  const openIssueButton = 'Open GitHub Issue';
+
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  window.showErrorMessage(errorMessage, openIssueButton).then(async selection => {
+    if (selection === openIssueButton) {
+      let issueBaseUrl: string | undefined;
+      let extensionVersion: string | undefined;
+
+      try {
+        const packageJsonPath = path.join(extensionContext.extensionPath, 'package.json');
+        const packageJsonContent = await fs.promises.readFile(packageJsonPath, 'utf-8');
+        const packageJson = JSON.parse(packageJsonContent);
+        if (typeof packageJson.bugs === 'object' && packageJson.bugs !== null && typeof packageJson.bugs.url === 'string' 
+            && typeof packageJson.version === 'string') {
+          issueBaseUrl = packageJson.bugs.url as string;
+          extensionVersion = packageJson.version;
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          vscode.window.showErrorMessage('Could not find bugs.url in package.json');
+          return;
+        }
+      } catch (readError) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        vscode.window.showErrorMessage(
+          `Failed to get GitHub issue URL from package.json: ${readError instanceof Error ? readError.message : readError}`
+        );
+        return;
+      }
+
+      const title = `Error while sorting: ${errorMessage}`;
+
+      let body = '';
+
+      // Add Array section if available
+      if (arrayString !== undefined) {
+        body += `**Array:**:\n\n\`\`\`\n${arrayString}\n\`\`\`\n\n`;
+      }
+
+      // Add Exception details
+      body += `**Exception**:\n\n`;
+      body += `Message: ${errorMessage}\n\n`;
+      if (error instanceof Error && error.stack !== undefined) {
+        body += `Stacktrace:\n\n\`\`\`\n${error.stack}\n\`\`\`\n`;
+      }
+
+      // Gather environment and configuration details
+      const osPlatform = os.platform();
+      const osRelease = os.release();
+      const timestamp = new Date().toISOString();
+      const extConfig = getExtensionConfiguration();
+
+      // Add Environment details
+      body += `---\n`;
+      body += `**Environment:**\n`;
+      body += `- VS Code Version: ${vscode.version}\n`;
+      body += `- Extension Version: ${extensionVersion}\n`;
+      body += `- OS: ${osPlatform} (${osRelease})\n`;
+      body += `- Timestamp: ${timestamp}\n\n`;
+
+      // Add Extension Configuration
+      body += `**Extension Configuration:**\n`;
+      body += `\`\`\`json\n${JSON.stringify(extConfig, null, 2)}\n\`\`\`\n`;
+
+
+      const githubUrl = `${issueBaseUrl}/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      vscode.env.openExternal(vscode.Uri.parse(githubUrl));
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      vscode.window.showErrorMessage(`Unknown selection ${selection}`);
+    }
+  });
+
+  // Must resolve, otherwise vsc will display another error message
+  return undefined;
+};
+
+
 function sort(
   extensionContext: vscode.ExtensionContext,
   sortFn: (extensionContext: vscode.ExtensionContext, window: typeof vscode.window,
       workspace: typeof vscode.workspace, array: ArrayItem[]) => Promise<ArrayItem[] | undefined>):
     () => Promise<unknown[] | undefined> {
   return async function() {
-    const fail = (error: string | Error | string[]): undefined => {
-      console.error(error);
-      let errors: string[];
-      if (typeof error === 'string') {
-        errors = [error];
-      } else if (error instanceof Error) {
-        errors = [error.message];
-      } else {
-        errors = error;
-      }
-      errors.forEach(window.showErrorMessage);
-      // Must resolve, otherwise vsc will display another error message
-      return undefined;
-    };
     const window = vscode.window;
     const workspace = vscode.workspace;
     // The code you place here will be executed every time your command is executed
     if (window.activeTextEditor == null) {
-      return fail('No text editor is active');
+      return fail(extensionContext, 'No text editor is active');
     } else {
+      let text: string | undefined = undefined;
       try {
         const editor = window.activeTextEditor as TextEditor;
         const document = editor.document;
@@ -71,7 +143,7 @@ function sort(
           selection = await searchEnclosingArray(document, editor.selection, fileExtension);
         }
 
-        const text = document.getText(selection);
+        text = document.getText(selection); // Assign value to text
         const parsedResult = processAndParseArray(text, fileExtension);
         
         const sortedItems  = await sortFn(extensionContext, window, workspace, parsedResult.items);
@@ -101,10 +173,10 @@ function sort(
           // Return the sorted items as literal values
           return convertToLiteralValues(sortedItems); // Pass sortedItems to convertToLiteralValues
         } else {
-          return fail('Could not apply workspace edit');
+          return fail(extensionContext, 'Could not apply workspace edit', text);
         }
       } catch (error) {
-        return fail(error as Error);
+        return fail(extensionContext, error as Error, text);
       }
     }
   };
