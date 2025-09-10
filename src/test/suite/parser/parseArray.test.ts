@@ -174,6 +174,68 @@ suite('parseArray', function() {
       ];
 
       expect(result.comments).to.deep.members(expectedComments);
+      
     });
-
+    
+    test('should collect multi-line inline comments from array elements', function() {
+      const json = '[\n  "a", /* comment1 */\n  "b" /* comment2 */\n]';
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(2);
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '/* comment1 */', line: 2, column: 7 },
+        { text: '/* comment2 */', line: 3, column: 6 }
+      ];
+      expect(result.comments).to.deep.members(expectedComments);
+    });
+    
+    test('should collect multi-line comments on lines before array elements', function() {
+      const json = '[\n  /*\n   * comment1\n   */\n  "a",\n  /* comment2 */\n  "b"\n]';
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(2);
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '/*\n   * comment1\n   */', line: 2, column: 2 },
+        { text: '/* comment2 */', line: 6, column: 2 }
+      ];
+      expect(result.comments).to.deep.members(expectedComments);
+    });
+    
+    test('should collect multi-line comments after the last array element (within the array brackets)', function() {
+      const json = '[\n  "a",\n  "b"\n  /* comment after last 1 */\n  /*\n   * comment after last 2\n   */\n]';
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(2);
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '/* comment after last 1 */', line: 4, column: 2 },
+        { text: '/*\n   * comment after last 2\n   */', line: 5, column: 2 }
+      ];
+      expect(result.comments).to.deep.members(expectedComments);
+    });
+    
+    test('should handle a mix of single and multi-line comment types and collect them all', function() {
+      const json = undent`
+      [
+        // before1
+        /* multi-line
+         * comment 1 */
+        "a", // inline1
+        /* multi-line comment 2 */
+        "b", // inline2
+        // after last1
+        /* after last2 */
+      ]`;
+      const result = parseArray(json);
+      expect(result.items.length).to.equal(2);
+      expect(result.comments.length).to.equal(7);
+    
+      const expectedComments: Partial<CommentInfo>[] = [
+        { text: '// before1', line: 2, column: 2 },
+        { text: '/* multi-line\n * comment 1 */', line: 3, column: 2 },
+        { text: '// inline1', line: 5, column: 7 },
+        { text: '/* multi-line comment 2 */', line: 6, column: 2 },
+        { text: '// inline2', line: 7, column: 7 },
+        { text: '// after last1', line: 8, column: 2 },
+        { text: '/* after last2 */', line: 9, column: 2 }
+      ];
+    
+      expect(result.comments).to.deep.members(expectedComments);
+    });
 });
