@@ -175,7 +175,7 @@ export default function parseArray(text: string): ParseResult {
   parser.addErrorListener({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     syntaxError(recognizer: Recognizer<Token, ATNSimulator>, offendingSymbol, line, charPositionInLine, msg, e) {
-      errors.push(new Error(msg));
+      errors.push(new Error(`Error in ${line}, ${charPositionInLine}: ${msg})`));
     },
   });
   const jsonContext = parser.json();

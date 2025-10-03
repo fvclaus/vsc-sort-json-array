@@ -411,6 +411,53 @@ suite('serializeArray', function() {
       `;
 
     expectSerializedArray(original, expected, {sortFn: (a, b) => a.id - b.id});
+  });
+
+  test('indentation of block comments', function() {
+    const original = undent`
+      [
+        /*
+          Normal indentation
+        */
+          /*
+                  Too much indentation
+          */
+          /*
+        Too little indentation
+          */
+      /* In this example, we're commenting out the addTwoNumbers
+      function, therefore preventing it from executing. Only the
+      multiplyTwoNumbers function will run */
+        /**
+         * Initialize constant with an array of strings.
+         * Loop through each item in the array and print
+         * it to the console.
+         */
+      ]
+      `;
+    const expected = undent`
+      [
+        /*
+          Normal indentation
+        */
+        /*
+                Too much indentation
+        */
+        /*
+        Too little indentation
+        */
+        /* In this example, we're commenting out the addTwoNumbers
+        function, therefore preventing it from executing. Only the
+        multiplyTwoNumbers function will run */
+        /**
+         * Initialize constant with an array of strings.
+         * Loop through each item in the array and print
+         * it to the console.
+         */
+      ]
+      `;
+
+    expectSerializedArray(original, expected, {sortFn: (a, b) => a.id - b.id});
   })
 
 });
