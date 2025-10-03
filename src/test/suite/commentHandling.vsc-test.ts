@@ -4,7 +4,6 @@ import * as vscode from "vscode";
 
 import {closeActiveEditor, openNewDocument} from './textEditorUtils';
 import { triggerSortExpectSuccess } from './triggerSortExpectSuccess';
-import { expect } from 'chai';
 import { undent } from './undent';
 import { expectErrorMessage, setupSpies } from './setupSpies';
 

@@ -99,8 +99,8 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// comment1', line: 2, column: 7 },
-        { text: '// comment2', line: 3, column: 6 }  
+        { type: 'inline', text: '// comment1', line: 2, column: 7 },
+        { type: 'inline', text: '// comment2', line: 3, column: 6 }
       ];
       expect(result.comments).to.deep.members(expectedComments);
     });
@@ -110,8 +110,8 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(1);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// commentA', line: 2, column: 12 }, 
-        { text: '// commentB', line: 3, column: 11 }  
+        { type: 'inline', text: '// commentA', line: 2, column: 12 },
+        { type: 'inline', text: '// commentB', line: 3, column: 11 }
       ];
       expect(result.comments).to.deep.members(expectedComments);
     });
@@ -121,8 +121,8 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// comment1', line: 2, column: 2 }, 
-        { text: '// comment2', line: 4, column: 2 }  
+        { type: 'inline', text: '// comment1', line: 2, column: 2 },
+        { type: 'inline', text: '// comment2', line: 4, column: 2 }
       ];
       expect(result.comments).to.deep.members(expectedComments);
     });
@@ -132,8 +132,8 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(1);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// commentA', line: 3, column: 4 }, 
-        { text: '// commentB', line: 5, column: 4 }  
+        { type: 'inline', text: '// commentA', line: 3, column: 4 },
+        { type: 'inline', text: '// commentB', line: 5, column: 4 }
       ];
       expect(result.comments).to.deep.members(expectedComments);
     });
@@ -143,8 +143,8 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// comment after last 1', line: 4, column: 2 }, 
-        { text: '// comment after last 2', line: 5, column: 2 }  
+        { type: 'inline', text: '// comment after last 1', line: 4, column: 2 },
+        { type: 'inline', text: '// comment after last 2', line: 5, column: 2 }
       ];
       expect(result.comments).to.deep.members(expectedComments);
     });
@@ -165,12 +165,12 @@ suite('parseArray', function() {
 
       // Check properties of each comment
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// before1', line: 2, column: 2 }, 
-        { text: '// inline1', line: 3, column: 7 }, 
-        { text: '// before2', line: 4, column: 2 }, 
-        { text: '// inline2', line: 5, column: 7 }, 
-        { text: '// after last1', line: 6, column: 2 }, 
-        { text: '// after last2', line: 7, column: 2 }  
+        { type: 'inline', text: '// before1', line: 2, column: 2 },
+        { type: 'inline', text: '// inline1', line: 3, column: 7 },
+        { type: 'inline', text: '// before2', line: 4, column: 2 },
+        { type: 'inline', text: '// inline2', line: 5, column: 7 },
+        { type: 'inline', text: '// after last1', line: 6, column: 2 },
+        { type: 'inline', text: '// after last2', line: 7, column: 2 }
       ];
 
       expect(result.comments).to.deep.members(expectedComments);
@@ -182,8 +182,8 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '/* comment1 */', line: 2, column: 7 },
-        { text: '/* comment2 */', line: 3, column: 6 }
+        { type: 'block', text: '/* comment1 */', startLine: 2, startColumn: 7, endLine: 2, endColumn: 21 },
+        { type: 'block', text: '/* comment2 */', startLine: 3, startColumn: 6, endLine: 3, endColumn: 20 }
       ];
       expect(result.comments).to.deep.members(expectedComments);
     });
@@ -193,8 +193,8 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '/*\n   * comment1\n   */', line: 2, column: 2 },
-        { text: '/* comment2 */', line: 6, column: 2 }
+        { type: 'block', text: '/*\n   * comment1\n   */', startLine: 2, startColumn: 2, endLine: 4, endColumn: 5 },
+        { type: 'block', text: '/* comment2 */', startLine: 6, startColumn: 2, endLine: 6, endColumn: 16 }
       ];
       expect(result.comments).to.deep.members(expectedComments);
     });
@@ -204,8 +204,8 @@ suite('parseArray', function() {
       const result = parseArray(json);
       expect(result.items.length).to.equal(2);
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '/* comment after last 1 */', line: 4, column: 2 },
-        { text: '/*\n   * comment after last 2\n   */', line: 5, column: 2 }
+        { type: 'block', text: '/* comment after last 1 */', startLine: 4, startColumn: 2, endLine: 4, endColumn: 28 },
+        { type: 'block', text: '/*\n   * comment after last 2\n   */', startLine: 5, startColumn: 2, endLine: 7, endColumn: 5 }
       ];
       expect(result.comments).to.deep.members(expectedComments);
     });
@@ -227,15 +227,42 @@ suite('parseArray', function() {
       expect(result.comments.length).to.equal(7);
     
       const expectedComments: Partial<CommentInfo>[] = [
-        { text: '// before1', line: 2, column: 2 },
-        { text: '/* multi-line\n * comment 1 */', line: 3, column: 2 },
-        { text: '// inline1', line: 5, column: 7 },
-        { text: '/* multi-line comment 2 */', line: 6, column: 2 },
-        { text: '// inline2', line: 7, column: 7 },
-        { text: '// after last1', line: 8, column: 2 },
-        { text: '/* after last2 */', line: 9, column: 2 }
+        { type: 'inline', text: '// before1', line: 2, column: 2 },
+        { type: 'block', text: '/* multi-line\n   * comment 1 */', startLine: 3, startColumn: 2, endLine: 4, endColumn: 17 },
+        { type: 'inline', text: '// inline1', line: 5, column: 7 },
+        { type: 'block', text: '/* multi-line comment 2 */', startLine: 6, startColumn: 2, endLine: 6, endColumn: 28 },
+        { type: 'inline', text: '// inline2', line: 7, column: 7 },
+        { type: 'inline', text: '// after last1', line: 8, column: 2 },
+        { type: 'block', text: '/* after last2 */', startLine: 9, startColumn: 2, endLine: 9, endColumn: 19 }
       ];
     
       expect(result.comments).to.deep.members(expectedComments);
     });
+
+  test('should handle nested comments in various configurations and collect them all', function() {
+    const json = undent`
+    [
+      // Line comment with /* block inside */
+      /* Block with // line inside */
+      "a",
+      // Line /* with block */ inside
+      // Line // with another line comment inside
+      /* Block with
+      // line inside */
+      "b"
+    ]`;
+    const result = parseArray(json);
+    expect(result.items.length).to.equal(2);
+    expect(result.comments.length).to.equal(5);
+
+    const expectedComments: Partial<CommentInfo>[] = [
+      { type: 'inline', text: '// Line comment with /* block inside */', line: 2, column: 2 },
+      { type: 'block', text: '/* Block with // line inside */', startLine: 3, startColumn: 2, endLine: 3, endColumn: 33 },
+      { type: 'inline', text: '// Line /* with block */ inside', line: 5, column: 2 },
+      { type: 'inline', text: '// Line // with another line comment inside', line: 6, column: 2 },
+      { type: 'block', text: '/* Block with\n  // line inside */', startLine: 7, startColumn: 2, endLine: 8, endColumn: 19 }
+    ];
+
+    expect(result.comments).to.deep.members(expectedComments);
+  });
 });

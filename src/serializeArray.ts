@@ -120,7 +120,7 @@ class ArraySerializer {
   }
 
   private addInlineComment(line: number): string {
-    const comments =  this.consumeComments(c => c.line === line);
+    const comments =  this.consumeComments(c => (c.type === 'inline' && c.line === line) || (c.type == 'block' && c.startLine == line && c.endLine == line));
     if (comments.length > 1) {
       throw new Error(`Found two inline comments in line ${line}`);
     }
@@ -133,7 +133,13 @@ class ArraySerializer {
     end: number,
     indentLevel: number
   ): string {
-    const comments =  this.consumeComments((c) => (c.line > start && c.line < end))
+    const comments =  this.consumeComments((c) => {
+      if (c.type === 'inline') {
+        return c.line > start && c.line < end;
+      } else { // block comment
+        return c.startLine > start && c.endLine < end;
+      }
+    })
       .map( c => `${c.text}`).map(c => this.makeIndent(indentLevel + 1) + c);
     if (comments.length > 0) {
       return comments.join("\n") + "\n";
