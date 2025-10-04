@@ -15,7 +15,7 @@ import { sleep } from '../../sleep';
 async function changeToCRLF(): Promise<void> {
   await vscode.commands.executeCommand("workbench.action.showCommands");
   // Pipeline fails for 1.172.0 without sleep
-  await sleep(2000);
+  // await sleep(2000);
   await selectQuickOpenItems("Change End of Line Sequence", "CRLF");
 }
 
