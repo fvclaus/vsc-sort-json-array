@@ -45,11 +45,11 @@ STRING
    ;
 
 fragment STRINGCHARS_DOUBLE
-   : ('\\"' | ~["])*
+   : ('\\' . | ~["\\])*
    ;
 
 fragment STRINGCHARS_SINGLE
-  : ('\\\'' | ~['])*
+  : ('\\' . | ~['\\])*
    ;
 
 
