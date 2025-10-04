@@ -18,7 +18,8 @@ export function setupSpies(): {showErrorMessageSpy: typeof showErrorMessageSpy, 
 
 export async function expectErrorMessage(msg: RegExp): Promise<void> {
   expect(showErrorMessageSpy.called, 'Expected vscode.window.showErrorMessage to be called').to.be.true;
-  expect(showErrorMessageSpy.lastCall.args[0]).to.satisfy((actualErrorMessage: string) => msg.test(actualErrorMessage));
+  const lastArg = showErrorMessageSpy.lastCall.args[0];
+  expect(lastArg).to.satisfy((actualErrorMessage: string) => msg.test(actualErrorMessage), `${lastArg} does not match ${msg}`);
   const timeout = 5000;
   const interval = 10;
   const startTime = Date.now();

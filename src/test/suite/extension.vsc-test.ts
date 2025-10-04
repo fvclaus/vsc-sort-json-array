@@ -16,7 +16,7 @@ suite('Extension Test Suite', function() {
   });
 
   test('Invalid json', async function() {
-    await triggerSortExpectFailure('[\'foo, 2, 3]', /Cannot parse selection as JSON array. Reason: no viable alternative at input '\['/)
+    await triggerSortExpectFailure('[\'foo, 2, 3]', /Cannot parse selection as JSON array. Reason: Error in 1, 1: no viable alternative at input '\['/)
   });
 
   test('Valid json', async function() {

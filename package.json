@@ -2,7 +2,7 @@
   "name": "sort-json-array",
   "displayName": "Sort JSON/JS array",
   "description": "Sorts JSON/JS arrays by value, object property or custom function",
-  "version": "4.2.0",
+  "version": "4.1.0",
   "publisher": "fvclaus",
   "license": "BSD-3-Clause",
   "engines": {
