@@ -23,7 +23,9 @@ suite('parseArray', function() {
     ['[]', []],
     ['[{\'foo\': 2}]', [{'foo': 2}]],
     ['[\'\u00e9\']', ['é']],
+    // eslint-disable-next-line max-len
     ['["ctrl+shift+\\\\", "starting quote here was consumed due to broken lexer rule"]', ["ctrl+shift+\\\\", "starting quote here was consumed due to broken lexer rule"]],
+    // eslint-disable-next-line max-len
     ["['ctrl+shift+\\\\', 'starting quote here was consumed due to broken lexer rule']", ["ctrl+shift+\\\\", "starting quote here was consumed due to broken lexer rule"]],
     ['["my bell \b"]', ["my bell \b"]],
     ['["first\\bsecond\\t", "third\\nfourth\\r", "fifth\\"sixth\\\\"]', ["first\\bsecond\\t", "third\\nfourth\\r", "fifth\\\"sixth\\\\"]],
