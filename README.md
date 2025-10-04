@@ -9,7 +9,7 @@ Sorts a JSON/JSONL/JSONC/JS array by common property or by custom function and r
 
 Install through VS Code extensions. Search for `sort js array`
 
-[Visual Studio Code Market Place: Sort JSON/JS array](https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array)
+[Visual Studio Code Market Place: Sort JSON/JSONL/JSONC/JS array](https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array)
 
 Can also be installed in VS Code: Launch VS Code Quick Open (Ctrl+P), paste the following command, and press enter.
 

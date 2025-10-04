@@ -1,12 +1,12 @@
 {
   "name": "sort-json-array",
-  "displayName": "Sort JSON/JS array",
-  "description": "Sorts JSON/JS arrays by value, object property or custom function",
+  "displayName": "Sort JSON/JSONL/JSONC/JS array",
+  "description": "Sorts JSON/JSONL/JSONC/JS arrays by value, object property or custom function",
   "version": "4.1.0",
   "publisher": "fvclaus",
   "license": "BSD-3-Clause",
   "engines": {
-    "vscode": "^1.44.0",
+    "vscode": "^1.90.0",
     "node": ">=22.0.0"
   },
   "bugs": {
@@ -36,17 +36,17 @@
     "commands": [
       {
         "command": "extension.sortJsonArrayAscending",
-        "title": "Sort JSON/JS array ascending",
+        "title": "Sort JSON/JSONL/JSONC/JS array ascending",
         "enablement": "editorLangId == json || editorLangId == jsonc || editorLangId == jsonl || editorLangId == typescript || editorLangId == typescriptreact || editorLangId == javascript || editorLangId == javascriptreact || editorLangId == dart || editorLangId == coffeescript"
       },
       {
         "command": "extension.sortJsonArrayDescending",
-        "title": "Sort JSON/JS array descending",
+        "title": "Sort JSON/JSONL/JSONC/JS array descending",
         "enablement": "editorLangId == json || editorLangId == jsonc || editorLangId == jsonl || editorLangId == typescript || editorLangId == typescriptreact || editorLangId == javascript || editorLangId == javascriptreact || editorLangId == dart || editorLangId == coffeescript"
       },
       {
         "command": "extension.sortJsonArrayCustom",
-        "title": "Sort JSON/JS array custom",
+        "title": "Sort JSON/JSONL/JSONC/JS array custom",
         "enablement": "editorLangId == json || editorLangId == jsonc || editorLangId == jsonl || editorLangId == typescript || editorLangId == typescriptreact || editorLangId == javascript || editorLangId == javascriptreact || editorLangId == dart || editorLangId == coffeescript"
       }
     ],
