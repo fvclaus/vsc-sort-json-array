@@ -14,6 +14,24 @@ All the following are supported now:
     // comment at the end of array
 ]
 ```
+* Adds support for block and multi line comments #44
+
+JSONC is no fully supported:
+```json
+    [ /* start of array */
+      /*
+       * comment before object
+       */
+      { /* comment start of object */
+        "id": 1, /* comment for property */
+        /*
+         * comment end of object
+         */
+      }, /* comment after object */
+      /* comment at the end */
+    ]`
+```
+* Fixes problem parsing backslashes at the end of a string: `"foo\\"` #45
 
 * Adds an 'Open GitHub Issue' button to all error messages #41
 

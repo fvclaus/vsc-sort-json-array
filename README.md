@@ -57,6 +57,29 @@ For older vscode versions: Opening the sort module in another tab only works pro
 
 Technical: Sort modules are stored in the global storage path location for this extension. This is a folder in your vs code config location.
 
+#### Sort `keybindings.json`
+The `keybindings.json` can be sorted with this custom sort module:
+
+```ts
+interface KeyMapping {
+    key: string;
+    command: string;
+}
+
+export function sort(a: KeyMapping, b: KeyMapping): number {
+
+    const aIsUnassignment = a.command.startsWith("-");
+    const bIsUnassignment = b.command.startsWith("-");
+
+    // Put assignments before unassignments
+    if (aIsUnassignment !== bIsUnassignment) {
+        return aIsUnassignment ? 1 : -1;
+    }
+
+    return a.command.localeCompare(b.command);
+}
+```
+
 ### Selecting array manually
 Selecting an array works well with the `editor.action.smartSelect.grow` keyboard shortcut or a similar expand-selection shortcut.
 
