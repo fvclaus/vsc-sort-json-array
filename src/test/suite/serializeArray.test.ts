@@ -255,4 +255,209 @@ suite('serializeArray', function() {
     expectSerializedArray(original, expected, {sortFn: (a, b) => a.id - b.id});
   })
 
+  test('multi-line comments in string array', function() {
+    const original = undent`
+      [ /* arrayInline */
+        /* before1 */
+        "a", /* inline1 */
+        /* before2 */
+        "b", /* inline2 */
+        /*
+         * before 3
+         * before 4
+         */
+        "c",
+        /* after last1 */
+        /* after last2 */
+      ]`;
+    const expected = undent`
+      [ /* arrayInline */
+        /* before1 */
+        "a", /* inline1 */
+        /* before2 */
+        "b", /* inline2 */
+        /*
+         * before 3
+         * before 4
+         */
+        "c"
+        /* after last1 */
+        /* after last2 */
+      ]
+      `;
+    expectSerializedArray(original, expected, { indentLevel: 0, newIndent: '  ' });
+  });
+
+  test('multi-line comments in object array', function() {
+    const original = undent`
+      [
+        {    /* objInlineBefore */
+      /* objBefore1 */
+      /* objBefore2 */
+      "a": 1, /* objInline1 */
+      /* objBefore2 */
+      "b": 2 /* objInline2 */
+      /* objAfter 1 */
+      /* objAfter 2 */
+        } /* objInlineAfter */
+        /* after last 1 */
+        /* after last 2 */
+      ]
+    `;
+    const expected = undent`
+      [
+        { /* objInlineBefore */
+          /* objBefore1 */
+          /* objBefore2 */
+          "a": 1, /* objInline1 */
+          /* objBefore2 */
+          "b": 2 /* objInline2 */
+          /* objAfter 1 */
+          /* objAfter 2 */
+        } /* objInlineAfter */
+        /* after last 1 */
+        /* after last 2 */
+      ]
+      `;
+    expectSerializedArray(original, expected);
+  });
+
+  test('multi-line comments in nested array', function() {
+    const original = undent`
+      [
+        [
+      /* nestedBefore1 */
+      "x", /* nestedInline1 */
+      /* nestedBefore2 */
+      "y" /* nestedInline2 */
+        ], /* itemInline */
+        /* after last */
+      ]
+      `;
+    const expected = undent`
+      [
+        [
+          /* nestedBefore1 */
+          "x", /* nestedInline1 */
+          /* nestedBefore2 */
+          "y" /* nestedInline2 */
+        ] /* itemInline */
+        /* after last */
+      ]
+      `;
+    expectSerializedArray(original, expected);
+  });
+
+  test('multi-line comments in empty objects and arrays', function() {
+    const original = undent`
+      [
+        {
+          "array": [
+          /* array comment */
+          /* array comment comment */
+          ],
+          "object": {
+            /* object comment 1 */
+            /* object comment 2 */
+            /* object comment 3 */
+            /* object comment 4 */
+          }
+        }
+      ]
+      `;
+    const expected = undent`
+      [
+        {
+          "array": [
+            /* array comment */
+            /* array comment comment */
+          ],
+          "object": {
+            /* object comment 1 */
+            /* object comment 2 */
+            /* object comment 3 */
+            /* object comment 4 */
+          }
+        }
+      ]
+      `;
+    expectSerializedArray(original, expected);
+  });
+
+  test('multi-line comments after sorting', function() {
+    const original = undent`
+      [
+        {
+          "id": 2 /* id 2 */
+          /* end 2 */
+        },
+        {
+          "id": 1 /* id 1 */
+          /* end 1 */
+        }
+      ]
+      `;
+    const expected = undent`
+      [
+        {
+          "id": 1 /* id 1 */
+          /* end 1 */
+        },
+        {
+          "id": 2 /* id 2 */
+          /* end 2 */
+        }
+      ]
+      `;
+
+    expectSerializedArray(original, expected, {sortFn: (a, b) => a.id - b.id});
+  });
+
+  test('indentation of block comments', function() {
+    const original = undent`
+      [
+        /*
+          Normal indentation
+        */
+          /*
+                  Too much indentation
+          */
+          /*
+        Too little indentation
+          */
+      /* In this example, we're commenting out the addTwoNumbers
+      function, therefore preventing it from executing. Only the
+      multiplyTwoNumbers function will run */
+        /**
+         * Initialize constant with an array of strings.
+         * Loop through each item in the array and print
+         * it to the console.
+         */
+      ]
+      `;
+    const expected = undent`
+      [
+        /*
+          Normal indentation
+        */
+        /*
+                Too much indentation
+        */
+        /*
+        Too little indentation
+        */
+        /* In this example, we're commenting out the addTwoNumbers
+        function, therefore preventing it from executing. Only the
+        multiplyTwoNumbers function will run */
+        /**
+         * Initialize constant with an array of strings.
+         * Loop through each item in the array and print
+         * it to the console.
+         */
+      ]
+      `;
+
+    expectSerializedArray(original, expected, {sortFn: (a, b) => a.id - b.id});
+  })
+
 });

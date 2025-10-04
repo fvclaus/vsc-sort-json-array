@@ -86,5 +86,8 @@ IDENTIFIER
 // Single-line comments
 LINE_COMMENT : '//' ~[\r\n]* -> channel(HIDDEN);
 
+// Multi-line comments
+BLOCK_COMMENT : '/*' .*? '*/' -> channel(HIDDEN);
+
 // handle characters which failed to match any other token
 ErrorCharacter : . ;

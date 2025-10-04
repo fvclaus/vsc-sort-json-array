@@ -4,7 +4,6 @@ import * as vscode from "vscode";
 
 import {closeActiveEditor, openNewDocument} from './textEditorUtils';
 import { triggerSortExpectSuccess } from './triggerSortExpectSuccess';
-import { expect } from 'chai';
 import { undent } from './undent';
 import { expectErrorMessage, setupSpies } from './setupSpies';
 
@@ -97,6 +96,83 @@ suite('Comment Handling Integration Tests', function() {
   } // comment end of id 2
   // comment at the end
 ]`;
+    await triggerSortExpectSuccess({
+      command: 'extension.sortJsonArrayAscending', // Sorts by id
+      code: originalJson,
+      expectedCode: expectedJson,
+      position: new vscode.Position(0, 0),
+      fileExtension: '.json'
+      
+    });
+  });
+  
+  test('should sort object array and preserve multi-line comments', async function() {
+    const originalJson = undent`
+    [ /* start of array */
+      /* comment 1 before id 2 object */
+      /*
+       * comment 2 before id 2 object
+       */
+      { /* comment start of id 2 */
+        /* comment before id 2 */
+        "id": 2, /* comment for id 2 */
+        /*
+         * comment between id 2 and array2
+         */
+        "array2": [ /* comment start of array2 */
+          1, /* inline comment array2 1 */
+          2, /* inline comment array2 2 */
+          3 /* inline comment array2 3 */
+        ], /* comment end of array 2 */
+        /* comment between array2 and dataId2 */
+        "dataId2": { /* comment start of dataId2 */
+          "value": "zeta" /* comment for zeta */
+        } /* comment end of dataId2 */
+      }, /* comment end of id 2 */
+      /* comment before id 1 object */
+      {   /* comment start of id 1 */
+        /* comment before id 1 */
+        "id": 1, /* comment for id 1 */
+        /* comment between id 1 and dataId1 */
+        "dataId1": { /* comment start of dataId1 */
+          "value": "alpha" /* comment for alpha */
+        } /* comment end of dataId1 */
+      } /* comment end of id 1 object */
+      /* comment at the end */
+    ]`;
+    const expectedJson = undent`
+    [ /* start of array */
+      /* comment before id 1 object */
+      { /* comment start of id 1 */
+        /* comment before id 1 */
+        "id": 1, /* comment for id 1 */
+        /* comment between id 1 and dataId1 */
+        "dataId1": { /* comment start of dataId1 */
+          "value": "alpha" /* comment for alpha */
+        } /* comment end of dataId1 */
+      }, /* comment end of id 1 object */
+      /* comment 1 before id 2 object */
+      /*
+       * comment 2 before id 2 object
+       */
+      { /* comment start of id 2 */
+        /* comment before id 2 */
+        "id": 2, /* comment for id 2 */
+        /*
+         * comment between id 2 and array2
+         */
+        "array2": [ /* comment start of array2 */
+          1, /* inline comment array2 1 */
+          2, /* inline comment array2 2 */
+          3 /* inline comment array2 3 */
+        ], /* comment end of array 2 */
+        /* comment between array2 and dataId2 */
+        "dataId2": { /* comment start of dataId2 */
+          "value": "zeta" /* comment for zeta */
+        } /* comment end of dataId2 */
+      } /* comment end of id 2 */
+      /* comment at the end */
+    ]`;
     await triggerSortExpectSuccess({
       command: 'extension.sortJsonArrayAscending', // Sorts by id
       code: originalJson,

@@ -42,7 +42,8 @@ export class JSONParser extends Parser {
 	public static readonly WS = 13;
 	public static readonly IDENTIFIER = 14;
 	public static readonly LINE_COMMENT = 15;
-	public static readonly ErrorCharacter = 16;
+	public static readonly BLOCK_COMMENT = 16;
+	public static readonly ErrorCharacter = 17;
 	public static readonly RULE_json = 0;
 	public static readonly RULE_value = 1;
 	public static readonly RULE_obj = 2;
@@ -60,7 +61,7 @@ export class JSONParser extends Parser {
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, "CLOSING_CURLIES", "OPENING_CURLIES", "COLON", "STRING", "NUMBER", 
-		"WS", "IDENTIFIER", "LINE_COMMENT", "ErrorCharacter",
+		"WS", "IDENTIFIER", "LINE_COMMENT", "BLOCK_COMMENT", "ErrorCharacter",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(JSONParser._LITERAL_NAMES, JSONParser._SYMBOLIC_NAMES, []);
 
@@ -389,7 +390,7 @@ export class JSONParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03\x12B\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03\x13B\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x03\x02" +
 		"\x03\x02\x03\x02\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03" +
 		"\x03\x03\x05\x03\x18\n\x03\x03\x04\x03\x04\x03\x04\x03\x04\x07\x04\x1E" +

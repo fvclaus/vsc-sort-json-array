@@ -10,14 +10,27 @@ export type Pair = [string, unknown];
 
 export const contextSymbol = Symbol("context");
 export const predecessorLineStopSymbol = Symbol("predecessorLineStop");
-export interface CommentInfo {
+
+export interface LineCommentInfo {
+  type: 'inline';
   text: string;
   line: number;
   column: number;
 }
 
-// The array needs to consist of one type to be sorted: 
-// So only object, string, numbers are supported array items. 
+export interface BlockCommentInfo {
+  type: 'block';
+  text: string;
+  startLine: number;
+  startColumn: number;
+  endLine: number;
+  endColumn: number;
+}
+
+export type CommentInfo = LineCommentInfo | BlockCommentInfo;
+
+// The array needs to consist of one type to be sorted:
+// So only object, string, numbers are supported array items.
 // [null], [undefined] or [true, false] doesn't make any sense
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext & { [predecessorLineStopSymbol]: number}}
@@ -162,7 +175,7 @@ export default function parseArray(text: string): ParseResult {
   parser.addErrorListener({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     syntaxError(recognizer: Recognizer<Token, ATNSimulator>, offendingSymbol, line, charPositionInLine, msg, e) {
-      errors.push(new Error(msg));
+      errors.push(new Error(`Error in ${line}, ${charPositionInLine}: ${msg})`));
     },
   });
   const jsonContext = parser.json();
@@ -171,17 +184,37 @@ export default function parseArray(text: string): ParseResult {
   }
 
   const comments: CommentInfo[] = tokenStream.getTokens().filter(token =>
-    token.channel === Token.HIDDEN_CHANNEL && token.type === JSONLexer.LINE_COMMENT
-  ).map(token => ({
-    text: typeof token.text !== 'undefined' ? token.text : "",
-    line: token.line,
-    column: token.charPositionInLine
-  }))
-  .sort((a, b) => {
-    if (a.line === b.line) {
-      throw new Error(`Found two comments on the same line: ${a.text} and ${b.text} on line ${a.line}`);
+    token.channel === Token.HIDDEN_CHANNEL && (token.type === JSONLexer.LINE_COMMENT || token.type === JSONLexer.BLOCK_COMMENT)
+  ).map(token => {
+    if (token.type === JSONLexer.LINE_COMMENT) {
+      return {
+        type: 'inline',
+        text: typeof token.text !== 'undefined' ? token.text : "",
+        line: token.line,
+        column: token.charPositionInLine
+      } as LineCommentInfo;
+    } else { // JSONLexer.BLOCK_COMMENT
+      const text = typeof token.text !== 'undefined' ? token.text : "";
+      const lines = text.split(/\r?\n/);
+      const endLine = token.line + lines.length - 1;
+      const endColumn = lines.length === 1 ? token.charPositionInLine + text.length : lines[lines.length - 1].length;
+      return {
+        type: 'block',
+        text: text,
+        startLine: token.line,
+        startColumn: token.charPositionInLine,
+        endLine: endLine,
+        endColumn: endColumn
+      } as BlockCommentInfo;
     }
-    return a.line - b.line
+  })
+  .sort((a, b) => {
+    const aLine = a.type === 'inline' ? a.line : a.startLine;
+    const bLine = b.type === 'inline' ? b.line : b.startLine;
+    if (aLine === bLine) {
+      throw new Error(`Found two comments on the same line: ${a.text} and ${b.text} on line ${aLine}`);
+    }
+    return aLine - bLine
   });
 
 

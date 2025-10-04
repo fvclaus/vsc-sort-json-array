@@ -5,6 +5,9 @@ import { FileExtension } from './fileExtension';
 import { TerminalNode } from 'antlr4ts/tree';
 import { ParserRuleContext } from 'antlr4ts';
 
+
+const NEWLINE = /\r?\n/;
+
 class ArraySerializer {
 
   private makeIndent(indentLevel: number): string {
@@ -120,7 +123,7 @@ class ArraySerializer {
   }
 
   private addInlineComment(line: number): string {
-    const comments =  this.consumeComments(c => c.line === line);
+    const comments =  this.consumeComments(c => (c.type === 'inline' && c.line === line) || (c.type == 'block' && c.startLine == line && c.endLine == line));
     if (comments.length > 1) {
       throw new Error(`Found two inline comments in line ${line}`);
     }
@@ -133,8 +136,28 @@ class ArraySerializer {
     end: number,
     indentLevel: number
   ): string {
-    const comments =  this.consumeComments((c) => (c.line > start && c.line < end))
-      .map( c => `${c.text}`).map(c => this.makeIndent(indentLevel + 1) + c);
+    const comments =  this.consumeComments((c) => {
+      if (c.type === 'inline') {
+        return c.line > start && c.line < end;
+      } else { // block comment
+        return c.startLine > start && c.endLine < end;
+      }
+    })
+      .map( c => {
+        if (c.type == 'inline') {
+          return this.makeIndent(indentLevel + 1) + c.text;
+        } else {
+          const commonTrailingWhitespace = new RegExp(`^\\s{0,${c.startColumn}}`);
+          return c.text.split(NEWLINE).map((l, i) => {
+            if (i == 0) {
+              return this.makeIndent(indentLevel + 1) + l;
+            } else {
+                return this.makeIndent(indentLevel + 1) + l.replace(commonTrailingWhitespace, "");
+            }
+          }).join("\n");
+        }
+        
+      })
     if (comments.length > 0) {
       return comments.join("\n") + "\n";
     } else {
@@ -157,13 +180,14 @@ class ArraySerializer {
   }
 }
 
+
 export default function serializeArrayFromTree(parseResult: ParseResult, fileExtension: FileExtension, text: string,
   {indentLevel, newIndent}: {indentLevel: number, newIndent: string}): string {
   
   const { items, comments: allCommentTokens } = parseResult;
 
   if (fileExtension === FileExtension.JSONL) {
-    const lines = text.split(/\r?\n/);
+    const lines = text.split(NEWLINE);
     const serializedArrayItems = items.map(value => {
         const valueContext = value[contextSymbol];
         const startToken = valueContext.start;

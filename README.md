@@ -1,15 +1,15 @@
-# Sort JSON/JS array
+# Sort JSON/JSONL/JSONC/JS array
 ![test status badge](https://github.com/fvclaus/vsc-sort-json-array/actions/workflows/ci.yml/badge.svg?branch=master)
 <a href="https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array">
     <img alt="VS Code Marketplace Installs" src="https://img.shields.io/visual-studio-marketplace/i/fvclaus.sort-json-array"></a>
 
-Sorts a JSON/JS array by common property or by custom function and replace the array in-place. The array can be selected (must include `[` and `]`). If no selection is present, the extension will try to find an array that is enclosed by the current cursor position.
+Sorts a JSON/JSONL/JSONC/JS array by common property or by custom function and replace the array in-place. The array can be selected (must include `[` and `]`). If no selection is present, the extension will try to find an array that is enclosed by the current cursor position.
 
 ## Installation
 
 Install through VS Code extensions. Search for `sort js array`
 
-[Visual Studio Code Market Place: Sort JSON/JS array](https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array)
+[Visual Studio Code Market Place: Sort JSON/JSONL/JSONC/JS array](https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array)
 
 Can also be installed in VS Code: Launch VS Code Quick Open (Ctrl+P), paste the following command, and press enter.
 
@@ -19,7 +19,7 @@ ext install fvclaus.sort-json-array
 
 ## What is supported?
 
-This extension contains its own parser, because `JSON.parse` is too restrictive and `eval` doesn't support comments (which is an upcoming feature) and will strip out some information (for example how and if object properties are quoted).
+This extension contains its own parser, because `JSON.parse` is too restrictive and `eval` doesn't support comments and will strip out some information (for example how and if object properties are quoted). The result is a support for a superset of JSON/JSONC/JSONL and a subset of JS.
 
 - Arrays: 
   - `number[]`, `string[]` or `object[]`
@@ -28,7 +28,11 @@ This extension contains its own parser, because `JSON.parse` is too restrictive 
   - Object properties/key can be either unquoted, `'single'` or `"double"` quoted
 - Strings: `'single'` and `"double"` quoted
 - Numbers: Base 10 numbers with optional exponent
+- Comments:
+  - `// Line comments`
+  - `/* Block comments stretching multiple lines`
 - JSONL: with the same rules as above. Selection of an arbitrary number of lines is supported.
+- JSONC: Full support with the same rules as above
 
 ## Demo
 
