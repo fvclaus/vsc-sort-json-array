@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        vscode-version: ['1.72.0', '1.100.0']
+        vscode-version: ['1.72.0', '1.104.0']
       fail-fast: false
 
     runs-on: ${{ matrix.os }}

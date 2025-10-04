@@ -10,9 +10,11 @@ import nextTick from '../../nextTick';
 import {closeActiveEditor} from '../../textEditorUtils';
 import { undent } from '../../undent';
 import { selectQuickOpenItems } from '../../sortCustom/selectQuickOpenItem';
+import { sleep } from '../../sleep';
 
 async function changeToCRLF(): Promise<void> {
-  await vscode.commands.executeCommand("workbench.action.showCommands");
+  await vscode.commands.executeCommand("workbench.action.showCommands");a
+  await sleep(1000);
   await selectQuickOpenItems("Change End of Line Sequence", "CRLF");
 }
 
