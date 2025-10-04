@@ -13,7 +13,7 @@ import { selectQuickOpenItems } from '../../sortCustom/selectQuickOpenItem';
 import { sleep } from '../../sleep';
 
 async function changeToCRLF(): Promise<void> {
-  await vscode.commands.executeCommand("workbench.action.showCommands");a
+  await vscode.commands.executeCommand("workbench.action.showCommands");
   await sleep(1000);
   await selectQuickOpenItems("Change End of Line Sequence", "CRLF");
 }
