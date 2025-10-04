@@ -23,6 +23,12 @@ suite('parseArray', function() {
     ['[]', []],
     ['[{\'foo\': 2}]', [{'foo': 2}]],
     ['[\'\u00e9\']', ['é']],
+    // eslint-disable-next-line max-len
+    ['["ctrl+shift+\\\\", "starting quote here was consumed due to broken lexer rule"]', ["ctrl+shift+\\\\", "starting quote here was consumed due to broken lexer rule"]],
+    // eslint-disable-next-line max-len
+    ["['ctrl+shift+\\\\', 'starting quote here was consumed due to broken lexer rule']", ["ctrl+shift+\\\\", "starting quote here was consumed due to broken lexer rule"]],
+    ['["my bell \b"]', ["my bell \b"]],
+    ['["first\\bsecond\\t", "third\\nfourth\\r", "fifth\\"sixth\\\\"]', ["first\\bsecond\\t", "third\\nfourth\\r", "fifth\\\"sixth\\\\"]],
     [`["myDanglingComma", ]`, [ "myDanglingComma" ]],
     ['[1e10, 1e-10, 1E10, 1E-10, -1e-10]', [1e10, 1e-10, 1e10, 1e-10, -1e-10]],
     ['[{foo: 1}, {πολύ: 1}, {$10: 2}, {〱〱〱〱: 5}, {KingGeorgeⅦ: 7}, {जावास्क्रिप्ट: "Javascript"}]', 
@@ -88,6 +94,7 @@ suite('parseArray', function() {
     ['[null, undefined]'],
     ['[true, false]'],
     ['[[]'],
+    ['["\\"]']
   ] as [string][]).forEach(([json]) => {
     test(`should not parse ${json}`, function() {
       expect(() => parseArray(json)).to.throw();

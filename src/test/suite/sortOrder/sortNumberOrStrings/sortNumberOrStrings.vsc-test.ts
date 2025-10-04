@@ -47,11 +47,10 @@ suite('Sort number or strings', function() {
   test("should support invalid JSON escape sequences", async function() {
     // JSON requires double escaping so \\ is \ which is not a valid value by itself.
     await triggerSortJsExpectSuccess('extension.sortJsonArrayAscending',
-      `["\\x", "\\"]`,
+      `["\\x"]`,
       new vscode.Position(0, 4),
       undent`
       [
-        "\\",
         "\\x"
       ]`
     )
