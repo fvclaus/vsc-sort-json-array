@@ -1,7 +1,14 @@
 # Sort JSON/JSONL/JSONC/JS array
-![test status badge](https://github.com/fvclaus/vsc-sort-json-array/actions/workflows/ci.yml/badge.svg?branch=master)
-<a href="https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array">
-    <img alt="VS Code Marketplace Installs" src="https://img.shields.io/visual-studio-marketplace/i/fvclaus.sort-json-array"></a>
+<div style="display: flex; flex-direction: row">
+<a style="flex-grow: 2" href="https://github.com/fvclaus/vsc-sort-json-array/actions?query=branch%3Amaster">
+      <img alt="Badge for test status of master branch" src="https://github.com/fvclaus/vsc-sort-json-array/actions/workflows/ci.yml/badge.svg?branch=master"></a>
+<div style="display: flex;">
+vscode <a style="margin-left: 5px; margin-right: 5px" href="https://marketplace.visualstudio.com/items?itemName=fvclaus.sort-json-array">
+      <img alt="Number of VS Code Marketplace Installs" src="https://img.shields.io/visual-studio-marketplace/i/fvclaus.sort-json-array"></a>
+Open VSX <a style="margin-left: 5px" href="https://open-vsx.org/extension/fvclaus/sort-json-array">
+    <img alt="Number of Open VSX installs" src="https://img.shields.io/open-vsx/dt/fvclaus/sort-json-array"></a>
+</div>
+</div>
 
 Sorts a JSON/JSONL/JSONC/JS array by common property or by custom function and replace the array in-place. The array can be selected (must include `[` and `]`). If no selection is present, the extension will try to find an array that is enclosed by the current cursor position.
 
