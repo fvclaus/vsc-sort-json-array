@@ -1,3 +1,8 @@
+<a name="6.0.0"></a>
+## 6.0.0
+* Replaces typescript with amaro (the library that does the typestripping in node) to reduce the size of the bundle from 13Mb to 3Mb
+* Bumps dependency versions
+
 <a name="5.0.0"></a>
 ## 5.0.0
 * Adds support for inline and single line comments #40
