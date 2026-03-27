@@ -10,7 +10,10 @@ async function main(): Promise<void> {
 
     console.log(`Using workspacePath ${workspacePath}`)
 
-    const version = process.env.VSCODE_VERSION != null? process.env.VSCODE_VERSION : '1.72.0';
+    const version = process.env.VSCODE_VERSION;
+    if (version == null) {
+      throw new Error('VSCODE_VERSION environment variable is required');
+    }
 
     // Download VS Code, unzip it and run the integration test
     await runTests({version,
@@ -24,7 +27,7 @@ async function main(): Promise<void> {
       ]
     });
   } catch (err) {
-    console.error('Failed to run tests');
+    console.error(`Failed to run tests: ${err}`);
     process.exit(1);
   }
 }
