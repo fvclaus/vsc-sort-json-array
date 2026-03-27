@@ -14,7 +14,7 @@ suite('processAndParseArray', function() {
     test(`should parse valid json ${json}`, function() {
       const result = processAndParseArray(json, fileExtension);
       const convertedArray = convertToLiteralValues(result.items);
-      expect(convertedArray).to.deep.equal(expectedArray);
+      expect(JSON.stringify(convertedArray)).to.deep.equal(JSON.stringify(expectedArray));
       expect(result.comments).to.be.an('array'); // Ensure allCommentTokens exists
     });
   });

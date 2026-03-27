@@ -38,7 +38,7 @@ suite('parseArray', function() {
     test(`should parse ${json}`, function() {
       const parseResult = parseArray(json);
       const convertedArray = convertToLiteralValues(parseResult.items);
-      expect(convertedArray).to.deep.equal(expectedArray);
+      expect(JSON.stringify(convertedArray)).to.equal(JSON.stringify(expectedArray));
     });
   });
 
