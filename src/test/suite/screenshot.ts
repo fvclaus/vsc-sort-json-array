@@ -12,6 +12,10 @@ export function takeScreenshot(name: string): void {
         console.log(`Screenshot command stdout: ${stdout.toString()}`);
       } else if (process.platform === 'win32') {
         const psScript = `
+$code = '[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);';
+Add-Type -MemberDefinition $code -Name Win32 -Namespace Native;
+$proc = Get-Process Code* -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1;
+if ($proc) { [Native.Win32]::SetForegroundWindow($proc.MainWindowHandle) | Out-Null; Start-Sleep -Milliseconds 500; }
 Add-Type -AssemblyName System.Windows.Forms;
 Add-Type -AssemblyName System.Drawing;
 $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds;
@@ -22,7 +26,7 @@ $p = Join-Path $env:TEMP 'vscode_sort_json_${safeName}.png';
 $bmp.Save($p);
 $graphics.Dispose();
 $bmp.Dispose();
-`.replace(/\n/g, '');
+`.replace(/\n/g, ' ');
         console.log(`Executing Windows screenshot command...`);
         const stdout = execSync(`powershell -Command "${psScript}"`, { stdio: 'pipe' });
         console.log(`Screenshot command stdout: ${stdout.toString()}`);

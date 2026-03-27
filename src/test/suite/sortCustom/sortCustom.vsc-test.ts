@@ -19,6 +19,7 @@ import {sleep} from '../sleep';
 import { selectQuickOpenItems } from './selectQuickOpenItem';
 import { waitForActiveExtension } from '../waitForActiveExtension';
 import { waitForQuickPick } from '../waitForQuickPick';
+import { takeScreenshot } from '../screenshot';
 
 
 const B2 = {
@@ -186,7 +187,9 @@ suite('Sort custom', function() {
 
   test('should rename module', async function() {
     await setupCommandTest();
+    takeScreenshot('rename_1')
     await selectQuickOpenItems(testModuleName, 'rename', 'sort.cars.ts');
+    takeScreenshot('rename_2')
     expect(fs.existsSync(testModulePath)).to.be.false;
     expect(fs.existsSync(path.join(globalStoragePath, 'sort.cars.ts'))).to.be.true;
   });

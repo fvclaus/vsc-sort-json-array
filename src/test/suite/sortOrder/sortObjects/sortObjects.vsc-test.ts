@@ -11,6 +11,7 @@ import {closeActiveEditor} from '../../textEditorUtils';
 import { undent } from '../../undent';
 import { selectQuickOpenItems } from '../../sortCustom/selectQuickOpenItem';
 import { sleep } from '../../sleep';
+import { takeScreenshot } from '../../screenshot';
 
 async function changeToCRLF(): Promise<void> {
   await vscode.commands.executeCommand("workbench.action.showCommands");
@@ -26,6 +27,7 @@ suite('Sort objects', function() {
 
   test('should sort using name and age', async function() {
     await triggerSortJsonExpectSuccess('extension.sortJsonArrayAscending', ALL, [JIMMY, JOHN, JOHN_PAUL, ROBERT], async function operateQuickOpen() {
+      takeScreenshot("sort_using_name_1")
       await vscode.commands.executeCommand('workbench.action.quickOpenSelectNext');
       await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
       await nextTick();
