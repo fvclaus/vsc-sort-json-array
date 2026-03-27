@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
 import * as vscode from 'vscode';
+import { execSync } from 'child_process';
 // TODO @types/source-map-support breaks the ts compilation
 // import * as sourceMapSupport from 'source-map-support';
 
@@ -52,16 +53,15 @@ export function run(): Promise<void> {
         if ((this.currentTest != null) && this.currentTest.state === 'failed') {
           const testName = this.currentTest.fullTitle().replace(/[^a-z0-9]/gi, '_').toLowerCase();
           
-          if (process.env.CI != null) {
-            if (process.platform === 'linux') {
-              const terminal = vscode.window.createTerminal('Screenshot Terminal');
-              terminal.sendText(`xwd -display :99 -root -silent | convert xwd:- png:/tmp/vscode_sort_json_${testName}.png`, true);
-            } else if (process.platform === 'win32') {
-              const terminal = vscode.window.createTerminal({
-                name: 'Screenshot Terminal',
-                shellPath: 'powershell.exe'
-              });
-              const psScript = `
+          try {
+            if (process.env.CI != null) {
+              if (process.platform === 'linux') {
+                const cmd = `xwd -display :99 -root -silent | convert xwd:- png:/tmp/vscode_sort_json_${testName}.png`;
+                console.log(`Executing screenshot command: ${cmd}`);
+                const stdout = execSync(cmd, { stdio: 'pipe' });
+                console.log(`Screenshot command stdout: ${stdout.toString()}`);
+              } else if (process.platform === 'win32') {
+                const psScript = `
 [Reflection.Assembly]::LoadWithPartialName("System.Drawing");
 function screenshot([Drawing.Rectangle]$bounds, $path) {
    $bmp = New-Object Drawing.Bitmap $bounds.width, $bounds.height;
@@ -74,8 +74,22 @@ function screenshot([Drawing.Rectangle]$bounds, $path) {
 $bounds = [Drawing.Rectangle]::FromLTRB(0, 0, 1000, 900);
 screenshot $bounds "$env:TEMP\\vscode_sort_json_${testName}.png";
 `.replace(/\n/g, '');
-              terminal.sendText(psScript, true);
+                console.log(`Executing Windows screenshot command...`);
+                const stdout = execSync(`powershell -Command "${psScript}"`, { stdio: 'pipe' });
+                console.log(`Screenshot command stdout: ${stdout.toString()}`);
+              }
+            } else {
+              const cmd = `xfce4-screenshooter -f -s /tmp/vscode_sort_json_${testName}.png`;
+              console.log(`Executing local screenshot command: ${cmd}`);
+              const stdout = execSync(cmd, { stdio: 'pipe' });
+              console.log(`Screenshot command stdout: ${stdout.toString()}`);
             }
+          } catch (e: any) {
+            console.error(`Screenshot command failed!`);
+            console.error(`Status (exit code): ${e.status}`);
+            console.error(`Error message: ${e.message}`);
+            if (e.stdout != null) console.error(`stdout: ${e.stdout.toString()}`);
+            if (e.stderr != null) console.error(`stderr: ${e.stderr.toString()}`);
           }
         }
       });
