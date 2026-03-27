@@ -194,7 +194,4 @@ suite('Comment Handling Integration Tests', function() {
     await expectErrorMessage(/Comments are not supported in JSONL files/);
   });
 
-  test.only('fail', function() {
-    expect('foo').to.be.equal('false');
-  })
 });
