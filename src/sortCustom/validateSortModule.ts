@@ -1,67 +1,46 @@
-import * as ts from 'typescript';
-import withTempFile from './unlinkTempfile';
-
-function validateSortFunction(node: ts.FunctionDeclaration): string[] {
-  const errors = [];
-  if (node.modifiers == null || node.modifiers.map((modifier) => modifier.kind).indexOf(ts.SyntaxKind.ExportKeyword) == -1) {
-    errors.push('Must use export keyword.');
-  }
-  if (node.parameters.length !== 2) {
-    errors.push('Must have exactly two parameters.');
-  }
-  if (node.type == null || node.type.kind !== ts.SyntaxKind.NumberKeyword) {
-    errors.push('Must have return type \'number\'.');
-  }
-  return errors;
-}
-
-
-function validateSourceFile(sourceFile: ts.SourceFile): string[] {
-  let errors: string[] = [];
-  let hasSortFunction = false;
-  sourceFile.forEachChild((node) => {
-    switch (node.kind) {
-      case ts.SyntaxKind.FunctionDeclaration: {
-        const functionDeclaration = node as ts.FunctionDeclaration;
-        const functionName = functionDeclaration.name;
-        if (functionName != null && functionName.escapedText === 'sort') {
-          const sortFunctionErrors = validateSortFunction(functionDeclaration)
-              .map((error) => `Sort function is invalid: ${error}`);
-          errors = [...sortFunctionErrors];
-          hasSortFunction = true;
-        }
-        break;
-      }
-    }
-  });
-  if (!hasSortFunction) {
-    errors.push('Must define a sort(a, b) function.');
-  }
-  return errors;
-}
+import * as fs from 'fs';
+import { transformSync } from 'amaro';
+import { loadSortFn } from './loadSortFn';
 
 export function validateSortModule(path: string): string[] {
-  return withTempFile((tempFilePath) => {
-    const program = ts.createProgram({
-      rootNames: [path], options: {
-        outFile: tempFilePath,
-        target: ts.ScriptTarget.ES2015,
-        module: ts.ModuleKind.System,
-        // Make sure tsc does not pick up types from a tsconfig.json in a parent folder
-        types: [],
-        skipDefaultLibCheck: true,
-        skipLibCheck: true,
-        noResolve: true
-      },
-    });
-    const emitResult = program.emit();
-    const diagnostics = ts.getPreEmitDiagnostics(program)
-        .concat(emitResult.diagnostics);
-
-    if (diagnostics.length > 0) {
-      return ['Does not compile. Please check the problems view.'];
-    } else {
-      return validateSourceFile(program.getSourceFile(path) as ts.SourceFile);
+  const code = fs.readFileSync(path, 'utf8');
+  try {
+    const transformResult = transformSync(code) as { code: string };
+    const strippedCode = transformResult.code;
+    
+    const errors: string[] = [];
+    let hasExportError = false;
+    
+    // Check for CommonJS exports
+    if (strippedCode.includes('exports.') === true || strippedCode.includes('module.exports') === true) {
+      errors.push('Sort function is invalid: CommonJS exports are not supported, use ES Module "export" instead.');
+      hasExportError = true;
     }
-  }, (e) => [`Does not compile: ${e}`]);
+
+    if (strippedCode.includes('export') === false) {
+        errors.push('Sort function is invalid: Must use export keyword.');
+        hasExportError = true;
+    }
+
+    try {
+      const sortFn = loadSortFn(path);
+      if (typeof sortFn === 'function') {
+        if (sortFn.length !== 2) {
+          errors.push('Sort function is invalid: Must have exactly two parameters.');
+        }
+      } else {
+        if (!hasExportError) {
+          errors.push('Must define a sort(a, b) function.');
+        }
+      }
+    } catch (e) {
+       if (!hasExportError) {
+         errors.push('Must define a sort(a, b) function.');
+       }
+    }
+
+    return errors;
+  } catch (e) {
+    return ['Does not compile. Please check the problems view.'];
+  }
 }

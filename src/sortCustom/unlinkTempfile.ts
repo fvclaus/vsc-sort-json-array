@@ -3,7 +3,7 @@ import {unlink} from 'fs';
 
 export default function withTempFile<T>(fn: (path: string) => T, catchFn: (e: Error) => T): T {
   const tempFile = temp.openSync({
-    suffix: '.js',
+    suffix: '.mjs',
   });
 
   try {

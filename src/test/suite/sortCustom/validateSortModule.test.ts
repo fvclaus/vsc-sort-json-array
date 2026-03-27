@@ -9,7 +9,6 @@ suite('Validate sort module', function() {
   [
     ['noExportKeyword', 'Must use export keyword'],
     ['wrongNumberOfParameters', 'Must have exactly two parameters'],
-    ['wrongReturnType', 'Must have return type \'number\''],
   ].forEach(([moduleName, expectedError]) => {
     test(`should detect errors in ${moduleName}`, function() {
       const errors = validateSortModule(createSourceModulePath(`sortModule.${moduleName}`));
@@ -35,6 +34,7 @@ suite('Validate sort module', function() {
     } catch (e) {
       // Ignore errors
     }
+    // amaro can throw if parsing fails
     expect(errors).to.have.members(['Does not compile. Please check the problems view.']);
   });
 });
