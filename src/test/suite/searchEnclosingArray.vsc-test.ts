@@ -16,14 +16,9 @@ suite('Find enclosing array', function() {
     return position;
   };
 
-  const version = vscode.version;
-
 
   afterEach(async () => {
     await closeActiveEditor();
-    Object.defineProperty(vscode, 'version', {
-      value: version,
-    });
   });
 
   ([

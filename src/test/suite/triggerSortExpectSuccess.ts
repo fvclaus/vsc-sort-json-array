@@ -94,5 +94,5 @@ export async function triggerSortJsonExpectSuccess(
     fileExtension: '.json',
     expectedCode: JSON.stringify(expectedArray, null, 2)
   })
-  expect(result).to.deep.equal(expectedArray);
+  expect(JSON.stringify(result)).to.equal(JSON.stringify(expectedArray));
 }
