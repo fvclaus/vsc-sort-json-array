@@ -5,6 +5,7 @@ export async function selectQuickOpenItems(...items: string[]): Promise<void> {
   for (const item of items) {
     await vscode.env.clipboard.writeText(item);
     await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+    await nextTick();
     await vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
     await nextTick();
   }
