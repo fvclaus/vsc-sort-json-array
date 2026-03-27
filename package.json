@@ -92,12 +92,12 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run compile",
+    "vscode:prepublish": "npm run compile",
     "compile": "rimraf out/ && tsc -p ./ --outDir out/",
     "watch": "rimraf out/ && tsc --watch --outDir out/",
-    "test:vsc": "pnpm run compile && node ./out/test/runTest.js",
-    "test:unit": "pnpm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.test.js'",
-    "test:benchmark": "pnpm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.benchmark-test.js'",
+    "test:vsc": "npm run compile && node ./out/test/runTest.js",
+    "test:unit": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.test.js'",
+    "test:benchmark": "npm run compile && mocha --recursive --ui tdd --timeout 5000 'out/**/*.benchmark-test.js'",
     "lint": "eslint \"src/**/*.ts\"",
     "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4",
     "vsce:package": "npx vsce package",
@@ -123,7 +123,7 @@
     "@types/rimraf": "^4.0.5",
     "@types/sinon": "^21.0.0",
     "@types/temp": "^0.9.4",
-    "@types/vscode": "1.110.0",
+    "@types/vscode": "1.104.0",
     "@typescript-eslint/eslint-plugin": "^8.57.1",
     "@typescript-eslint/parser": "^8.57.1",
     "@vscode/test-electron": "^2.5.2",
@@ -142,7 +142,8 @@
     "ts-node": "^10.9.2",
     "tslint": "^6.1.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.1"
+    "typescript-eslint": "^8.57.1",
+    "vsce-pnpm": "^0.1.0"
   },
   "contributors": [
     "Philipp Kursawe <phil.kursawe@gmail.com>"

@@ -1,9 +1,9 @@
-import * as mvFile from 'mv';
+import mvFile from 'mv';
 import * as path from 'path';
 
 export function mvDir(from: string, to: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    mvFile.default(from, to, {mkdirp: true}, (error) => {
+    mvFile(from, to, {mkdirp: true}, (error) => {
       if (error != null) {
         reject(error);
       } else {

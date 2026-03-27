@@ -1,7 +1,0 @@
-minimumReleaseAge: 10080
-
-strictDepBuilds: true
-
-trustPolicy: no-downgrade
-
-trustPolicyIgnoreAfter: 10080
