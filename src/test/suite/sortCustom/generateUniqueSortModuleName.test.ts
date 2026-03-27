@@ -1,5 +1,4 @@
-import chai = require('chai');
-const expect = chai.expect;
+import { expect } from 'chai';
 import {afterEach} from 'mocha';
 import * as temp from 'temp';
 import * as fs from 'fs';
@@ -22,6 +21,7 @@ suite('Generate unique sort module name', function() {
     if (storageLocation != null) {
       try {
         rimraf.sync(storageLocation);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         // Ignore errors.
       }
@@ -33,6 +33,7 @@ suite('Generate unique sort module name', function() {
     [['sort.1.ts', 'sort.2.ts'], 'sort.3.ts'],
     [[], 'sort.1.ts'],
   ].forEach(([modules, expectedModuleName]) => {
+
     test('should ignore other naming conventions', function() {
       storageLocation = generateModuleFiles(modules as string[]);
       const uniqueSortModuleName = createNewSortModule(storageLocation);

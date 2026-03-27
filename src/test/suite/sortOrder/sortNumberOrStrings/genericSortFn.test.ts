@@ -1,8 +1,7 @@
 
-import chai = require('chai');
+import { expect } from 'chai';
 import {genericSortFn} from '../../../../sortOrder/sortNumberOrStrings/genericSortFn';
 import {SortOrder} from '../../../../sortOrder/SortOrder';
-const expect = chai.expect;
 
 suite('Determine array type', function() {
   const ASCENDING_ARRAYS = [
@@ -12,6 +11,7 @@ suite('Determine array type', function() {
   ];
 
   ASCENDING_ARRAYS.forEach(([array, expectedArray]) => {
+
     test(`should sort array ${JSON.stringify(array)}`, function() {
       array.sort(genericSortFn({order: SortOrder.ascending, collator: new Intl.Collator()}));
       expect(array).to.deep.equal(expectedArray);

@@ -27,7 +27,7 @@ async function sortArray(extensionContext: vscode.ExtensionContext, window: type
     case ArrayType.number:
       return array.sort(genericSortFn(sortConfiguration));
     case ArrayType.string:
-      // eslint-disable-next-line @typescript-eslint/ban-types
+      // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
       return (array as String[]).sort(stringSortFn(sortConfiguration)) as ArrayItem[];
     default:
       throw new Error(`This extension can only support arrays that contain only objects, only numbers or only strings.`);

@@ -1,4 +1,4 @@
-/* eslint-disable new-cap */
+ 
 
 import {CommonTokenStream, Recognizer, CharStreams, Token} from 'antlr4ts';
 import {TerminalNode} from 'antlr4ts/tree';
@@ -32,10 +32,10 @@ export type CommentInfo = LineCommentInfo | BlockCommentInfo;
 // The array needs to consist of one type to be sorted:
 // So only object, string, numbers are supported array items.
 // [null], [undefined] or [true, false] doesn't make any sense
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
 export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext & { [predecessorLineStopSymbol]: number}}
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
 export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
   return array.map(el => {
     if (el instanceof String || el instanceof Number) {

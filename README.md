@@ -12,7 +12,7 @@ Install it from [Visual Studio Code Market Place](https://marketplace.visualstud
 
 In extensions search for `sort js array` or launch Quick Open (Ctrl+P), paste the following command, and press enter.
 
-```
+```bash
 ext install fvclaus.sort-json-array
 ```
 
@@ -37,13 +37,13 @@ This extension contains its own parser, because `JSON.parse` is too restrictive 
 
 ## Demo
 
-#### Sort array of objects ascending or descending by one or more properties to produce a deterministic sort result:  
+### Sort array of objects ascending or descending by one or more properties to produce a deterministic sort result:  
 ![Sort by property](doc/sortOrderExample.gif)
 
-#### Sort array using custom function:  
+### Sort array using custom function:  
 ![Sort by custom function](doc/sortCustomExample.gif)
 
-#### Manage sort modules:  
+### Manage sort modules:  
 ![Sort by custom function](doc/sortCustomModuleManagementExample.gif)
 
 

@@ -1,5 +1,4 @@
-import chai = require('chai');
-const expect = chai.expect;
+import { expect } from 'chai';
 import {afterEach} from 'mocha';
 import {closeActiveEditor, openNewJsonDocument} from './textEditorUtils';
 import {searchEnclosingArray} from '../../searchEnclosingArray';
@@ -17,14 +16,9 @@ suite('Find enclosing array', function() {
     return position;
   };
 
-  const version = vscode.version;
-
 
   afterEach(async () => {
     await closeActiveEditor();
-    Object.defineProperty(vscode, 'version', {
-      value: version,
-    });
   });
 
   ([
@@ -90,6 +84,7 @@ suite('Find enclosing array', function() {
   ] as [unknown[], string, vscode.Position?, vscode.Position?, FileExtension?][])
       .forEach(([array, textAtPosition, expectedStart, expectedEnd, fileExtension = FileExtension.OTHER]) => {
         const content = stringifyArray(array, fileExtension);
+
         test(`should find enclosing root array ${content}`, async function() {
           const {
             document,

@@ -33,6 +33,7 @@ export function validateSortModule(path: string): string[] {
           errors.push('Must define a sort(a, b) function.');
         }
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
        if (!hasExportError) {
          errors.push('Must define a sort(a, b) function.');
@@ -40,6 +41,7 @@ export function validateSortModule(path: string): string[] {
     }
 
     return errors;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return ['Does not compile. Please check the problems view.'];
   }

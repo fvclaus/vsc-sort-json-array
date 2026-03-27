@@ -18,7 +18,7 @@ class SortError extends Error {
 function trySortModule(window: typeof vscode.window, path: string, moduleName: string, array: ArrayItem[]): Promise<ArrayItem[]> {
   // Must wrap in Promise to receive errors. Thenable has no .catch
   return new Promise((resolve, reject) => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+     
     window.withProgress<void>({
       location: vscode.ProgressLocation.Window,
       title: `Validating and applying sort module ${moduleName}`,
@@ -71,7 +71,7 @@ function executeAction({
     switch (actionChoice) {
       case 'edit': {
         fs.openSync(modulePath, 'a+');
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+         
         workspace.openTextDocument(modulePath)
             .then((document) => window.showTextDocument(document))
             .then(() => {
@@ -83,7 +83,7 @@ function executeAction({
                         outputChannel.appendLine('Sort preview:');
                         outputChannel.appendLine(JSON.stringify(sortedArray, null, 2));
                         outputChannel.show(true);
-                        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                         
                         window.showInformationMessage(`Module ${moduleName} is valid`);
                       })
                       .catch((error: SortError) => error.errors.forEach(window.showErrorMessage));
@@ -108,7 +108,7 @@ function executeAction({
             .catch(reject);
         break;
       case 'rename': {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+         
         window.showInputBox({
           prompt: 'New sort module name including .ts',
           value: moduleChoice.label,
@@ -122,10 +122,10 @@ function executeAction({
           if (newModuleName != null) {
             try {
               fs.renameSync(modulePath, path.join(extensionContext.globalStoragePath, newModuleName));
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
+               
               window.showInformationMessage(`Renamed module ${moduleName} to ${newModuleName}.`);
             } catch (e) {
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
+               
               window.showErrorMessage(`Cannot rename module ${moduleName}: ${e}`);
             }
             pickModuleAndAction(extensionContext, outputChannel, window, workspace, array)
@@ -141,13 +141,14 @@ function executeAction({
           try {
             // Try to remove transpiled version.
             fs.unlinkSync(modulePath.replace('.ts', '.js'));
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (e) {
             // Ignore errors
           }
-          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+           
           window.showInformationMessage(`Deleted module ${moduleChoice.label}.`);
         } catch (e) {
-          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+           
           window.showErrorMessage(`Cannot delete module ${moduleChoice.label}: ${e}`);
         }
         pickModuleAndAction(extensionContext, outputChannel, window, workspace, array)

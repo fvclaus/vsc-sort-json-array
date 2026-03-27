@@ -5,16 +5,16 @@ import {triggerSortJsonExpectSuccess} from '../triggerSortExpectSuccess';
 import {afterEach, after, before, beforeEach} from 'mocha';
 
 
-import chai = require('chai');
-const expect = chai.expect;
+import { expect } from 'chai';
 
 import * as temp from 'temp';
 import * as fs from 'fs';
 import * as path from 'path';
 import nextTick from '../nextTick';
 import {getGlobalStoragePath} from './getGlobalStoragePath';
+import {rimraf} from "rimraf";
 import {replaceTextInCurrentEditor, closeActiveEditor} from '../textEditorUtils';
-import {rm, mvDir, createSourceModulePath} from './storagePathFsUtils';
+import {mvDir, createSourceModulePath} from './storagePathFsUtils';
 import {sleep} from '../sleep';
 import { selectQuickOpenItems } from './selectQuickOpenItem';
 import { waitForActiveExtension } from '../waitForActiveExtension';
@@ -59,7 +59,7 @@ async function moveExistingSortModules(globalStoragePath: string): Promise<strin
 }
 
 async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: string): Promise<void> {
-  await rm(globalStoragePath);
+  await rimraf(globalStoragePath);
   await mvDir(tempDir, globalStoragePath);
 }
 
@@ -110,7 +110,7 @@ suite('Sort custom', function() {
   }
 
 
-  test.only('should sort using custom function', async function() {
+  test('should sort using custom function', async function() {
     createTestModule();
     await triggerSortJsonExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
       await selectQuickOpenItems(testModuleName, 'edit');
@@ -180,7 +180,7 @@ suite('Sort custom', function() {
     await vscode.commands.executeCommand('editor.action.selectAll');
     // Must not await, because this will only resolve once the user navigated 
     // through all menus and the sort is finished.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+     
     vscode.commands.executeCommand('extension.sortJsonArrayCustom');
     await waitForQuickPick(extension);
   }

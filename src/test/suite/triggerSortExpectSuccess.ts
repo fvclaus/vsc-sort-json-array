@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import chai = require('chai');
-export const expect = chai.expect;
+import { expect } from 'chai';
 import {openNewDocument} from './textEditorUtils';
 import nextTick from './nextTick';
 import { expectZeroInvocations, setupSpies } from './setupSpies';
@@ -95,5 +94,5 @@ export async function triggerSortJsonExpectSuccess(
     fileExtension: '.json',
     expectedCode: JSON.stringify(expectedArray, null, 2)
   })
-  expect(result).to.deep.equal(expectedArray);
+  expect(JSON.stringify(result)).to.equal(JSON.stringify(expectedArray));
 }
