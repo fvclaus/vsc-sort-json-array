@@ -29,6 +29,6 @@ export default function processAndParseArray(arrayAsText: string, fileExtension:
     }
     return parsedArray;
   } catch (e) {
-    throw new Error(`Cannot parse selection as JSON array. Reason: ${(e as Error).message}`, e);
+    throw new Error(`Cannot parse selection as JSON array. Reason: ${(e as Error).message}`, {cause: e});
   }
 }

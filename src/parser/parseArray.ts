@@ -35,7 +35,8 @@ export type CommentInfo = LineCommentInfo | BlockCommentInfo;
 // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
 export type ArrayItem = (object | String | Number) & {[contextSymbol]: ValueContext & { [predecessorLineStopSymbol]: number}}
 
-export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, string | number> | (string | number))[]{
+// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
+export function convertToLiteralValues(array: ArrayItem[]): (Exclude<ArrayItem, String | Number> | (string | number))[]{
   return array.map(el => {
     if (el instanceof String || el instanceof Number) {
       // Can't use === on String() objects

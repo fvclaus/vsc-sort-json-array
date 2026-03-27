@@ -12,8 +12,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import nextTick from '../nextTick';
 import {getGlobalStoragePath} from './getGlobalStoragePath';
+import {rimraf} from "rimraf";
 import {replaceTextInCurrentEditor, closeActiveEditor} from '../textEditorUtils';
-import {rm, mvDir, createSourceModulePath} from './storagePathFsUtils';
+import {mvDir, createSourceModulePath} from './storagePathFsUtils';
 import {sleep} from '../sleep';
 import { selectQuickOpenItems } from './selectQuickOpenItem';
 import { waitForActiveExtension } from '../waitForActiveExtension';
@@ -58,7 +59,7 @@ async function moveExistingSortModules(globalStoragePath: string): Promise<strin
 }
 
 async function moveExistingSortModulesBack(tempDir: string, globalStoragePath: string): Promise<void> {
-  await rm(globalStoragePath);
+  await rimraf(globalStoragePath);
   await mvDir(tempDir, globalStoragePath);
 }
 

@@ -39,9 +39,13 @@ $bmp.Dispose();
     }
   } catch (e: unknown) {
     console.error(`Screenshot command failed!`);
-    console.error(`Status (exit code): ${e.status}`);
-    console.error(`Error message: ${e.message}`);
-    if (e.stdout != null) console.error(`stdout: ${e.stdout.toString()}`);
-    if (e.stderr != null) console.error(`stderr: ${e.stderr.toString()}`);
+    if (e instanceof Error) {
+      console.error(`Error message: ${e.message}`);
+      if ('status' in e) console.error(`Status (exit code): ${e.status}`);
+      if ('stdout' in e && e.stdout != null) console.error(`stdout: ${e.stdout.toString()}`);
+      if ('stderr' in e && e.stderr != null) console.error(`stderr: ${e.stderr.toString()}`);
+    } else {
+      console.error(`Unknown error: ${String(e)}`);
+    }
   }
 }
