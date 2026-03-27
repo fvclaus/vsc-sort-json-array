@@ -90,12 +90,14 @@ const fail = async (extensionContext: vscode.ExtensionContext, error: string | E
       const osRelease = os.release();
       const timestamp = new Date().toISOString();
       const extConfig = getExtensionConfiguration();
+      const nodeVersion = process.version;
 
       // Add Environment details
       body += `---\n`;
       body += `**Environment:**\n`;
       body += `- VS Code Version: ${vscode.version}\n`;
       body += `- Extension Version: ${extensionVersion}\n`;
+      body += `- Node Version: ${nodeVersion}\n`;
       body += `- OS: ${osPlatform} (${osRelease})\n`;
       body += `- Timestamp: ${timestamp}\n\n`;
 
