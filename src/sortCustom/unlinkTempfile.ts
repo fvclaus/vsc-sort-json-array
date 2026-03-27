@@ -1,8 +1,8 @@
-import temp = require('temp');
+import { openSync } from 'temp';
 import {unlink} from 'fs';
 
 export default function withTempFile<T>(fn: (path: string) => T, catchFn: (e: Error) => T): T {
-  const tempFile = temp.openSync({
+  const tempFile = openSync({
     suffix: '.mjs',
   });
 

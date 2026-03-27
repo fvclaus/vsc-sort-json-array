@@ -1,10 +1,9 @@
 import processAndParseArray from '../../processAndParseArray';
-import chai = require('chai');
+import { expect } from 'chai';
 import {FileExtension} from '../../fileExtension';
 import { convertToLiteralValues } from '../../parser/parseArray'; // Removed metadataSymbol, added CommentInfo
 import {suite, test} from 'mocha';
 
-const expect = chai.expect;
 
 suite('processAndParseArray', function() {
   ([

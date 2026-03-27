@@ -42,7 +42,6 @@ const fail = async (extensionContext: vscode.ExtensionContext, error: string | E
   const errorMessage = typeof error === 'string' ? error : error.message;
   const openIssueButton = 'Open GitHub Issue';
 
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   window.showErrorMessage(errorMessage, openIssueButton).then(async selection => {
     if (selection === openIssueButton) {
       let issueBaseUrl: string | undefined;
@@ -57,12 +56,10 @@ const fail = async (extensionContext: vscode.ExtensionContext, error: string | E
           issueBaseUrl = packageJson.bugs.url as string;
           extensionVersion = packageJson.version;
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-floating-promises
           vscode.window.showErrorMessage('Could not find bugs.url in package.json');
           return;
         }
       } catch (readError) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         vscode.window.showErrorMessage(
           `Failed to get GitHub issue URL from package.json: ${readError instanceof Error ? readError.message : readError}`
         );
@@ -107,10 +104,8 @@ const fail = async (extensionContext: vscode.ExtensionContext, error: string | E
 
 
       const githubUrl = `${issueBaseUrl}/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       vscode.env.openExternal(vscode.Uri.parse(githubUrl));
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       vscode.window.showErrorMessage(`Unknown selection ${selection}`);
     }
   });
@@ -170,7 +165,6 @@ function sort(
           // Restore cursor position
           editor.selection = new vscode.Selection(cursorPosition, cursorPosition);
           // Must not await this otherwise it will hang until the user clicks it away.
-          // eslint-disable-next-line @typescript-eslint/no-floating-promises
           window.showInformationMessage('Successfully sorted array!');
           // Return the sorted items as literal values
           return convertToLiteralValues(sortedItems); // Pass sortedItems to convertToLiteralValues

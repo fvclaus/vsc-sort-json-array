@@ -1,7 +1,6 @@
-import chai = require('chai');
+import { expect } from 'chai';
 import {loadSortFn} from '../../../sortCustom/loadSortFn';
 import {createSourceModulePath} from './storagePathFsUtils';
-const expect = chai.expect;
 
 suite('Load sort fn', function() {
   test('should load sort function from module', function() {

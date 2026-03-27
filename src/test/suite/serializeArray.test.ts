@@ -1,11 +1,9 @@
-import chai = require('chai');
+import { expect } from 'chai';
 import {FileExtension} from '../../fileExtension';
 import {suite, test} from 'mocha';
 import processAndParseArray from '../../processAndParseArray';
 import { undent } from './undent';
 import serializeArrayFromTree from '../../serializeArray';
-
-const expect = chai.expect;
 
 suite('serializeArray', function() {
 

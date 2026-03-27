@@ -3,6 +3,7 @@ import { URLSearchParams } from 'node:url';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const showErrorMessageSpy = sinon.stub(vscode.window, 'showErrorMessage').resolves(Promise.resolve('Open GitHub Issue') as any);
 
 const openExternalSpy = sinon.spy(vscode.env, 'openExternal');

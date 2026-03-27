@@ -37,7 +37,7 @@ $bmp.Dispose();
       const stdout = execSync(cmd, { stdio: 'pipe' });
       console.log(`Screenshot command stdout: ${stdout.toString()}`);
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error(`Screenshot command failed!`);
     console.error(`Status (exit code): ${e.status}`);
     console.error(`Error message: ${e.message}`);

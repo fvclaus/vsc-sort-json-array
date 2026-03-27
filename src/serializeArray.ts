@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import { ObjContext, PairContext, ArrContext, ValueContext } from './parser/generated/JSONParser';
 import { CommentInfo, contextSymbol, ParseResult, predecessorLineStopSymbol } from './parser/parseArray';
 import { FileExtension } from './fileExtension';
@@ -51,6 +51,7 @@ class ArraySerializer {
       const getPredecessorLineStop = (): number => {
         if (child instanceof ValueContext && predecessorLineStopSymbol in child) {
           // Top Level item. May have changed order. Retrieve the the predecessor before sorting
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return (child as any)[predecessorLineStopSymbol] as number;
         } else if (index === 0) {
           // First child, use start token of parent
@@ -102,7 +103,7 @@ class ArraySerializer {
 
 
     const indent = topLevelValue ? this.makeIndent(indentLevel) : '';
-    let text : string | null = null;
+    let text : string | null;
     if (child instanceof TerminalNode) {
       text = child.symbol.text as string;
     } else if (child instanceof ObjContext || child instanceof ArrContext) {

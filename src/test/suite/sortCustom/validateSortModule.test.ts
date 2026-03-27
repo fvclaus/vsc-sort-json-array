@@ -1,6 +1,5 @@
-import chai = require('chai');
+import { expect } from 'chai';
 import {validateSortModule} from '../../../sortCustom/validateSortModule';
-const expect = chai.expect;
 import * as temp from 'temp';
 import * as fs from 'fs';
 import {createSourceModulePath} from './storagePathFsUtils';
@@ -32,6 +31,7 @@ suite('Validate sort module', function() {
     const errors = validateSortModule(tempPath.path);
     try {
       fs.unlinkSync(tempPath.path);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // Ignore errors
     }

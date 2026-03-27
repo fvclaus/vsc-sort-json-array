@@ -44,6 +44,7 @@ suite('Extension Test Suite', function() {
   });
 
   [".jsx", ".js", ".ts", ".tsx"].forEach(extension => {
+
     test(`commands should be visible in ${extension}`, async function() {
       await waitForActiveExtension();
       await openNewDocument('[1, 2, 3]', extension);

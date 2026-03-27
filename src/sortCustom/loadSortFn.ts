@@ -9,7 +9,8 @@ export function loadSortFn(path: string): (a: unknown, b: unknown) => number {
     
     fs.writeFileSync(tempFilePath, strippedCode);
     
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+     
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const sortModule = require(tempFilePath);
     return sortModule.sort;
   }, (e) => {

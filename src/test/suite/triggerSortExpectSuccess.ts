@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import chai = require('chai');
-export const expect = chai.expect;
+import { expect } from 'chai';
 import {openNewDocument} from './textEditorUtils';
 import nextTick from './nextTick';
 import { expectZeroInvocations, setupSpies } from './setupSpies';

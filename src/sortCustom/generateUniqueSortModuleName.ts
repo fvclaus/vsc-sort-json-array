@@ -19,7 +19,7 @@ export function createNewSortModule(globalStoragePath: string): string {
   const sortModules = glob.sync(`sort.*.ts`, {
     cwd: globalStoragePath,
   })
-      .filter((module) => module.match(numberedSortModuleRegex))
+      .filter((module) => module.match(numberedSortModuleRegex) !== null)
       .map((module) => parseInt((module.match(numberedSortModuleRegex) as string[])[1]));
   sortModules.sort((a, b) => b - a);
   sortModules.push(0);
