@@ -9,6 +9,7 @@ suite('Validate sort module', function() {
   [
     ['noExportKeyword', 'Must use export keyword'],
     ['wrongNumberOfParameters', 'Must have exactly two parameters'],
+    ['commonJsExport', 'CommonJS exports are not supported, use ES Module "export" instead'],
   ].forEach(([moduleName, expectedError]) => {
     test(`should detect errors in ${moduleName}`, function() {
       const errors = validateSortModule(createSourceModulePath(`sortModule.${moduleName}`));

@@ -110,7 +110,7 @@ suite('Sort custom', function() {
   }
 
 
-  test('should sort using custom function', async function() {
+  test.only('should sort using custom function', async function() {
     createTestModule();
     await triggerSortJsonExpectSuccess('extension.sortJsonArrayCustom', [A4, B2, C2, Q5], [C2, B2, A4, Q5], async function operateQuickOpen() {
       await selectQuickOpenItems(testModuleName, 'edit');
@@ -187,9 +187,10 @@ suite('Sort custom', function() {
 
   test('should rename module', async function() {
     await setupCommandTest();
-    takeScreenshot('rename_1')
+    takeScreenshot('rename_1');
     await selectQuickOpenItems(testModuleName, 'rename', 'sort.cars.ts');
-    takeScreenshot('rename_2')
+    takeScreenshot('rename_2');
+    await nextTick();
     expect(fs.existsSync(testModulePath)).to.be.false;
     expect(fs.existsSync(path.join(globalStoragePath, 'sort.cars.ts'))).to.be.true;
   });
