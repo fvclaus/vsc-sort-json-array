@@ -6,6 +6,8 @@ import {closeActiveEditor, openNewDocument} from './textEditorUtils';
 import { triggerSortExpectSuccess } from './triggerSortExpectSuccess';
 import { undent } from './undent';
 import { expectErrorMessage, setupSpies } from './setupSpies';
+import chai = require('chai');
+const expect = chai.expect;
 
 suite('Comment Handling Integration Tests', function() {
   afterEach(async () => {
@@ -191,4 +193,5 @@ suite('Comment Handling Integration Tests', function() {
 
     await expectErrorMessage(/Comments are not supported in JSONL files/);
   });
+
 });

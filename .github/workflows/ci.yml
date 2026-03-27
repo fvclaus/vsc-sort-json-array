@@ -32,6 +32,10 @@ jobs:
       - run: npm run test:benchmark
         if: matrix.os == 'ubuntu-latest' # Run only once
 
+      - name: Install Screenshot Dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y x11-apps imagemagick
+
       - name: Run VS Code Extension Tests
         if: runner.os == 'Linux'
         run: |
@@ -40,8 +44,25 @@ jobs:
           npm run test:vsc
         env:
           VSCODE_VERSION: ${{ matrix.vscode-version }}
+
+      - name: Upload Failing Test Screenshots Linux
+        if: failure() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: failing-tests-screenshots-${{ matrix.os }}-${{ matrix.vscode-version }}
+          path: /tmp/vscode_sort_json_*.png
+          if-no-files-found: ignore
+
       - name: Run VS Code Extension Tests
         if: runner.os != 'Linux'
         run: npm run test:vsc
         env:
           VSCODE_VERSION: ${{ matrix.vscode-version }}
+
+      - name: Upload Failing Test Screenshots Windows
+        if: failure() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: failing-tests-screenshots-${{ matrix.os }}-${{ matrix.vscode-version }}
+          path: ~\AppData\Local\Temp\vscode_sort_json_*.png
+          if-no-files-found: ignore
