@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
+import * as vscode from 'vscode';
 // TODO @types/source-map-support breaks the ts compilation
 // import * as sourceMapSupport from 'source-map-support';
 
@@ -46,6 +47,38 @@ export function run(): Promise<void> {
 
       // Add files to the test suite
       files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
+
+      mocha.suite.afterEach(function (this: Mocha.Context) {
+        if ((this.currentTest != null) && this.currentTest.state === 'failed') {
+          const testName = this.currentTest.fullTitle().replace(/[^a-z0-9]/gi, '_').toLowerCase();
+          
+          if (process.env.CI != null) {
+            if (process.platform === 'linux') {
+              const terminal = vscode.window.createTerminal('Screenshot Terminal');
+              terminal.sendText(`xwd -display :99 -root -silent | convert xwd:- png:/tmp/vscode_sort_json_${testName}.png`, true);
+            } else if (process.platform === 'win32') {
+              const terminal = vscode.window.createTerminal({
+                name: 'Screenshot Terminal',
+                shellPath: 'powershell.exe'
+              });
+              const psScript = `
+[Reflection.Assembly]::LoadWithPartialName("System.Drawing");
+function screenshot([Drawing.Rectangle]$bounds, $path) {
+   $bmp = New-Object Drawing.Bitmap $bounds.width, $bounds.height;
+   $graphics = [Drawing.Graphics]::FromImage($bmp);
+   $graphics.CopyFromScreen($bounds.Location, [Drawing.Point]::Empty, $bounds.size);
+   $bmp.Save($path);
+   $graphics.Dispose();
+   $bmp.Dispose();
+}
+$bounds = [Drawing.Rectangle]::FromLTRB(0, 0, 1000, 900);
+screenshot $bounds "$env:TEMP\\vscode_sort_json_${testName}.png";
+`.replace(/\n/g, '');
+              terminal.sendText(psScript, true);
+            }
+          }
+        }
+      });
 
       try {
         // Run the mocha test
