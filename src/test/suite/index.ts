@@ -1,8 +1,7 @@
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
-import * as vscode from 'vscode';
-import { execSync } from 'child_process';
+import { takeScreenshot } from './screenshot';
 // TODO @types/source-map-support breaks the ts compilation
 // import * as sourceMapSupport from 'source-map-support';
 
@@ -51,45 +50,7 @@ export function run(): Promise<void> {
 
       mocha.suite.afterEach(function (this: Mocha.Context) {
         if ((this.currentTest != null) && this.currentTest.state === 'failed') {
-          const testName = this.currentTest.fullTitle().replace(/[^a-z0-9]/gi, '_').toLowerCase();
-          
-          try {
-            if (process.env.CI != null) {
-              if (process.platform === 'linux') {
-                const cmd = `xwd -display :99 -root -silent | convert xwd:- png:/tmp/vscode_sort_json_${testName}.png`;
-                console.log(`Executing screenshot command: ${cmd}`);
-                const stdout = execSync(cmd, { stdio: 'pipe' });
-                console.log(`Screenshot command stdout: ${stdout.toString()}`);
-              } else if (process.platform === 'win32') {
-                const psScript = `
-Add-Type -AssemblyName System.Windows.Forms;
-Add-Type -AssemblyName System.Drawing;
-$bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds;
-$bmp = New-Object System.Drawing.Bitmap $bounds.width, $bounds.height;
-$graphics = [System.Drawing.Graphics]::FromImage($bmp);
-$graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.size);
-$p = Join-Path $env:TEMP 'vscode_sort_json_${testName}.png';
-$bmp.Save($p);
-$graphics.Dispose();
-$bmp.Dispose();
-`.replace(/\n/g, '');
-                console.log(`Executing Windows screenshot command...`);
-                const stdout = execSync(`powershell -Command "${psScript}"`, { stdio: 'pipe' });
-                console.log(`Screenshot command stdout: ${stdout.toString()}`);
-              }
-            } else {
-              const cmd = `xfce4-screenshooter -f -s /tmp/vscode_sort_json_${testName}.png`;
-              console.log(`Executing local screenshot command: ${cmd}`);
-              const stdout = execSync(cmd, { stdio: 'pipe' });
-              console.log(`Screenshot command stdout: ${stdout.toString()}`);
-            }
-          } catch (e: any) {
-            console.error(`Screenshot command failed!`);
-            console.error(`Status (exit code): ${e.status}`);
-            console.error(`Error message: ${e.message}`);
-            if (e.stdout != null) console.error(`stdout: ${e.stdout.toString()}`);
-            if (e.stderr != null) console.error(`stderr: ${e.stderr.toString()}`);
-          }
+          takeScreenshot(this.currentTest.fullTitle());
         }
       });
 
