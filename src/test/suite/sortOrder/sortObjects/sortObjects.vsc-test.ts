@@ -10,7 +10,6 @@ import nextTick from '../../nextTick';
 import {closeActiveEditor} from '../../textEditorUtils';
 import { undent } from '../../undent';
 import { selectQuickOpenItems } from '../../sortCustom/selectQuickOpenItem';
-import { sleep } from '../../sleep';
 import { takeScreenshot } from '../../screenshot';
 
 async function changeToCRLF(): Promise<void> {
