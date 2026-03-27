@@ -62,18 +62,16 @@ export function run(): Promise<void> {
                 console.log(`Screenshot command stdout: ${stdout.toString()}`);
               } else if (process.platform === 'win32') {
                 const psScript = `
-[Reflection.Assembly]::LoadWithPartialName('System.Drawing');
-function screenshot([Drawing.Rectangle]$bounds, $path) {
-   $bmp = New-Object Drawing.Bitmap $bounds.width, $bounds.height;
-   $graphics = [Drawing.Graphics]::FromImage($bmp);
-   $graphics.CopyFromScreen($bounds.Location, [Drawing.Point]::Empty, $bounds.size);
-   $bmp.Save($path);
-   $graphics.Dispose();
-   $bmp.Dispose();
-}
-$bounds = [Drawing.Rectangle]::FromLTRB(0, 0, 1000, 900);
+Add-Type -AssemblyName System.Windows.Forms;
+Add-Type -AssemblyName System.Drawing;
+$bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds;
+$bmp = New-Object System.Drawing.Bitmap $bounds.width, $bounds.height;
+$graphics = [System.Drawing.Graphics]::FromImage($bmp);
+$graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.size);
 $p = Join-Path $env:TEMP 'vscode_sort_json_${testName}.png';
-screenshot $bounds $p;
+$bmp.Save($p);
+$graphics.Dispose();
+$bmp.Dispose();
 `.replace(/\n/g, '');
                 console.log(`Executing Windows screenshot command...`);
                 const stdout = execSync(`powershell -Command "${psScript}"`, { stdio: 'pipe' });
