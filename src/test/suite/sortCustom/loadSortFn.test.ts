@@ -46,7 +46,7 @@ suite('Load sort fn', function() {
       // Ignore errors
     }
     // amaro can throw if parsing fails
-    expect(errors[0]).to.contain('Sort function has the following compilation error');
+    expect(errors[0]).to.contain('Unterminated string constant');
   });
 
   test('should load sort function with enum and parameter properties', function() {

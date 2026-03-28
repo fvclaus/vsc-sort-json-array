@@ -1,7 +1,11 @@
+<a name="6.0.1"></a>
+## 6.0.1
+* Fixes missing Open Github issue button
+
 <a name="6.0.0"></a>
 ## 6.0.0
-* Replaces typescript with amaro (the library that does the typestripping in node) to reduce the size of the bundle from 13Mb to 3Mb
-* Bumps dependency versions
+* Replaces typescript with amaro (the library that does the typestripping in node) to reduce the size of the bundle from 64Mb to 10Mb unpacked #52
+* Bumps dependency versions #53
 
 <a name="5.0.0"></a>
 ## 5.0.0

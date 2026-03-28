@@ -11,16 +11,13 @@ export function loadSortFn(path: string): { sortFn?: SortFn, errors: string[] } 
     const strippedCode = transformResult.code;
 
     const errors: string[] = [];
-    let hasExportError = false;
 
     if (strippedCode.includes('exports.') === true || strippedCode.includes('module.exports') === true) {
-      errors.push('Sort function is invalid: CommonJS exports are not supported, use ES Module "export" instead.');
-      hasExportError = true;
+      return {errors: ['Sort function is invalid: CommonJS exports are not supported, use ES Module "export" instead.']};
     }
 
     if (strippedCode.includes('export') === false) {
-      errors.push('Sort function is invalid: Must use export keyword.');
-      hasExportError = true;
+      return {errors: ['Sort function is invalid: Must use export keyword.']};
     }
 
     try {
@@ -38,9 +35,7 @@ export function loadSortFn(path: string): { sortFn?: SortFn, errors: string[] } 
           errors.push('Sort function is invalid: Must have exactly two parameters.');
         }
       } else {
-        if (!hasExportError) {
-          errors.push('Must define a sort(a, b) function.');
-        }
+        errors.push('Must define a sort(a, b) function.');
       }
 
       if (errors.length > 0) {
@@ -48,15 +43,17 @@ export function loadSortFn(path: string): { sortFn?: SortFn, errors: string[] } 
       }
 
       return { sortFn, errors: [] };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e) {
-      if (!hasExportError) {
-        errors.push('Must define a sort(a, b) function.');
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+    if (errors.length == 0) {
+      // This is prefixed with the module name higher in the stack
+        errors.push(`${e.message ?? e}`);
       }
       return { errors };
     }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
-    return { errors: [`Sort function has the following compilation error: ${e.message ?? e}`] };
+    // This is prefixed with the module name higher in the stack
+    return { errors: [`${e.message ?? e}`] };
   }
 }
