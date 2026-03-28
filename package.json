@@ -2,7 +2,7 @@
   "name": "sort-json-array",
   "displayName": "Sort JSON/JSONL/JSONC/JS array",
   "description": "Sorts JSON/JSONL/JSONC/JS arrays by value, object property or custom function",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "publisher": "fvclaus",
   "license": "BSD-3-Clause",
   "engines": {

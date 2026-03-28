@@ -1,6 +1,6 @@
 <a name="6.0.1"></a>
 ## 6.0.1
-* Fixes missing Open Github issue button
+* Fixes missing Open Github issue button #57
 
 <a name="6.0.0"></a>
 ## 6.0.0
