@@ -8,9 +8,9 @@ import { ArrayItem } from '../parser/parseArray';
 import { showQuickPick } from '../showQuickPick';
 
 
-class SortError extends Error {
+export class SortError extends Error {
   constructor(public errors: string[]) {
-    super();
+    super(errors.join(', '));
   }
 }
 
@@ -84,7 +84,7 @@ function executeAction({
                          
                         window.showInformationMessage(`Module ${moduleName} is valid`);
                       })
-                      .catch((error: SortError) => error.errors.forEach(window.showErrorMessage));
+                      .catch(reject);
                 }
               });
               const onClose = window.onDidChangeVisibleTextEditors(async (e) => {
