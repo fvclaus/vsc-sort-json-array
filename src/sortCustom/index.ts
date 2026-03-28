@@ -1,4 +1,3 @@
-import {validateSortModule} from './validateSortModule';
 import {loadSortFn} from './loadSortFn';
 import * as vscode from 'vscode';
 import * as glob from 'glob';
@@ -28,9 +27,8 @@ function trySortModule(window: typeof vscode.window, path: string, moduleName: s
         reject(error);
         return Promise.reject(error);
       };
-      const errors = validateSortModule(path);
-      if (errors.length === 0) {
-        const sortFn = loadSortFn(path);
+      const { sortFn, errors } = loadSortFn(path);
+      if (errors.length === 0 && sortFn !== undefined) {
         const arrayCopy = array.slice() as ArrayItem[];
         try {
           arrayCopy.sort(sortFn);
