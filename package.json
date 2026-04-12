@@ -101,7 +101,8 @@
     "lint": "eslint \"src/**/*.ts\"",
     "antlr4:generate": "rimraf src/parser/generated && antlr4ts -Dlanguage=JavaScript -no-listener -visitor -Xexact-output-dir -o src/parser/generated src/parser/JSON.g4",
     "vsce:package": "npx vsce package",
-    "vsce:publish": "npx vsce publish"
+    "vsce:publish": "npx vsce publish",
+    "ovsx:publish": "npx ovsx publish"
   },
   "dependencies": {
     "amaro": "^1.1.8",
