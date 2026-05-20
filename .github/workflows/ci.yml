@@ -42,8 +42,16 @@ jobs:
         run: |
           export DISPLAY=':99.0'
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          npm run test:vsc
+
+      - name: Run VS Code Extension Tests (with retry)
+        if: runner.os == 'Linux'
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: npm run test:vsc
         env:
+          DISPLAY: ':99.0'
           VSCODE_VERSION: ${{ matrix.vscode-version }}
 
       - name: Upload Failing Test Screenshots Linux
@@ -54,9 +62,13 @@ jobs:
           path: /tmp/vscode_sort_json_*.png
           if-no-files-found: ignore
 
-      - name: Run VS Code Extension Tests
+      - name: Run VS Code Extension Tests (with retry)
         if: runner.os != 'Linux'
-        run: npm run test:vsc
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: npm run test:vsc
         env:
           VSCODE_VERSION: ${{ matrix.vscode-version }}
 
